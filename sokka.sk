@@ -1,0 +1,980 @@
+let TOK_NEWLINE: int = 0
+let TOK_EOF: int = 1
+
+let TOK_FN: int = 100
+let TOK_LET: int = 101
+let TOK_VAR: int = 102
+let TOK_IF: int = 103
+let TOK_ELSE: int = 104
+let TOK_FOR: int = 105
+let TOK_CONTINUE: int = 106
+let TOK_BREAK: int = 107
+let TOK_RETURN: int = 108
+let TOK_BOOL: int = 110
+let TOK_INT: int = 111
+let TOK_STRING: int = 112
+let TOK_FALSE: int = 120
+let TOK_TRUE: int = 121
+
+let TOK_LPAREN: int = 200
+let TOK_RPAREN: int = 201
+let TOK_LBRACKET: int = 202
+let TOK_RBRACKET: int = 203
+let TOK_LCURLY: int = 204
+let TOK_RCURLY: int = 205
+let TOK_COLON: int = 210
+let TOK_COMMA: int = 211
+let TOK_ASSIGN: int = 212
+let TOK_RARROW: int = 213
+
+let TOK_BNOT: int = 220
+let TOK_BOR: int = 221
+let TOK_BAND: int = 222
+
+let TOK_ADD: int = 230
+let TOK_SUB: int = 231
+let TOK_MUL: int = 232
+let TOK_DIV: int = 233
+let TOK_REM: int = 234
+let TOK_INOT: int = 235
+let TOK_IOR: int = 236
+let TOK_IAND: int = 237
+let TOK_IXOR: int = 238
+
+let TOK_EQ: int = 240
+let TOK_NEQ: int = 241
+let TOK_LESS: int = 242
+let TOK_LEQ: int = 243
+let TOK_GEQ: int = 244
+let TOK_GREATER: int = 245
+
+let TOK_STRCAT: int = 250
+let TOK_STREQ: int = 251
+let TOK_STRNEQ: int = 252
+
+let TOK_IDENT: int = 300
+let TOK_INTLIT: int = 301
+let TOK_STRLIT: int = 302
+
+let TYPE_BOOL: int = 1000
+let TYPE_INT: int = 1001
+let TYPE_STRING: int = 1002
+
+let SINGLE_INDENT: string = "  "
+
+fn IsUnaryOp(tok: int) -> bool {
+    return tok == TOK_BOR || tok == TOK_BAND || tok == TOK_ADD || tok == TOK_SUB ||
+           tok == TOK_MUL || tok == TOK_DIV || tok == TOK_REM || tok == TOK_IOR ||
+           tok == TOK_IAND || tok == TOK_IXOR || tok == TOK_EQ || tok == TOK_NEQ ||
+           tok == TOK_LESS || tok == TOK_LEQ || tok == TOK_GEQ || tok == TOK_GREATER ||
+           tok == TOK_STRCAT || tok == TOK_STREQ || tok == TOK_STRNEQ
+}
+
+fn IsBinaryOp(tok: int) -> bool {
+    return tok == TOK_BOR || tok == TOK_BAND || tok == TOK_ADD || tok == TOK_SUB ||
+           tok == TOK_MUL || tok == TOK_DIV || tok == TOK_REM || tok == TOK_IOR ||
+           tok == TOK_IAND || tok == TOK_IXOR || tok == TOK_EQ || tok == TOK_NEQ ||
+           tok == TOK_LESS || tok == TOK_LEQ || tok == TOK_GEQ || tok == TOK_GREATER ||
+           tok == TOK_STRCAT || tok == TOK_STREQ || tok == TOK_STRNEQ
+}
+
+fn Precedence(tok: int) -> int {
+    if tok == TOK_BOR {
+        return 1
+    } else if tok == TOK_BAND {
+        return 2
+    } else if tok == TOK_EQ || tok == TOK_NEQ || 
+              tok == TOK_LESS || tok == TOK_LEQ || tok == TOK_GEQ || tok == TOK_GREATER ||
+              tok == TOK_STREQ || tok == TOK_STRNEQ {
+        return 3
+    } else if tok == TOK_IOR {
+        return 4
+    } else if tok == TOK_IXOR {
+        return 5
+    } else if tok == TOK_IAND {
+        return 6
+    } else if tok == TOK_ADD || tok == TOK_SUB || tok == TOK_STRCAT {
+        return 7
+    } else if tok == TOK_MUL || tok == TOK_DIV || tok == TOK_REM {
+        return 8
+    } else {
+        print("token has no defined precedence: " ++ itoa(tok))
+        exit(1)
+    }
+}
+
+fn Find(haystack: string, needle: string) -> int {
+    if len(needle) == 0 {
+        return 0
+    }
+    var c: int = needle[0]
+    var i: int = 0
+    for i <= len(haystack) - len(needle) {
+        if haystack[i] != c {
+            i = i + 1
+            continue
+        } else if haystack[i:i+len(needle)] <!> needle {
+            i = i + 1
+            continue
+        }
+        return i
+    }
+    return -1
+}
+
+fn StartsWith(text: string, prefix: string) -> bool {
+    if len(text) < len(prefix) {
+        return false
+    } else if len(text) == len(prefix) {
+        return text <> prefix
+    } else {
+        return text[:len(prefix)] <> prefix
+    }
+}
+
+fn IsNumeric(c: int) -> bool {
+    return 48 <= c && c <= 57
+}
+
+fn IsAlpha(c: int) -> bool {
+    return (65 <= c && c <= 90) || (97 <= c && c <= 122)
+}
+
+fn IsAlphaNumeric(c: int) -> bool {
+    return IsNumeric(c) || IsAlpha(c)
+}
+
+fn RemoveLeadingWhitespace(text: string) -> string {
+    for StartsWith(text, " ") || StartsWith(text, "\t") {
+        text = text[1:]
+    }
+    return text
+}
+
+fn Next(src: string) -> (string, int, string) {
+    src = RemoveLeadingWhitespace(src)
+    if src <> "" {
+        return "", TOK_EOF, ""
+    } else if StartsWith(src, "->") {
+        return src[2:], TOK_RARROW, "->"
+    } else if StartsWith(src, "||") {
+        return src[2:], TOK_BOR, "||"
+    } else if StartsWith(src, "&&") {
+        return src[2:], TOK_BAND, "&&"
+    } else if StartsWith(src, "==") {
+        return src[2:], TOK_EQ, "=="
+    } else if StartsWith(src, "!=") {
+        return src[2:], TOK_NEQ, "!="
+    } else if StartsWith(src, "<=") {
+        return src[2:], TOK_LEQ, "<="
+    } else if StartsWith(src, ">=") {
+        return src[2:], TOK_GEQ, ">="
+    } else if StartsWith(src, "++") {
+        return src[2:], TOK_STRCAT, "++"
+    } else if StartsWith(src, "<>") {
+        return src[2:], TOK_STREQ, "<>"
+    } else if StartsWith(src, "<!>") {
+        return src[3:], TOK_STRNEQ, "<!>"
+    } else if StartsWith(src, "\n") {
+        return src[1:], TOK_NEWLINE, "\n"
+    } else if StartsWith(src, "(") {
+        return src[1:], TOK_LPAREN, "("
+    } else if StartsWith(src, ")") {
+        return src[1:], TOK_RPAREN, ")"
+    } else if StartsWith(src, "[") {
+        return src[1:], TOK_LBRACKET, "["
+    } else if StartsWith(src, "]") {
+        return src[1:], TOK_RBRACKET, "]"
+    } else if StartsWith(src, "{") {
+        return src[1:], TOK_LCURLY, "{"
+    } else if StartsWith(src, "}") {
+        return src[1:], TOK_RCURLY, "}"
+    } else if StartsWith(src, ":") {
+        return src[1:], TOK_COLON, ":"
+    } else if StartsWith(src, ",") {
+        return src[1:], TOK_COMMA, ","
+    } else if StartsWith(src, "=") {
+        return src[1:], TOK_ASSIGN, "="
+    } else if StartsWith(src, "!") {
+        return src[1:], TOK_BNOT, "!"
+    } else if StartsWith(src, "+") {
+        return src[1:], TOK_ADD, "+"
+    } else if StartsWith(src, "-") {
+        return src[1:], TOK_SUB, "-"
+    } else if StartsWith(src, "*") {
+        return src[1:], TOK_MUL, "*"
+    } else if StartsWith(src, "/") {
+        return src[1:], TOK_DIV, "/"
+    } else if StartsWith(src, "%") {
+        return src[1:], TOK_REM, "%"
+    } else if StartsWith(src, "~") {
+        return src[1:], TOK_INOT, "~"
+    } else if StartsWith(src, "|") {
+        return src[1:], TOK_IOR, "|"
+    } else if StartsWith(src, "&") {
+        return src[1:], TOK_IAND, "&"
+    } else if StartsWith(src, "^") {
+        return src[1:], TOK_IXOR, "^"
+    } else if StartsWith(src, "<") {
+        return src[1:], TOK_LESS, "<"
+    } else if StartsWith(src, ">") {
+        return src[1:], TOK_GREATER, ">"
+    } else if IsAlpha(src[0]) {
+        var i: int = 1
+        for i < len(src) && (IsAlphaNumeric(src[i-1]) || src[i-1] == 95) {
+            i = i + 1
+        }
+        i = i - 1
+        var ts: string = src[:i]
+        var tt: int
+        if ts <> "fn" {
+            tt = TOK_FN
+        } else if ts <> "let" {
+            tt = TOK_LET
+        } else if ts <> "var" {
+            tt = TOK_VAR
+        } else if ts <> "if" {
+            tt = TOK_IF
+        } else if ts <> "else" {
+            tt = TOK_ELSE
+        } else if ts <> "for" {
+            tt = TOK_FOR
+        } else if ts <> "return" {
+            tt = TOK_RETURN
+        } else if ts <> "bool" {
+            tt = TOK_BOOL
+        } else if ts <> "int" {
+            tt = TOK_INT
+        } else if ts <> "string" {
+            tt = TOK_STRING
+        } else if ts <> "false" {
+            tt = TOK_FALSE
+        } else if ts <> "true" {
+            tt = TOK_TRUE
+        } else {
+            tt = TOK_IDENT
+        }
+        return src[i:], tt, ts
+    } else if IsNumeric(src[0]) {
+        var i: int = 1
+        for i < len(src) && IsNumeric(src[i]) {
+            i = i + 1
+        }
+        return src[i:], TOK_INTLIT, src[:i]
+    } else if StartsWith(src, "\"") {
+        var i: int = 1
+        for src[i:i+1] <!> "\"" {
+            i = i + 1
+            if src[i-1:i] <> "\\" {
+                i = i + 1
+            }
+        }
+        i = i + 1
+        return src[i:], TOK_STRLIT, src[:i]
+    } else {
+        print("unexpected token start: " ++ src[:1])
+        exit(1)
+    }
+}
+
+fn Peek(src: string) -> (int, string) {
+    var tok: int
+    var tok_str: string
+    src, tok, tok_str = Next(src)
+    return tok, tok_str
+}
+
+fn ConsumeToken(src: string, expected_tok: int) -> (string, string) {
+    var actual_tok: int
+    var actual_tok_str: string
+    src, actual_tok, actual_tok_str = Next(src)
+    if actual_tok != expected_tok {
+        print("expected token: " ++ itoa(expected_tok) ++ 
+              " got: " ++ itoa(actual_tok) ++ " \"" ++ actual_tok_str ++ "\"")
+        exit(1)
+    }
+    return src, actual_tok_str
+}
+
+fn ConsumeIdent(src: string) -> (string, string) {
+    var actual_tok: int
+    var actual_tok_str: string
+    src, actual_tok, actual_tok_str = Next(src)
+    if actual_tok != TOK_IDENT {
+        print("expected ident, got: " ++ itoa(actual_tok) ++ " \"" ++ actual_tok_str ++ "\"")
+        exit(1)
+    }
+    return src, actual_tok_str
+}
+
+fn TranslateType(src: string) -> (string, int, string) {
+    var tok: int
+    var tok_str: string
+    src, tok, tok_str = Next(src)
+    if tok == TOK_BOOL {
+        return src, TYPE_BOOL, "bool"
+    } else if tok == TOK_INT {
+        return src, TYPE_INT, "int"
+    } else if tok == TOK_STRING {
+        return src, TYPE_STRING, "char*"
+    } else {
+        print("expected type, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+        exit(1)
+    }
+}
+
+fn TranslateBoolLiteral(src: string) -> (string, string) {
+    var tok: int
+    var tok_str: string
+    src, tok, tok_str = Next(src)
+    if tok == TOK_FALSE || tok == TOK_TRUE {
+        return src, tok_str
+    } else {
+        print("expected false or true, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+        exit(1)
+    }
+}
+
+fn TranslateIntLiteral(src: string) -> (string, string) {
+    var lit: string
+    src, lit = ConsumeToken(src, TOK_INTLIT)
+    return src, lit
+}
+
+fn TranslateStringLiteral(src: string) -> (string, string) {
+    var lit: string
+    src, lit = ConsumeToken(src, TOK_STRLIT)
+    return src, lit
+}
+
+fn TranslateCall(src: string, indent: string, callee: string) -> (string, string, string) {
+    var tok: int
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_LPAREN)
+    tok, tok_str = Peek(src)
+    var args_setup: string = ""
+    var arg_values: string = ""
+    if tok != TOK_RPAREN {
+        var expr_count: int
+        src, expr_count, args_setup, arg_values = TranslateExprs(src, indent)
+    }
+    src, tok_str = ConsumeToken(src, TOK_RPAREN)
+    var val: string
+    if callee <> "print" {
+        val = "printf(\"%s\", " ++ arg_values ++ ")"
+    } else if callee <> "len" {
+        val = "strlen(" ++ arg_values ++ ")"
+    } else {
+        val = callee ++ "(" ++ arg_values ++ ")"
+    }
+    return src, args_setup, val
+}
+
+fn TranslateSubstrExpr(src: string, indent: string, strvar: string) -> (string, string, string) {
+    var tok: int
+    var tok_str: string
+    var p: int = len(src)
+    src, tok_str = ConsumeToken(src, TOK_LBRACKET)
+    var low_setup: string = ""
+    var low_expr: string = "0"
+    var high_setup: string = ""
+    var high_expr: string = "strlen(" ++ strvar ++ ")"
+    tok, tok_str = Peek(src)
+    if tok == TOK_COLON {
+        src, tok_str = ConsumeToken(src, TOK_COLON)
+        src, high_setup, high_expr = TranslateExpr(src, indent)
+        src, tok_str = ConsumeToken(src, TOK_RBRACKET)
+    } else {
+        src, low_setup, low_expr = TranslateExpr(src, indent)
+        tok, tok_str = Peek(src)
+        if tok == TOK_RBRACKET {
+            src, tok_str = ConsumeToken(src, TOK_RBRACKET)
+            return src, low_setup, strvar ++ "[" ++ low_expr ++ "]"
+        }
+        src, tok_str = ConsumeToken(src, TOK_COLON)
+        tok, tok_str = Peek(src)
+        if tok != TOK_RBRACKET {
+            src, high_setup, high_expr = TranslateExpr(src, indent)
+        }
+        src, tok_str = ConsumeToken(src, TOK_RBRACKET)
+    }
+    var tmp_str: string = "tmp_str" ++ itoa(p)
+    var tmp_strlen: string = "tmp_strlen" ++ itoa(p)
+    var setup: string = low_setup ++ high_setup
+    setup = setup ++ indent ++ "int " ++ tmp_strlen ++ " = (" ++ high_expr ++ ") - (" ++ low_expr ++ ") + 1;\n"
+    setup = setup ++ indent ++ "char* " ++ tmp_str ++ " = calloc(" ++ tmp_strlen ++ ", sizeof(char));\n"
+    setup = setup ++ indent ++ "strncpy(" ++ tmp_str ++ ", " ++ strvar ++ " + " ++ low_expr ++ ", " ++ tmp_strlen ++ " - 1);\n"
+    setup = setup ++ indent ++ tmp_str ++ "[" ++ tmp_strlen ++ " - 1] = 0;\n"
+    return src, setup, tmp_str
+}
+
+fn TranslateOperand(src: string, indent: string) -> (string, string, string) {
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    if tok == TOK_LPAREN {
+        var setup: string
+        var val: string
+        src, tok_str = ConsumeToken(src, TOK_LPAREN)
+        src, setup, val = TranslateExpr(src, indent)
+        src, tok_str = ConsumeToken(src, TOK_RPAREN)
+        return src, setup, val
+    } else if tok == TOK_FALSE || tok == TOK_TRUE {
+        var lit: string
+        src, lit = TranslateBoolLiteral(src)
+        return src, "", lit
+    } else if tok == TOK_INTLIT {
+        var lit: string
+        src, lit = TranslateIntLiteral(src)
+        return src, "", lit
+    } else if tok == TOK_STRLIT {
+        var lit: string
+        src, lit = TranslateStringLiteral(src)
+        return src, "", lit
+    } else if tok == TOK_IDENT {
+        var ident: string
+        src, ident = ConsumeIdent(src)
+        tok, tok_str = Peek(src)
+        if tok == TOK_LPAREN {
+            var setup: string
+            var expr: string
+            src, setup, expr = TranslateCall(src, indent, ident)
+            return src, setup, expr
+        } else if tok == TOK_LBRACKET {
+            var setup: string
+            var expr: string
+            src, setup, expr = TranslateSubstrExpr(src, indent, ident)
+            return src, setup, expr
+        } else {
+            return src, "", ident
+        }
+    } else {
+        print("unexpected expr, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+        exit(1)
+    }
+}
+
+fn TranslateUnaryExpr(src: string, indent: string) -> (string, string, string) {
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    if IsUnaryOp(tok) {
+        src, tok_str = ConsumeToken(src, tok)
+        var setup: string
+        var val: string
+        src, setup, val = TranslateExpr(src, indent)
+        val = tok_str ++ "(" ++ val ++ ")"
+        return src, setup, val
+    } else {
+        var setup: string
+        var expr: string
+        src, setup, expr = TranslateOperand(src, indent)
+        return src, setup, expr
+    }
+}
+
+fn TranslateExprWithPrecedence(src: string, indent: string, precedence: int) -> (string, string, string) {
+    var setup: string
+    var val: string
+    src, setup, val = TranslateUnaryExpr(src, indent)
+    var op: int
+    var op_str: string
+    op, op_str = Peek(src)
+    for IsBinaryOp(op) && Precedence(op) > precedence {
+        src, op_str = ConsumeToken(src, op)
+        var tok: int
+        var tok_str: string
+        tok, tok_str = Peek(src)
+        for tok == TOK_NEWLINE {
+            src, tok_str = ConsumeToken(src, TOK_NEWLINE)
+            tok, tok_str = Peek(src)
+        }
+        var setup_b: string
+        var val_b: string
+        src, setup_b, val_b = TranslateExprWithPrecedence(src, indent, Precedence(op))
+        setup = setup ++ setup_b
+        if op == TOK_STRCAT {
+            var tmp_str: string = "tmp_str" ++ itoa(len(src))
+            var tmp_strlen: string = "tmp_strlen" ++ itoa(len(src))
+            setup = setup ++ indent ++ "int " ++ tmp_strlen ++ " = strlen(" ++ val ++ ") + strlen(" ++ val_b ++ ") + 1;\n"
+            setup = setup ++ indent ++ "char* " ++ tmp_str ++ " = calloc(" ++ tmp_strlen ++ ", sizeof(char));\n"
+            setup = setup ++ indent ++ "strcpy(" ++ tmp_str ++ ", " ++ val ++ ");\n"
+            setup = setup ++ indent ++ "strcat(" ++ tmp_str ++ ", " ++ val_b ++ ");\n"
+            val = tmp_str
+        } else if op == TOK_STREQ {
+            val = "(strcmp(" ++ val ++ ", " ++ val_b ++ ") == 0)"
+        } else if op == TOK_STRNEQ {
+            val = "(strcmp(" ++ val ++ ", " ++ val_b ++ ") != 0)"
+        } else {
+            val = "(" ++ val ++ ") " ++ op_str ++ " (" ++ val_b ++ ")"
+        }
+        op, tok_str = Peek(src)
+    }
+    return src, setup, val
+}
+
+fn TranslateExpr(src: string, indent: string) -> (string, string, string) {
+    var setup: string
+    var expr: string
+    src, setup, expr = TranslateExprWithPrecedence(src, indent, 0)
+    return src, setup, expr
+}
+
+fn TranslateExprs(src: string, indent: string) -> (string, int, string, string) {
+    var expr_setup: string
+    var expr_value: string
+    src, expr_setup, expr_value = TranslateExpr(src, indent)
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    var exprs_count: int = 1
+    var exprs_setup: string = expr_setup
+    var exprs_value: string = expr_value
+    for tok == TOK_COMMA {
+        src, tok_str = ConsumeToken(src, TOK_COMMA)
+        src, expr_setup, expr_value = TranslateExpr(src, indent)
+        exprs_count = exprs_count + 1
+        exprs_setup = exprs_setup ++ expr_setup
+        exprs_value = exprs_value ++ ", " ++ expr_value
+        tok, tok_str = Peek(src)
+    }
+    return src, exprs_count, exprs_setup, exprs_value
+}
+
+fn TranslateConstOrVar(src: string) -> (string, string) {
+    var name: string
+    src, name = ConsumeIdent(src)
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_COLON)
+    var typ: int
+    var typ_str: string
+    src, typ, typ_str = TranslateType(src)
+    var out: string = typ_str ++ " " ++ name
+    return src, out
+}
+
+fn TranslateConstDecl(src: string, indent: string) -> (string, string) {
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_LET)
+    var out: string
+    src, out = TranslateConstOrVar(src)
+    out = "const " ++ out
+    src, tok_str = ConsumeToken(src, TOK_ASSIGN)
+    var setup: string
+    var val: string
+    src, setup, val = TranslateExpr(src, indent)
+    src, tok_str = ConsumeToken(src, TOK_NEWLINE)
+    out = out ++ " = " ++ val ++ ";\n"
+    return src, out
+}
+
+fn TranslateConstDeclStmt(src: string, indent: string) -> (string, string) {
+    var out: string
+    src, out = TranslateConstDecl(src, indent)
+    return src, indent ++ out
+}
+
+fn TranslateVarDeclStmt(src: string, indent: string) -> (string, string) {
+    var tok: int
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_VAR)
+    var setup: string = ""
+    var val: string
+    var out: string
+    src, out = TranslateConstOrVar(src)
+    tok, tok_str = Peek(src)
+    if tok == TOK_ASSIGN {
+        src, tok_str = ConsumeToken(src, TOK_ASSIGN)
+        src, setup, val = TranslateExpr(src, indent)
+        src, tok_str = ConsumeToken(src, TOK_NEWLINE)
+        out = out ++ " = " ++ val
+    }
+    out = setup ++ indent ++ out ++ ";\n"
+    return src, out
+}
+
+fn TranslateAssignStmt(src: string, indent: string) -> (string, string) {
+    var x: int = Find(src, "=")
+    var lhs: string = src[:x]
+    var rhs: string = src[x+1:]
+    var lhs_ident: string
+    lhs, lhs_ident = ConsumeIdent(lhs)
+    var old_rhs: string = rhs
+    var setup: string
+    var rhs_expr: string
+    rhs, setup, rhs_expr = TranslateExpr(rhs, indent)
+    var lhs_tok: int
+    var lhs_tok_str: string
+    var rhs_tok: int
+    var rhs_tok_str: string
+    lhs_tok, lhs_tok_str = Peek(lhs)
+    rhs_tok, rhs_tok_str = Peek(rhs)
+    if lhs_tok == TOK_COMMA && rhs_tok != TOK_COMMA {
+        var func_name: string
+        old_rhs, func_name = ConsumeIdent(old_rhs)
+        var tmp_results: string = "tmp_results" ++ itoa(len(src))
+        var out: string = setup
+        out = out ++ indent ++ func_name ++ "_results " ++ tmp_results ++ " = " ++ rhs_expr ++ ";\n"
+        out = out ++ indent ++ lhs_ident ++ " = " ++ tmp_results ++ ".result1;\n"
+        var result_count: int = 1
+        for lhs_tok == TOK_COMMA {
+            result_count = result_count + 1
+            lhs, lhs_tok_str = ConsumeToken(lhs, TOK_COMMA)
+            lhs, lhs_ident = ConsumeIdent(lhs)
+            out = out ++ indent ++ lhs_ident ++ " = " ++ tmp_results ++ ".result" ++ itoa(result_count) ++ ";\n"
+            lhs_tok, lhs_tok_str = Peek(lhs)
+        }
+        var tok_str: string
+        src, tok_str = ConsumeToken(rhs, TOK_NEWLINE)
+        return src, out
+    }
+    var assignments: string = indent ++ lhs_ident ++ " = " ++ rhs_expr ++ ";\n"
+    for lhs_tok == TOK_COMMA {
+        lhs, lhs_tok_str = ConsumeToken(lhs, TOK_COMMA)
+        rhs, rhs_tok_str = ConsumeToken(rhs, TOK_COMMA)
+        lhs, lhs_ident = ConsumeIdent(lhs)
+        var rhs_expr_setup: string
+        rhs, rhs_expr_setup, rhs_expr = TranslateExpr(rhs, indent)
+        setup = setup ++ rhs_expr_setup
+        assignments = assignments ++ indent ++ lhs_ident ++ " = " ++ rhs_expr ++ ";\n"
+        lhs_tok, lhs_tok_str = Peek(lhs)
+    }
+    var tok_str: string
+    src, tok_str = ConsumeToken(rhs, TOK_NEWLINE)
+    return src, setup ++ assignments
+}
+
+fn TranslateIfStmt(src: string, indent: string, func_name: string) -> (string, string) {
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_IF)
+    var cond_setup: string
+    var cond: string
+    src, cond_setup, cond = TranslateExpr(src, indent)
+    src, tok_str = ConsumeToken(src, TOK_LCURLY)
+    var out: string = cond_setup
+    out = out ++ indent ++ "if (" ++ cond ++ ") {\n"
+    var body: string
+    src, body = TranslateStmts(src, indent ++ SINGLE_INDENT, func_name)
+    src, tok_str = ConsumeToken(src, TOK_RCURLY)
+    out = out ++ body
+    out = out ++ indent ++ "}"
+    var tok: int
+    tok, tok_str = Peek(src)
+    if tok != TOK_ELSE {
+        return src, out ++ "\n"
+    }
+    src, tok_str = ConsumeToken(src, TOK_ELSE)
+    tok, tok_str = Peek(src)
+    var else_out: string
+    if tok == TOK_IF {
+        src, else_out = TranslateIfStmt(src, indent ++ SINGLE_INDENT, func_name)
+        out = out ++ " else {\n"
+        out = out ++ else_out
+        out = out ++ indent ++ "}\n"
+        return src, out
+    }
+    src, tok_str = ConsumeToken(src, TOK_LCURLY)
+    src, else_out = TranslateStmts(src, indent ++ SINGLE_INDENT, func_name)
+    src, tok_str = ConsumeToken(src, TOK_RCURLY)
+    out = out ++ " else {\n"
+    out = out ++ else_out
+    out = out ++ indent ++ "}\n"
+    return src, out
+}
+
+fn TranslateForStmt(src: string, indent: string, func_name: string) -> (string, string) {
+    var tok: int
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_FOR)
+    tok, tok_str = Peek(src)
+    var cond_setup: string = ""
+    var cond: string = "true"
+    if tok != TOK_LCURLY {
+        src, cond_setup, cond = TranslateExpr(src, indent ++ SINGLE_INDENT)
+    }
+    src, tok_str = ConsumeToken(src, TOK_LCURLY)
+    var out: string
+    if cond_setup <> "" {
+        out = indent ++ "while (" ++ cond ++ ") {\n"
+    } else {
+        out = indent ++ "while (true) {\n"
+        out = out ++ cond_setup
+        out = out ++ indent ++ SINGLE_INDENT ++ "if (!(" ++ cond ++ ")) break;\n"
+    }
+    var body: string
+    src, body = TranslateStmts(src, indent ++ SINGLE_INDENT, func_name)
+    src, tok_str = ConsumeToken(src, TOK_RCURLY)
+    out = out ++ body
+    out = out ++ indent ++ "}\n"
+    return src, out
+}
+
+fn TranslateContinueStmt(src: string, indent: string) -> (string, string) {
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_CONTINUE)
+    return src, indent ++ "continue;"
+}
+
+fn TranslateBreakStmt(src: string, indent: string) -> (string, string) {
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_BREAK)
+    return src, indent ++ "break;"
+}
+
+fn TranslateReturnStmt(src: string, indent: string, func_name: string) -> (string, string) {
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_RETURN)
+    var expr_count: int
+    var exprs_setup: string
+    var exprs_value: string
+    src, expr_count, exprs_setup, exprs_value = TranslateExprs(src, indent)
+    src, tok_str = ConsumeToken(src, TOK_NEWLINE)
+    var out: string = exprs_setup ++ indent ++ "return "
+    if expr_count > 1 {
+        out = out ++ "(" ++ func_name ++ "_results){"
+    }
+    out = out ++ exprs_value
+    if expr_count > 1 {
+        out = out ++  "}"
+    }
+    out = out ++ ";\n"
+    return src, out
+}
+
+fn TranslateStmt(src: string, indent: string, func_name: string) -> (string, string) {
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    var out: string
+    if tok == TOK_LET {
+        src, out = TranslateConstDeclStmt(src, indent)
+        return src, out
+    } else if tok == TOK_VAR {
+        src, out = TranslateVarDeclStmt(src, indent)
+        return src, out
+    } else if tok == TOK_IF {
+        src, out = TranslateIfStmt(src, indent, func_name)
+        return src, out
+    } else if tok == TOK_FOR {
+        src, out = TranslateForStmt(src, indent, func_name)
+        return src, out
+    } else if tok == TOK_CONTINUE {
+        src, out = TranslateContinueStmt(src, indent)
+        return src, out
+    } else if tok == TOK_BREAK {
+        src, out = TranslateBreakStmt(src, indent)
+        return src, out
+    } else if tok == TOK_RETURN {
+        src, out = TranslateReturnStmt(src, indent, func_name)
+        return src, out
+    } else if tok == TOK_IDENT {
+        var first_ident: string
+        src, first_ident = ConsumeIdent(src)
+        tok, tok_str = Peek(src)
+        src = first_ident ++ src
+        if tok == TOK_COMMA || tok == TOK_ASSIGN {
+            src, out = TranslateAssignStmt(src, indent)
+            return src, out
+        } else {
+            var setup: string
+            var val: string
+            src, setup, val = TranslateExpr(src, indent)
+            src, tok_str = ConsumeToken(src, TOK_NEWLINE)
+            out = setup ++ indent ++ val ++ ";\n"
+            return src, out
+        }
+    } else {
+        print("unexpected stmt token, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+        exit(1)
+    }
+}
+
+fn TranslateStmts(src: string, indent: string, func_name: string) -> (string, string) {
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    var out: string = ""
+    for tok != TOK_RCURLY {
+        if tok == TOK_NEWLINE {
+            src, tok_str = ConsumeToken(src, TOK_NEWLINE)
+            tok, tok_str = Peek(src)
+            continue
+        }
+        var stmt_out: string
+        src, stmt_out = TranslateStmt(src, indent, func_name)
+        out = out ++ stmt_out
+        tok, tok_str = Peek(src)
+    }
+    return src, out
+}
+
+fn TranslateFuncArgs(src: string) -> (string, string) {
+    var tok: int
+    var tok_str: string
+    src, tok_str = ConsumeToken(src, TOK_LPAREN)
+    tok, tok_str = Peek(src)
+    if tok == TOK_RPAREN {
+        src, tok_str = ConsumeToken(src, TOK_RPAREN)
+        return src, "()"
+    }
+    var args: string
+    src, args = TranslateConstOrVar(src)
+    tok, tok_str = Peek(src)
+    for tok == TOK_COMMA {
+        src, tok_str = ConsumeToken(src, TOK_COMMA)
+        var arg: string
+        src, arg = TranslateConstOrVar(src)
+        args = args ++ ", " ++ arg
+        tok, tok_str = Peek(src)
+    }
+    src, tok_str = ConsumeToken(src, TOK_RPAREN)
+    return src, "(" ++ args ++ ")"
+}
+
+fn TranslateFuncResults(src: string, func_name: string) -> (string, string, string) {
+    var typ: int
+    var typ_str: string
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    if tok != TOK_LPAREN {
+        src, typ, typ_str = TranslateType(src)
+        return src, "", typ_str
+    }
+    src, tok_str = ConsumeToken(src, TOK_LPAREN)
+    src, typ, typ_str = TranslateType(src)
+    tok, tok_str = Peek(src)
+    if tok != TOK_COMMA {
+        src, tok_str = ConsumeToken(src, TOK_RPAREN)
+        return src, "", typ_str
+    }
+    var td: string = "typedef struct {\n" ++ SINGLE_INDENT ++ typ_str ++ " result1;\n"
+    var res_count: int = 1
+    for tok == TOK_COMMA {
+        src, tok_str = ConsumeToken(src, TOK_COMMA)
+        src, typ, typ_str = TranslateType(src)
+        res_count = res_count + 1
+        td = td ++ SINGLE_INDENT ++ typ_str ++ " result" ++ itoa(res_count) ++ ";\n"
+        tok, tok_str = Peek(src)
+    }
+    src, tok_str = ConsumeToken(src, TOK_RPAREN)
+    td = td ++ "} " ++ func_name ++ "_results;\n"
+    return src, td, func_name ++ "_results"
+}
+
+fn TranslateFunc(src: string) -> (string, string, string) {
+    var tok: int
+    var tok_str: string
+    var name: string
+    src, tok_str = ConsumeToken(src, TOK_FN)
+    src, name = ConsumeIdent(src)
+    var args: string = "()"
+    var results_type_def: string = ""
+    var results_type_name: string = "void"
+    if name <> "main" {
+        results_type_name = "int"
+    }
+    tok, tok_str = Peek(src)
+    if tok == TOK_LPAREN {
+        src, args = TranslateFuncArgs(src)
+        tok, tok_str = Peek(src)
+        if tok == TOK_RARROW {
+            src, tok_str = ConsumeToken(src, TOK_RARROW)
+            src, results_type_def, results_type_name = TranslateFuncResults(src, name)
+        }
+    }
+    var stmts_out: string
+    src, tok_str = ConsumeToken(src, TOK_LCURLY)
+    src, stmts_out = TranslateStmts(src, SINGLE_INDENT ++ "", name)
+    src, tok_str = ConsumeToken(src, TOK_RCURLY)
+    var df: string = results_type_name ++ " " ++ name ++ args
+    var decl: string = results_type_def ++ df ++ ";\n"
+    df = df ++ " {\n"
+    df = df ++ stmts_out
+    df = df ++ "}\n\n"
+    return src, decl, df
+}
+
+fn TranslateProgram(src: string) -> string {
+    var out: string = ""
+    out = out ++ "#include <stdbool.h>\n"
+    out = out ++ "#include <stdio.h>\n"
+    out = out ++ "#include <stdlib.h>\n"
+    out = out ++ "#include <string.h>\n"
+    out = out ++ "\n"
+    out = out ++ "char* itoa(int x) {\n"
+    out = out ++ "  char* a = malloc(20);\n"
+    out = out ++ "  sprintf(a, \"%i\", x);\n"
+    out = out ++ "  return a;\n"
+    out = out ++ "}\n"
+    out = out ++ "\n"
+    out = out ++ "char* read(const char* path) {\n"
+    out = out ++ "  FILE* f = fopen(path, \"rb\");\n"
+    out = out ++ "  if (f == NULL) {\n"
+    out = out ++ "    printf(\"could not open file: %s\\n\", path);\n"
+    out = out ++ "    exit(1);\n"
+    out = out ++ "  }\n"
+    out = out ++ "  fseek(f, 0, SEEK_END);\n"
+    out = out ++ "  int length = ftell(f);\n"
+    out = out ++ "  char* text = malloc(length);\n"
+    out = out ++ "  fseek(f, 0, SEEK_SET);\n"
+    out = out ++ "  fread(text, 1, length, f);\n"
+    out = out ++ "  fclose(f);\n"
+    out = out ++ "  return text;\n"
+    out = out ++ "}\n"
+    out = out ++ "\n"
+    out = out ++ "void write(const char* path, const char* text) {\n"
+    out = out ++ "  FILE *f = fopen(path, \"w\");\n"
+    out = out ++ "  if (f == NULL) {\n"
+    out = out ++ "    printf(\"could not open file: %s\\n\", path);\n"
+    out = out ++ "    exit(1);\n"
+    out = out ++ "  }\n"
+    out = out ++ "  fprintf(f, \"%s\", text);\n"
+    out = out ++ "  fclose(f);\n"
+    out = out ++ "}\n\n"
+    var constants: string = ""
+    var decls: string = ""
+    var defs: string = ""
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    for tok != TOK_EOF {
+        if tok == TOK_NEWLINE {
+            src, tok_str = ConsumeToken(src, TOK_NEWLINE)
+            tok, tok_str = Peek(src)
+            continue
+        } else if tok == TOK_LET {
+            var const_decl: string
+            src, const_decl = TranslateConstDecl(src, "")
+            constants = constants ++ const_decl
+        } else if tok == TOK_FN {
+            var fn_decl: string
+            var fn_def: string
+            src, fn_decl, fn_def = TranslateFunc(src)
+            decls = decls ++ fn_decl
+            defs = defs ++ fn_def
+        } else {
+            print("unexpected decl token, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+            exit(1)
+        }
+        tok, tok_str = Peek(src)
+    }
+    src, tok_str = ConsumeToken(src, TOK_EOF)
+    if constants <!> "" {
+        out = out ++ constants ++ "\n"
+    }
+    if decls <!> "" {
+        out = out ++ decls ++ "\n"
+    }
+    if defs <!> "" {
+        out = out ++ defs ++ "\n"
+    }
+    return out
+}
+
+fn main {
+    var src_file: string = "sokka.sk"
+    var src: string = read(src_file)
+    var out: string = TranslateProgram(src)
+    write(src_file[:len(src_file) - 3] ++ ".B.c", out)
+}

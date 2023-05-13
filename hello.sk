@@ -1,0 +1,126 @@
+fn myFunc(x: string, y: bool) {
+  var a: string = "xyz"
+  print(a ++ x)
+}
+
+fn compA(a: int, b: int) -> int {
+  return a + b
+}
+
+fn compB(a: int, b: int) -> (int, int) {
+  return a / b, a % b
+}
+
+fn yolo(a: string, b: string) -> (string, string) {
+  return a ++ b, b ++ a
+}
+
+let evolution: bool = true
+
+fn boolTest() -> bool {
+  let a: bool = false
+  var b: bool
+  var c: bool
+  var d: bool
+  return a && b || c && d
+}
+
+fn precendenceTest() -> bool {
+  var a: int
+  var b: int
+  var c: int
+  var d: int
+  var x: int
+  var y: int
+  var z: int
+  var t: int = 1 + 2 - 3
+  return "abc" <> "xyz" || false && z | y ^ x & a + b / c % d < 123 == ("123" <!> "yo") && true
+}
+
+fn ifTest {
+  print("ifTest starting\n")
+  if 12 < 23 {
+    print("12 is less than 23\n")
+  } else if 23 < 34 {
+    print("23 is less than 34\n")
+  } else {
+    print("12 is not less than 23, which is not less than 34\n")
+  }
+  if false {
+    print("This should never happen.\n")
+  }
+  print("ifTest completed\n")
+}
+
+fn forTest {
+  print("forTest starting\n")
+  var i: int = 1
+  var s: string = "Hello!"
+  for i <= 10 {
+    if i % 2 == 0 {
+      s = s ++ "!"
+      i = i + 1
+      continue
+    }
+    print(s ++ "\n")
+    s = s ++ "!"
+    i = i + 1
+  }
+  s = "Bye!"
+  i = 1
+  for {
+    print(s ++ "\n")
+    s = s ++ "!"
+    i = i + 1
+    if i > 5 {
+      break
+    }
+  }
+  print("forTest completed\n")
+}
+
+let kHowdieStart: int = 16
+
+fn four() -> int {
+  return 4
+}
+
+fn substrTest {
+  var s: string = "Yolo What's up? Howdie\n"
+  print(s[:four()] ++ "\n")
+  print(s[2+3:15] ++ "\n")
+  print(s[kHowdieStart:])
+}
+
+fn lenTest {
+  var s: string = "ABCDEFGHIJK"
+  print(s[:len("abc")] ++ "\n")
+  print(s[:len(s)] ++ "\n")
+}
+
+fn main {
+  print("Hello world!" ++ "\n")
+  substrTest()
+  lenTest()
+  test()
+  myFunc("??\n", false)
+  var a: string
+  var b: string
+  a, b = yolo("!", "?")
+  print(a ++ "\n")
+  print(b ++ "\n")
+  var tmp: string
+  tmp, b, a = b, a, tmp
+  print(a ++ "\n")
+  print(b ++ "\n")
+  ifTest()
+  forTest()
+  print("Goodbye world!\n")
+}
+
+fn test {
+  var x: string = "abc" ++ "\n"
+  var y: int = 123 + 456
+  var z: bool = false
+  print(x)
+}
