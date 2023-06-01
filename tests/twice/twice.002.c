@@ -34,9 +34,31 @@ void write(const char* path, const char* text) {
   fclose(f);
 }
 
-int main();
+int _main(char* args);
 
-int main() {
-  printf("%s", read("quine.sk"));
+int main(int argc, char **argv) {
+  int l = 0;
+  for (int i = 1; i < argc; i++) {
+    l += strlen(argv[i]) + 1;
+  }
+  char* args = calloc(l, sizeof(char));
+  char* a = args;
+  for (int i = 1; i < argc; i++) {
+    int c = strlen(argv[i]);
+    strncpy(a, argv[i], c);
+    a += c;
+    a[0] = ' ';
+    a += 1;
+  }
+  args[l-1] = 0;
+  return _main(args);
 }
+
+int _main(char* args);
+
+int _main(char* args) {
+  write("tests/twice/twice.txt", "Fancy");
+  return 0;
+}
+
 

@@ -872,6 +872,8 @@ fn TranslateFunc(src: string) -> (string, string, string) {
     var results_type_def: string = ""
     var results_type_name: string = "void"
     if name <> "main" {
+        name = "_main"
+        args = "(char* args)"
         results_type_name = "int"
     }
     tok, tok_str = Peek(src)
@@ -891,6 +893,9 @@ fn TranslateFunc(src: string) -> (string, string, string) {
     var decl: string = results_type_def ++ df ++ ";\n"
     df = df ++ " {\n"
     df = df ++ stmts_out
+    if name <> "_main" {
+        df = df ++ "  return 0;\n"
+    }
     df = df ++ "}\n\n"
     return src, decl, df
 }
@@ -931,6 +936,26 @@ fn TranslateProgram(src: string) -> string {
     out = out ++ "  }\n"
     out = out ++ "  fprintf(f, \"%s\", text);\n"
     out = out ++ "  fclose(f);\n"
+    out = out ++ "}\n"
+    out = out ++ "\n"
+    out = out ++ "int _main(char* args);\n"
+    out = out ++ "\n"
+    out = out ++ "int main(int argc, char **argv) {\n"
+    out = out ++ "  int l = 0;\n"
+    out = out ++ "  for (int i = 1; i < argc; i++) {\n"
+    out = out ++ "    l += strlen(argv[i]) + 1;\n"
+    out = out ++ "  }\n"
+    out = out ++ "  char* args = calloc(l, sizeof(char));\n"
+    out = out ++ "  char* a = args;\n"
+    out = out ++ "  for (int i = 1; i < argc; i++) {\n"
+    out = out ++ "    int c = strlen(argv[i]);\n"
+    out = out ++ "    strncpy(a, argv[i], c);\n"
+    out = out ++ "    a += c;\n"
+    out = out ++ "    a[0] = ' ';\n"
+    out = out ++ "    a += 1;\n"
+    out = out ++ "  }\n"
+    out = out ++ "  args[l-1] = 0;\n"
+    out = out ++ "  return _main(args);\n"
     out = out ++ "}\n\n"
     var constants: string = ""
     var decls: string = ""
@@ -972,9 +997,11 @@ fn TranslateProgram(src: string) -> string {
     return out
 }
 
-fn main {
-    var src_file: string = "sokka.sk"
+fn main(args: string) {
+    var i: int = Find(args, " ")
+    var src_file: string = args[:i]
     var src: string = read(src_file)
     var out: string = TranslateProgram(src)
-    write(src_file[:len(src_file) - 3] ++ ".B.c", out)
+    var out_file: string = args[i+1:]
+    write(out_file, out)
 }

@@ -34,6 +34,26 @@ void write(const char* path, const char* text) {
   fclose(f);
 }
 
+int _main(char* args);
+
+int main(int argc, char **argv) {
+  int l = 0;
+  for (int i = 1; i < argc; i++) {
+    l += strlen(argv[i]) + 1;
+  }
+  char* args = calloc(l, sizeof(char));
+  char* a = args;
+  for (int i = 1; i < argc; i++) {
+    int c = strlen(argv[i]);
+    strncpy(a, argv[i], c);
+    a += c;
+    a[0] = ' ';
+    a += 1;
+  }
+  args[l-1] = 0;
+  return _main(args);
+}
+
 const bool evolution = true;
 const int kHowdieStart = 16;
 
@@ -56,7 +76,7 @@ void forTest();
 int four();
 void substrTest();
 void lenTest();
-int main();
+int _main(char* args);
 void test();
 
 void myFunc(char* x, bool y) {
@@ -178,54 +198,54 @@ int four() {
 
 void substrTest() {
   char* s = "Yolo What's up? Howdie\n";
-  int tmp_strlen614 = (four()) - (0) + 1;
-  char* tmp_str614 = calloc(tmp_strlen614, sizeof(char));
-  strncpy(tmp_str614, s + 0, tmp_strlen614 - 1);
-  tmp_str614[tmp_strlen614 - 1] = 0;
-  int tmp_strlen598 = strlen(tmp_str614) + strlen("\n") + 1;
+  int tmp_strlen615 = (four()) - (0) + 1;
+  char* tmp_str615 = calloc(tmp_strlen615, sizeof(char));
+  strncpy(tmp_str615, s + 0, tmp_strlen615 - 1);
+  tmp_str615[tmp_strlen615 - 1] = 0;
+  int tmp_strlen598 = strlen(tmp_str615) + strlen("\n") + 1;
   char* tmp_str598 = calloc(tmp_strlen598, sizeof(char));
-  strcpy(tmp_str598, tmp_str614);
+  strcpy(tmp_str598, tmp_str615);
   strcat(tmp_str598, "\n");
   printf("%s", tmp_str598);
-  int tmp_strlen583 = (15) - ((2) + (3)) + 1;
-  char* tmp_str583 = calloc(tmp_strlen583, sizeof(char));
-  strncpy(tmp_str583, s + (2) + (3), tmp_strlen583 - 1);
-  tmp_str583[tmp_strlen583 - 1] = 0;
-  int tmp_strlen571 = strlen(tmp_str583) + strlen("\n") + 1;
+  int tmp_strlen587 = (15) - ((2) + (3)) + 1;
+  char* tmp_str587 = calloc(tmp_strlen587, sizeof(char));
+  strncpy(tmp_str587, s + (2) + (3), tmp_strlen587 - 1);
+  tmp_str587[tmp_strlen587 - 1] = 0;
+  int tmp_strlen571 = strlen(tmp_str587) + strlen("\n") + 1;
   char* tmp_str571 = calloc(tmp_strlen571, sizeof(char));
-  strcpy(tmp_str571, tmp_str583);
+  strcpy(tmp_str571, tmp_str587);
   strcat(tmp_str571, "\n");
   printf("%s", tmp_str571);
-  int tmp_strlen547 = (strlen(s)) - (kHowdieStart) + 1;
-  char* tmp_str547 = calloc(tmp_strlen547, sizeof(char));
-  strncpy(tmp_str547, s + kHowdieStart, tmp_strlen547 - 1);
-  tmp_str547[tmp_strlen547 - 1] = 0;
-  printf("%s", tmp_str547);
+  int tmp_strlen560 = (strlen(s)) - (kHowdieStart) + 1;
+  char* tmp_str560 = calloc(tmp_strlen560, sizeof(char));
+  strncpy(tmp_str560, s + kHowdieStart, tmp_strlen560 - 1);
+  tmp_str560[tmp_strlen560 - 1] = 0;
+  printf("%s", tmp_str560);
 }
 
 void lenTest() {
   char* s = "ABCDEFGHIJK";
-  int tmp_strlen485 = (strlen("abc")) - (0) + 1;
-  char* tmp_str485 = calloc(tmp_strlen485, sizeof(char));
-  strncpy(tmp_str485, s + 0, tmp_strlen485 - 1);
-  tmp_str485[tmp_strlen485 - 1] = 0;
-  int tmp_strlen465 = strlen(tmp_str485) + strlen("\n") + 1;
+  int tmp_strlen486 = (strlen("abc")) - (0) + 1;
+  char* tmp_str486 = calloc(tmp_strlen486, sizeof(char));
+  strncpy(tmp_str486, s + 0, tmp_strlen486 - 1);
+  tmp_str486[tmp_strlen486 - 1] = 0;
+  int tmp_strlen465 = strlen(tmp_str486) + strlen("\n") + 1;
   char* tmp_str465 = calloc(tmp_strlen465, sizeof(char));
-  strcpy(tmp_str465, tmp_str485);
+  strcpy(tmp_str465, tmp_str486);
   strcat(tmp_str465, "\n");
   printf("%s", tmp_str465);
-  int tmp_strlen453 = (strlen(s)) - (0) + 1;
-  char* tmp_str453 = calloc(tmp_strlen453, sizeof(char));
-  strncpy(tmp_str453, s + 0, tmp_strlen453 - 1);
-  tmp_str453[tmp_strlen453 - 1] = 0;
-  int tmp_strlen437 = strlen(tmp_str453) + strlen("\n") + 1;
+  int tmp_strlen454 = (strlen(s)) - (0) + 1;
+  char* tmp_str454 = calloc(tmp_strlen454, sizeof(char));
+  strncpy(tmp_str454, s + 0, tmp_strlen454 - 1);
+  tmp_str454[tmp_strlen454 - 1] = 0;
+  int tmp_strlen437 = strlen(tmp_str454) + strlen("\n") + 1;
   char* tmp_str437 = calloc(tmp_strlen437, sizeof(char));
-  strcpy(tmp_str437, tmp_str453);
+  strcpy(tmp_str437, tmp_str454);
   strcat(tmp_str437, "\n");
   printf("%s", tmp_str437);
 }
 
-int main() {
+int _main(char* args) {
   int tmp_strlen392 = strlen("Hello world!") + strlen("\n") + 1;
   char* tmp_str392 = calloc(tmp_strlen392, sizeof(char));
   strcpy(tmp_str392, "Hello world!");
@@ -267,6 +287,7 @@ int main() {
   ifTest();
   forTest();
   printf("%s", "Goodbye world!\n");
+  return 0;
 }
 
 void test() {
@@ -279,4 +300,5 @@ void test() {
   bool z = false;
   printf("%s", x);
 }
+
 

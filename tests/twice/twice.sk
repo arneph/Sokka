@@ -1,0 +1,3 @@
+fn main {
+    write("tests/twice/twice.txt", "Fancy")
+}

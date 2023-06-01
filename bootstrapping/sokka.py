@@ -634,13 +634,17 @@ def TranslateFunc(src: str) -> tuple[str, str, str]:
     src, stmts_out = TranslateStmts(src, SINGLE_INDENT, name)
     src, tok_str = ConsumeToken(src, TOK_RCURLY)
     if name == 'main':
+        name = '_main'
         df = 'int '
+        args = '(char* args)'
     else:
         df = 'void '
     df = results_type_name + ' ' + name + args
     decl = results_type_def + df + ';\n'
     df += ' {\n'
     df += stmts_out
+    if name == '_main':
+        df += '  return 0;\n'
     df += '}\n\n'
     return src, decl, df
 
@@ -680,6 +684,26 @@ def TranslateProgram(src: str) -> str:
     out += '  }\n'
     out += '  fprintf(f, "%s", text);\n'
     out += '  fclose(f);\n'
+    out += '}\n'
+    out += '\n'
+    out += 'int _main(char* args);\n'
+    out += '\n'
+    out += 'int main(int argc, char **argv) {\n'
+    out += '  int l = 0;\n'
+    out += '  for (int i = 1; i < argc; i++) {\n'
+    out += '    l += strlen(argv[i]) + 1;\n'
+    out += '  }\n'
+    out += '  char* args = calloc(l, sizeof(char));\n'
+    out += '  char* a = args;\n'
+    out += '  for (int i = 1; i < argc; i++) {\n'
+    out += '    int c = strlen(argv[i]);\n'
+    out += '    strncpy(a, argv[i], c);\n'
+    out += '    a += c;\n'
+    out += '    a[0] = \' \';\n'
+    out += '    a += 1;\n'
+    out += '  }\n'
+    out += '  args[l-1] = 0;\n'
+    out += '  return _main(args);\n'
     out += '}\n\n'
     constants = ''
     decls = ''
@@ -712,5 +736,5 @@ def TranslateProgram(src: str) -> str:
 src_file = open(sys.argv[1], "r")
 src = src_file.read()
 out = TranslateProgram(src)
-out_file = open(sys.argv[1][:-3] + '.A.c', "w")
+out_file = open(sys.argv[2], "w")
 out_file.write(out)
