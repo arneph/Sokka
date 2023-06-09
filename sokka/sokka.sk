@@ -22,10 +22,11 @@ let TOK_LBRACKET: int = 202
 let TOK_RBRACKET: int = 203
 let TOK_LCURLY: int = 204
 let TOK_RCURLY: int = 205
-let TOK_COLON: int = 210
-let TOK_COMMA: int = 211
-let TOK_ASSIGN: int = 212
-let TOK_RARROW: int = 213
+let TOK_UNDERSCORE: int = 210
+let TOK_COLON: int = 211
+let TOK_COMMA: int = 212
+let TOK_ASSIGN: int = 213
+let TOK_RARROW: int = 214
 
 let TOK_BNOT: int = 220
 let TOK_BOR: int = 221
@@ -189,6 +190,8 @@ fn Next(src: string) -> (string, int, string) {
         return src[1:], TOK_LCURLY, "{"
     } else if StartsWith(src, "}") {
         return src[1:], TOK_RCURLY, "}"
+    } else if StartsWith(src, "_") {
+        return src[1:], TOK_UNDERSCORE, "_"
     } else if StartsWith(src, ":") {
         return src[1:], TOK_COLON, ":"
     } else if StartsWith(src, ",") {
@@ -302,6 +305,17 @@ fn ConsumeIdent(src: string) -> (string, string) {
     src, actual_tok, actual_tok_str = Next(src)
     if actual_tok != TOK_IDENT {
         print("expected ident, got: " ++ itoa(actual_tok) ++ " \"" ++ actual_tok_str ++ "\"")
+        exit(1)
+    }
+    return src, actual_tok_str
+}
+
+fn ConsumeIdentOrUnderscore(src: string) -> (string, string) {
+    var actual_tok: int
+    var actual_tok_str: string
+    src, actual_tok, actual_tok_str = Next(src)
+    if actual_tok != TOK_UNDERSCORE && actual_tok != TOK_IDENT {
+        print("expected ident or underscore, got: " ++ itoa(actual_tok) ++ " \"" ++ actual_tok_str ++ "\"")
         exit(1)
     }
     return src, actual_tok_str
@@ -598,7 +612,7 @@ fn TranslateAssignStmt(src: string, indent: string) -> (string, string) {
     var lhs: string = src[:x]
     var rhs: string = src[x+1:]
     var lhs_ident: string
-    lhs, lhs_ident = ConsumeIdent(lhs)
+    lhs, lhs_ident = ConsumeIdentOrUnderscore(lhs)
     var old_rhs: string = rhs
     var setup: string
     var rhs_expr: string
@@ -615,13 +629,17 @@ fn TranslateAssignStmt(src: string, indent: string) -> (string, string) {
         var tmp_results: string = "tmp_results" ++ itoa(len(src))
         var out: string = setup
         out = out ++ indent ++ func_name ++ "_results " ++ tmp_results ++ " = " ++ rhs_expr ++ ";\n"
-        out = out ++ indent ++ lhs_ident ++ " = " ++ tmp_results ++ ".result1;\n"
+        if lhs_ident <!> "_" {
+            out = out ++ indent ++ lhs_ident ++ " = " ++ tmp_results ++ ".result1;\n"
+        }
         var result_count: int = 1
         for lhs_tok == TOK_COMMA {
             result_count = result_count + 1
             lhs, lhs_tok_str = ConsumeToken(lhs, TOK_COMMA)
-            lhs, lhs_ident = ConsumeIdent(lhs)
-            out = out ++ indent ++ lhs_ident ++ " = " ++ tmp_results ++ ".result" ++ itoa(result_count) ++ ";\n"
+            lhs, lhs_ident = ConsumeIdentOrUnderscore(lhs)
+            if lhs_ident <!> "_" {
+                out = out ++ indent ++ lhs_ident ++ " = " ++ tmp_results ++ ".result" ++ itoa(result_count) ++ ";\n"
+            }
             lhs_tok, lhs_tok_str = Peek(lhs)
         }
         var tok_str: string
@@ -767,9 +785,9 @@ fn TranslateStmt(src: string, indent: string, func_name: string) -> (string, str
     } else if tok == TOK_RETURN {
         src, out = TranslateReturnStmt(src, indent, func_name)
         return src, out
-    } else if tok == TOK_IDENT {
+    } else if tok == TOK_IDENT || tok == TOK_UNDERSCORE {
         var first_ident: string
-        src, first_ident = ConsumeIdent(src)
+        src, first_ident = ConsumeIdentOrUnderscore(src)
         tok, tok_str = Peek(src)
         src = first_ident ++ src
         if tok == TOK_COMMA || tok == TOK_ASSIGN {

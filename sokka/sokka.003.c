@@ -17,7 +17,7 @@ char* read(const char* path) {
   }
   fseek(f, 0, SEEK_END);
   int length = ftell(f);
-  char* text = malloc(length);
+  char* text = malloc(length + 1);
   fseek(f, 0, SEEK_SET);
   fread(text, 1, length, f);
   fclose(f);
@@ -76,10 +76,11 @@ const int TOK_LBRACKET = 202;
 const int TOK_RBRACKET = 203;
 const int TOK_LCURLY = 204;
 const int TOK_RCURLY = 205;
-const int TOK_COLON = 210;
-const int TOK_COMMA = 211;
-const int TOK_ASSIGN = 212;
-const int TOK_RARROW = 213;
+const int TOK_UNDERSCORE = 210;
+const int TOK_COLON = 211;
+const int TOK_COMMA = 212;
+const int TOK_ASSIGN = 213;
+const int TOK_RARROW = 214;
 const int TOK_BNOT = 220;
 const int TOK_BOR = 221;
 const int TOK_BAND = 222;
@@ -139,6 +140,11 @@ typedef struct {
   char* result2;
 } ConsumeIdent_results;
 ConsumeIdent_results ConsumeIdent(char* src);
+typedef struct {
+  char* result1;
+  char* result2;
+} ConsumeIdentOrUnderscore_results;
+ConsumeIdentOrUnderscore_results ConsumeIdentOrUnderscore(char* src);
 typedef struct {
   char* result1;
   int result2;
@@ -316,11 +322,11 @@ int Precedence(int tok) {
                 if ((((tok) == (TOK_MUL)) || ((tok) == (TOK_DIV))) || ((tok) == (TOK_REM))) {
                   return 8;
                 } else {
-                  int tmp_strlen28108 = strlen("token has no defined precedence: ") + strlen(itoa(tok)) + 1;
-                  char* tmp_str28108 = calloc(tmp_strlen28108, sizeof(char));
-                  strcpy(tmp_str28108, "token has no defined precedence: ");
-                  strcat(tmp_str28108, itoa(tok));
-                  printf("%s", tmp_str28108);
+                  int tmp_strlen28743 = strlen("token has no defined precedence: ") + strlen(itoa(tok)) + 1;
+                  char* tmp_str28743 = calloc(tmp_strlen28743, sizeof(char));
+                  strcpy(tmp_str28743, "token has no defined precedence: ");
+                  strcat(tmp_str28743, itoa(tok));
+                  printf("%s", tmp_str28743);
                   exit(1);
                 }
               }
@@ -343,11 +349,11 @@ int Find(char* haystack, char* needle) {
       i = (i) + (1);
       continue;
     } else {
-      int tmp_strlen27793 = ((i) + (strlen(needle))) - (i) + 1;
-      char* tmp_str27793 = calloc(tmp_strlen27793, sizeof(char));
-      strncpy(tmp_str27793, haystack + i, tmp_strlen27793 - 1);
-      tmp_str27793[tmp_strlen27793 - 1] = 0;
-      if ((strcmp(tmp_str27793, needle) != 0)) {
+      int tmp_strlen28428 = ((i) + (strlen(needle))) - (i) + 1;
+      char* tmp_str28428 = calloc(tmp_strlen28428, sizeof(char));
+      strncpy(tmp_str28428, haystack + i, tmp_strlen28428 - 1);
+      tmp_str28428[tmp_strlen28428 - 1] = 0;
+      if ((strcmp(tmp_str28428, needle) != 0)) {
         i = (i) + (1);
         continue;
       }
@@ -364,11 +370,11 @@ bool StartsWith(char* text, char* prefix) {
     if ((strlen(text)) == (strlen(prefix))) {
       return (strcmp(text, prefix) == 0);
     } else {
-      int tmp_strlen27458 = (strlen(prefix)) - (0) + 1;
-      char* tmp_str27458 = calloc(tmp_strlen27458, sizeof(char));
-      strncpy(tmp_str27458, text + 0, tmp_strlen27458 - 1);
-      tmp_str27458[tmp_strlen27458 - 1] = 0;
-      return (strcmp(tmp_str27458, prefix) == 0);
+      int tmp_strlen28093 = (strlen(prefix)) - (0) + 1;
+      char* tmp_str28093 = calloc(tmp_strlen28093, sizeof(char));
+      strncpy(tmp_str28093, text + 0, tmp_strlen28093 - 1);
+      tmp_str28093[tmp_strlen28093 - 1] = 0;
+      return (strcmp(tmp_str28093, prefix) == 0);
     }
   }
 }
@@ -387,11 +393,11 @@ bool IsAlphaNumeric(int c) {
 
 char* RemoveLeadingWhitespace(char* text) {
   while ((StartsWith(text, " ")) || (StartsWith(text, "\t"))) {
-    int tmp_strlen27064 = (strlen(text)) - (1) + 1;
-    char* tmp_str27064 = calloc(tmp_strlen27064, sizeof(char));
-    strncpy(tmp_str27064, text + 1, tmp_strlen27064 - 1);
-    tmp_str27064[tmp_strlen27064 - 1] = 0;
-    text = tmp_str27064;
+    int tmp_strlen27699 = (strlen(text)) - (1) + 1;
+    char* tmp_str27699 = calloc(tmp_strlen27699, sizeof(char));
+    strncpy(tmp_str27699, text + 1, tmp_strlen27699 - 1);
+    tmp_str27699[tmp_strlen27699 - 1] = 0;
+    text = tmp_str27699;
   }
   return text;
 }
@@ -402,278 +408,286 @@ Next_results Next(char* src) {
     return (Next_results){"", TOK_EOF, ""};
   } else {
     if (StartsWith(src, "->")) {
-      int tmp_strlen26841 = (strlen(src)) - (2) + 1;
-      char* tmp_str26841 = calloc(tmp_strlen26841, sizeof(char));
-      strncpy(tmp_str26841, src + 2, tmp_strlen26841 - 1);
-      tmp_str26841[tmp_strlen26841 - 1] = 0;
-      return (Next_results){tmp_str26841, TOK_RARROW, "->"};
+      int tmp_strlen27476 = (strlen(src)) - (2) + 1;
+      char* tmp_str27476 = calloc(tmp_strlen27476, sizeof(char));
+      strncpy(tmp_str27476, src + 2, tmp_strlen27476 - 1);
+      tmp_str27476[tmp_strlen27476 - 1] = 0;
+      return (Next_results){tmp_str27476, TOK_RARROW, "->"};
     } else {
       if (StartsWith(src, "||")) {
-        int tmp_strlen26762 = (strlen(src)) - (2) + 1;
-        char* tmp_str26762 = calloc(tmp_strlen26762, sizeof(char));
-        strncpy(tmp_str26762, src + 2, tmp_strlen26762 - 1);
-        tmp_str26762[tmp_strlen26762 - 1] = 0;
-        return (Next_results){tmp_str26762, TOK_BOR, "||"};
+        int tmp_strlen27397 = (strlen(src)) - (2) + 1;
+        char* tmp_str27397 = calloc(tmp_strlen27397, sizeof(char));
+        strncpy(tmp_str27397, src + 2, tmp_strlen27397 - 1);
+        tmp_str27397[tmp_strlen27397 - 1] = 0;
+        return (Next_results){tmp_str27397, TOK_BOR, "||"};
       } else {
         if (StartsWith(src, "&&")) {
-          int tmp_strlen26686 = (strlen(src)) - (2) + 1;
-          char* tmp_str26686 = calloc(tmp_strlen26686, sizeof(char));
-          strncpy(tmp_str26686, src + 2, tmp_strlen26686 - 1);
-          tmp_str26686[tmp_strlen26686 - 1] = 0;
-          return (Next_results){tmp_str26686, TOK_BAND, "&&"};
+          int tmp_strlen27321 = (strlen(src)) - (2) + 1;
+          char* tmp_str27321 = calloc(tmp_strlen27321, sizeof(char));
+          strncpy(tmp_str27321, src + 2, tmp_strlen27321 - 1);
+          tmp_str27321[tmp_strlen27321 - 1] = 0;
+          return (Next_results){tmp_str27321, TOK_BAND, "&&"};
         } else {
           if (StartsWith(src, "==")) {
-            int tmp_strlen26609 = (strlen(src)) - (2) + 1;
-            char* tmp_str26609 = calloc(tmp_strlen26609, sizeof(char));
-            strncpy(tmp_str26609, src + 2, tmp_strlen26609 - 1);
-            tmp_str26609[tmp_strlen26609 - 1] = 0;
-            return (Next_results){tmp_str26609, TOK_EQ, "=="};
+            int tmp_strlen27244 = (strlen(src)) - (2) + 1;
+            char* tmp_str27244 = calloc(tmp_strlen27244, sizeof(char));
+            strncpy(tmp_str27244, src + 2, tmp_strlen27244 - 1);
+            tmp_str27244[tmp_strlen27244 - 1] = 0;
+            return (Next_results){tmp_str27244, TOK_EQ, "=="};
           } else {
             if (StartsWith(src, "!=")) {
-              int tmp_strlen26534 = (strlen(src)) - (2) + 1;
-              char* tmp_str26534 = calloc(tmp_strlen26534, sizeof(char));
-              strncpy(tmp_str26534, src + 2, tmp_strlen26534 - 1);
-              tmp_str26534[tmp_strlen26534 - 1] = 0;
-              return (Next_results){tmp_str26534, TOK_NEQ, "!="};
+              int tmp_strlen27169 = (strlen(src)) - (2) + 1;
+              char* tmp_str27169 = calloc(tmp_strlen27169, sizeof(char));
+              strncpy(tmp_str27169, src + 2, tmp_strlen27169 - 1);
+              tmp_str27169[tmp_strlen27169 - 1] = 0;
+              return (Next_results){tmp_str27169, TOK_NEQ, "!="};
             } else {
               if (StartsWith(src, "<=")) {
-                int tmp_strlen26458 = (strlen(src)) - (2) + 1;
-                char* tmp_str26458 = calloc(tmp_strlen26458, sizeof(char));
-                strncpy(tmp_str26458, src + 2, tmp_strlen26458 - 1);
-                tmp_str26458[tmp_strlen26458 - 1] = 0;
-                return (Next_results){tmp_str26458, TOK_LEQ, "<="};
+                int tmp_strlen27093 = (strlen(src)) - (2) + 1;
+                char* tmp_str27093 = calloc(tmp_strlen27093, sizeof(char));
+                strncpy(tmp_str27093, src + 2, tmp_strlen27093 - 1);
+                tmp_str27093[tmp_strlen27093 - 1] = 0;
+                return (Next_results){tmp_str27093, TOK_LEQ, "<="};
               } else {
                 if (StartsWith(src, ">=")) {
-                  int tmp_strlen26382 = (strlen(src)) - (2) + 1;
-                  char* tmp_str26382 = calloc(tmp_strlen26382, sizeof(char));
-                  strncpy(tmp_str26382, src + 2, tmp_strlen26382 - 1);
-                  tmp_str26382[tmp_strlen26382 - 1] = 0;
-                  return (Next_results){tmp_str26382, TOK_GEQ, ">="};
+                  int tmp_strlen27017 = (strlen(src)) - (2) + 1;
+                  char* tmp_str27017 = calloc(tmp_strlen27017, sizeof(char));
+                  strncpy(tmp_str27017, src + 2, tmp_strlen27017 - 1);
+                  tmp_str27017[tmp_strlen27017 - 1] = 0;
+                  return (Next_results){tmp_str27017, TOK_GEQ, ">="};
                 } else {
                   if (StartsWith(src, "++")) {
-                    int tmp_strlen26306 = (strlen(src)) - (2) + 1;
-                    char* tmp_str26306 = calloc(tmp_strlen26306, sizeof(char));
-                    strncpy(tmp_str26306, src + 2, tmp_strlen26306 - 1);
-                    tmp_str26306[tmp_strlen26306 - 1] = 0;
-                    return (Next_results){tmp_str26306, TOK_STRCAT, "++"};
+                    int tmp_strlen26941 = (strlen(src)) - (2) + 1;
+                    char* tmp_str26941 = calloc(tmp_strlen26941, sizeof(char));
+                    strncpy(tmp_str26941, src + 2, tmp_strlen26941 - 1);
+                    tmp_str26941[tmp_strlen26941 - 1] = 0;
+                    return (Next_results){tmp_str26941, TOK_STRCAT, "++"};
                   } else {
                     if (StartsWith(src, "<>")) {
-                      int tmp_strlen26227 = (strlen(src)) - (2) + 1;
-                      char* tmp_str26227 = calloc(tmp_strlen26227, sizeof(char));
-                      strncpy(tmp_str26227, src + 2, tmp_strlen26227 - 1);
-                      tmp_str26227[tmp_strlen26227 - 1] = 0;
-                      return (Next_results){tmp_str26227, TOK_STREQ, "<>"};
+                      int tmp_strlen26862 = (strlen(src)) - (2) + 1;
+                      char* tmp_str26862 = calloc(tmp_strlen26862, sizeof(char));
+                      strncpy(tmp_str26862, src + 2, tmp_strlen26862 - 1);
+                      tmp_str26862[tmp_strlen26862 - 1] = 0;
+                      return (Next_results){tmp_str26862, TOK_STREQ, "<>"};
                     } else {
                       if (StartsWith(src, "<!>")) {
-                        int tmp_strlen26148 = (strlen(src)) - (3) + 1;
-                        char* tmp_str26148 = calloc(tmp_strlen26148, sizeof(char));
-                        strncpy(tmp_str26148, src + 3, tmp_strlen26148 - 1);
-                        tmp_str26148[tmp_strlen26148 - 1] = 0;
-                        return (Next_results){tmp_str26148, TOK_STRNEQ, "<!>"};
+                        int tmp_strlen26783 = (strlen(src)) - (3) + 1;
+                        char* tmp_str26783 = calloc(tmp_strlen26783, sizeof(char));
+                        strncpy(tmp_str26783, src + 3, tmp_strlen26783 - 1);
+                        tmp_str26783[tmp_strlen26783 - 1] = 0;
+                        return (Next_results){tmp_str26783, TOK_STRNEQ, "<!>"};
                       } else {
                         if (StartsWith(src, "\n")) {
-                          int tmp_strlen26068 = (strlen(src)) - (1) + 1;
-                          char* tmp_str26068 = calloc(tmp_strlen26068, sizeof(char));
-                          strncpy(tmp_str26068, src + 1, tmp_strlen26068 - 1);
-                          tmp_str26068[tmp_strlen26068 - 1] = 0;
-                          return (Next_results){tmp_str26068, TOK_NEWLINE, "\n"};
+                          int tmp_strlen26703 = (strlen(src)) - (1) + 1;
+                          char* tmp_str26703 = calloc(tmp_strlen26703, sizeof(char));
+                          strncpy(tmp_str26703, src + 1, tmp_strlen26703 - 1);
+                          tmp_str26703[tmp_strlen26703 - 1] = 0;
+                          return (Next_results){tmp_str26703, TOK_NEWLINE, "\n"};
                         } else {
                           if (StartsWith(src, "(")) {
-                            int tmp_strlen25989 = (strlen(src)) - (1) + 1;
-                            char* tmp_str25989 = calloc(tmp_strlen25989, sizeof(char));
-                            strncpy(tmp_str25989, src + 1, tmp_strlen25989 - 1);
-                            tmp_str25989[tmp_strlen25989 - 1] = 0;
-                            return (Next_results){tmp_str25989, TOK_LPAREN, "("};
+                            int tmp_strlen26624 = (strlen(src)) - (1) + 1;
+                            char* tmp_str26624 = calloc(tmp_strlen26624, sizeof(char));
+                            strncpy(tmp_str26624, src + 1, tmp_strlen26624 - 1);
+                            tmp_str26624[tmp_strlen26624 - 1] = 0;
+                            return (Next_results){tmp_str26624, TOK_LPAREN, "("};
                           } else {
                             if (StartsWith(src, ")")) {
-                              int tmp_strlen25912 = (strlen(src)) - (1) + 1;
-                              char* tmp_str25912 = calloc(tmp_strlen25912, sizeof(char));
-                              strncpy(tmp_str25912, src + 1, tmp_strlen25912 - 1);
-                              tmp_str25912[tmp_strlen25912 - 1] = 0;
-                              return (Next_results){tmp_str25912, TOK_RPAREN, ")"};
+                              int tmp_strlen26547 = (strlen(src)) - (1) + 1;
+                              char* tmp_str26547 = calloc(tmp_strlen26547, sizeof(char));
+                              strncpy(tmp_str26547, src + 1, tmp_strlen26547 - 1);
+                              tmp_str26547[tmp_strlen26547 - 1] = 0;
+                              return (Next_results){tmp_str26547, TOK_RPAREN, ")"};
                             } else {
                               if (StartsWith(src, "[")) {
-                                int tmp_strlen25835 = (strlen(src)) - (1) + 1;
-                                char* tmp_str25835 = calloc(tmp_strlen25835, sizeof(char));
-                                strncpy(tmp_str25835, src + 1, tmp_strlen25835 - 1);
-                                tmp_str25835[tmp_strlen25835 - 1] = 0;
-                                return (Next_results){tmp_str25835, TOK_LBRACKET, "["};
+                                int tmp_strlen26470 = (strlen(src)) - (1) + 1;
+                                char* tmp_str26470 = calloc(tmp_strlen26470, sizeof(char));
+                                strncpy(tmp_str26470, src + 1, tmp_strlen26470 - 1);
+                                tmp_str26470[tmp_strlen26470 - 1] = 0;
+                                return (Next_results){tmp_str26470, TOK_LBRACKET, "["};
                               } else {
                                 if (StartsWith(src, "]")) {
-                                  int tmp_strlen25756 = (strlen(src)) - (1) + 1;
-                                  char* tmp_str25756 = calloc(tmp_strlen25756, sizeof(char));
-                                  strncpy(tmp_str25756, src + 1, tmp_strlen25756 - 1);
-                                  tmp_str25756[tmp_strlen25756 - 1] = 0;
-                                  return (Next_results){tmp_str25756, TOK_RBRACKET, "]"};
+                                  int tmp_strlen26391 = (strlen(src)) - (1) + 1;
+                                  char* tmp_str26391 = calloc(tmp_strlen26391, sizeof(char));
+                                  strncpy(tmp_str26391, src + 1, tmp_strlen26391 - 1);
+                                  tmp_str26391[tmp_strlen26391 - 1] = 0;
+                                  return (Next_results){tmp_str26391, TOK_RBRACKET, "]"};
                                 } else {
                                   if (StartsWith(src, "{")) {
-                                    int tmp_strlen25677 = (strlen(src)) - (1) + 1;
-                                    char* tmp_str25677 = calloc(tmp_strlen25677, sizeof(char));
-                                    strncpy(tmp_str25677, src + 1, tmp_strlen25677 - 1);
-                                    tmp_str25677[tmp_strlen25677 - 1] = 0;
-                                    return (Next_results){tmp_str25677, TOK_LCURLY, "{"};
+                                    int tmp_strlen26312 = (strlen(src)) - (1) + 1;
+                                    char* tmp_str26312 = calloc(tmp_strlen26312, sizeof(char));
+                                    strncpy(tmp_str26312, src + 1, tmp_strlen26312 - 1);
+                                    tmp_str26312[tmp_strlen26312 - 1] = 0;
+                                    return (Next_results){tmp_str26312, TOK_LCURLY, "{"};
                                   } else {
                                     if (StartsWith(src, "}")) {
-                                      int tmp_strlen25600 = (strlen(src)) - (1) + 1;
-                                      char* tmp_str25600 = calloc(tmp_strlen25600, sizeof(char));
-                                      strncpy(tmp_str25600, src + 1, tmp_strlen25600 - 1);
-                                      tmp_str25600[tmp_strlen25600 - 1] = 0;
-                                      return (Next_results){tmp_str25600, TOK_RCURLY, "}"};
+                                      int tmp_strlen26235 = (strlen(src)) - (1) + 1;
+                                      char* tmp_str26235 = calloc(tmp_strlen26235, sizeof(char));
+                                      strncpy(tmp_str26235, src + 1, tmp_strlen26235 - 1);
+                                      tmp_str26235[tmp_strlen26235 - 1] = 0;
+                                      return (Next_results){tmp_str26235, TOK_RCURLY, "}"};
                                     } else {
-                                      if (StartsWith(src, ":")) {
-                                        int tmp_strlen25523 = (strlen(src)) - (1) + 1;
-                                        char* tmp_str25523 = calloc(tmp_strlen25523, sizeof(char));
-                                        strncpy(tmp_str25523, src + 1, tmp_strlen25523 - 1);
-                                        tmp_str25523[tmp_strlen25523 - 1] = 0;
-                                        return (Next_results){tmp_str25523, TOK_COLON, ":"};
+                                      if (StartsWith(src, "_")) {
+                                        int tmp_strlen26158 = (strlen(src)) - (1) + 1;
+                                        char* tmp_str26158 = calloc(tmp_strlen26158, sizeof(char));
+                                        strncpy(tmp_str26158, src + 1, tmp_strlen26158 - 1);
+                                        tmp_str26158[tmp_strlen26158 - 1] = 0;
+                                        return (Next_results){tmp_str26158, TOK_UNDERSCORE, "_"};
                                       } else {
-                                        if (StartsWith(src, ",")) {
-                                          int tmp_strlen25447 = (strlen(src)) - (1) + 1;
-                                          char* tmp_str25447 = calloc(tmp_strlen25447, sizeof(char));
-                                          strncpy(tmp_str25447, src + 1, tmp_strlen25447 - 1);
-                                          tmp_str25447[tmp_strlen25447 - 1] = 0;
-                                          return (Next_results){tmp_str25447, TOK_COMMA, ","};
+                                        if (StartsWith(src, ":")) {
+                                          int tmp_strlen26077 = (strlen(src)) - (1) + 1;
+                                          char* tmp_str26077 = calloc(tmp_strlen26077, sizeof(char));
+                                          strncpy(tmp_str26077, src + 1, tmp_strlen26077 - 1);
+                                          tmp_str26077[tmp_strlen26077 - 1] = 0;
+                                          return (Next_results){tmp_str26077, TOK_COLON, ":"};
                                         } else {
-                                          if (StartsWith(src, "=")) {
-                                            int tmp_strlen25371 = (strlen(src)) - (1) + 1;
-                                            char* tmp_str25371 = calloc(tmp_strlen25371, sizeof(char));
-                                            strncpy(tmp_str25371, src + 1, tmp_strlen25371 - 1);
-                                            tmp_str25371[tmp_strlen25371 - 1] = 0;
-                                            return (Next_results){tmp_str25371, TOK_ASSIGN, "="};
+                                          if (StartsWith(src, ",")) {
+                                            int tmp_strlen26001 = (strlen(src)) - (1) + 1;
+                                            char* tmp_str26001 = calloc(tmp_strlen26001, sizeof(char));
+                                            strncpy(tmp_str26001, src + 1, tmp_strlen26001 - 1);
+                                            tmp_str26001[tmp_strlen26001 - 1] = 0;
+                                            return (Next_results){tmp_str26001, TOK_COMMA, ","};
                                           } else {
-                                            if (StartsWith(src, "!")) {
-                                              int tmp_strlen25294 = (strlen(src)) - (1) + 1;
-                                              char* tmp_str25294 = calloc(tmp_strlen25294, sizeof(char));
-                                              strncpy(tmp_str25294, src + 1, tmp_strlen25294 - 1);
-                                              tmp_str25294[tmp_strlen25294 - 1] = 0;
-                                              return (Next_results){tmp_str25294, TOK_BNOT, "!"};
+                                            if (StartsWith(src, "=")) {
+                                              int tmp_strlen25925 = (strlen(src)) - (1) + 1;
+                                              char* tmp_str25925 = calloc(tmp_strlen25925, sizeof(char));
+                                              strncpy(tmp_str25925, src + 1, tmp_strlen25925 - 1);
+                                              tmp_str25925[tmp_strlen25925 - 1] = 0;
+                                              return (Next_results){tmp_str25925, TOK_ASSIGN, "="};
                                             } else {
-                                              if (StartsWith(src, "+")) {
-                                                int tmp_strlen25219 = (strlen(src)) - (1) + 1;
-                                                char* tmp_str25219 = calloc(tmp_strlen25219, sizeof(char));
-                                                strncpy(tmp_str25219, src + 1, tmp_strlen25219 - 1);
-                                                tmp_str25219[tmp_strlen25219 - 1] = 0;
-                                                return (Next_results){tmp_str25219, TOK_ADD, "+"};
+                                              if (StartsWith(src, "!")) {
+                                                int tmp_strlen25848 = (strlen(src)) - (1) + 1;
+                                                char* tmp_str25848 = calloc(tmp_strlen25848, sizeof(char));
+                                                strncpy(tmp_str25848, src + 1, tmp_strlen25848 - 1);
+                                                tmp_str25848[tmp_strlen25848 - 1] = 0;
+                                                return (Next_results){tmp_str25848, TOK_BNOT, "!"};
                                               } else {
-                                                if (StartsWith(src, "-")) {
-                                                  int tmp_strlen25145 = (strlen(src)) - (1) + 1;
-                                                  char* tmp_str25145 = calloc(tmp_strlen25145, sizeof(char));
-                                                  strncpy(tmp_str25145, src + 1, tmp_strlen25145 - 1);
-                                                  tmp_str25145[tmp_strlen25145 - 1] = 0;
-                                                  return (Next_results){tmp_str25145, TOK_SUB, "-"};
+                                                if (StartsWith(src, "+")) {
+                                                  int tmp_strlen25773 = (strlen(src)) - (1) + 1;
+                                                  char* tmp_str25773 = calloc(tmp_strlen25773, sizeof(char));
+                                                  strncpy(tmp_str25773, src + 1, tmp_strlen25773 - 1);
+                                                  tmp_str25773[tmp_strlen25773 - 1] = 0;
+                                                  return (Next_results){tmp_str25773, TOK_ADD, "+"};
                                                 } else {
-                                                  if (StartsWith(src, "*")) {
-                                                    int tmp_strlen25071 = (strlen(src)) - (1) + 1;
-                                                    char* tmp_str25071 = calloc(tmp_strlen25071, sizeof(char));
-                                                    strncpy(tmp_str25071, src + 1, tmp_strlen25071 - 1);
-                                                    tmp_str25071[tmp_strlen25071 - 1] = 0;
-                                                    return (Next_results){tmp_str25071, TOK_MUL, "*"};
+                                                  if (StartsWith(src, "-")) {
+                                                    int tmp_strlen25699 = (strlen(src)) - (1) + 1;
+                                                    char* tmp_str25699 = calloc(tmp_strlen25699, sizeof(char));
+                                                    strncpy(tmp_str25699, src + 1, tmp_strlen25699 - 1);
+                                                    tmp_str25699[tmp_strlen25699 - 1] = 0;
+                                                    return (Next_results){tmp_str25699, TOK_SUB, "-"};
                                                   } else {
-                                                    if (StartsWith(src, "/")) {
-                                                      int tmp_strlen24997 = (strlen(src)) - (1) + 1;
-                                                      char* tmp_str24997 = calloc(tmp_strlen24997, sizeof(char));
-                                                      strncpy(tmp_str24997, src + 1, tmp_strlen24997 - 1);
-                                                      tmp_str24997[tmp_strlen24997 - 1] = 0;
-                                                      return (Next_results){tmp_str24997, TOK_DIV, "/"};
+                                                    if (StartsWith(src, "*")) {
+                                                      int tmp_strlen25625 = (strlen(src)) - (1) + 1;
+                                                      char* tmp_str25625 = calloc(tmp_strlen25625, sizeof(char));
+                                                      strncpy(tmp_str25625, src + 1, tmp_strlen25625 - 1);
+                                                      tmp_str25625[tmp_strlen25625 - 1] = 0;
+                                                      return (Next_results){tmp_str25625, TOK_MUL, "*"};
                                                     } else {
-                                                      if (StartsWith(src, "%")) {
-                                                        int tmp_strlen24923 = (strlen(src)) - (1) + 1;
-                                                        char* tmp_str24923 = calloc(tmp_strlen24923, sizeof(char));
-                                                        strncpy(tmp_str24923, src + 1, tmp_strlen24923 - 1);
-                                                        tmp_str24923[tmp_strlen24923 - 1] = 0;
-                                                        return (Next_results){tmp_str24923, TOK_REM, "%"};
+                                                      if (StartsWith(src, "/")) {
+                                                        int tmp_strlen25551 = (strlen(src)) - (1) + 1;
+                                                        char* tmp_str25551 = calloc(tmp_strlen25551, sizeof(char));
+                                                        strncpy(tmp_str25551, src + 1, tmp_strlen25551 - 1);
+                                                        tmp_str25551[tmp_strlen25551 - 1] = 0;
+                                                        return (Next_results){tmp_str25551, TOK_DIV, "/"};
                                                       } else {
-                                                        if (StartsWith(src, "~")) {
-                                                          int tmp_strlen24849 = (strlen(src)) - (1) + 1;
-                                                          char* tmp_str24849 = calloc(tmp_strlen24849, sizeof(char));
-                                                          strncpy(tmp_str24849, src + 1, tmp_strlen24849 - 1);
-                                                          tmp_str24849[tmp_strlen24849 - 1] = 0;
-                                                          return (Next_results){tmp_str24849, TOK_INOT, "~"};
+                                                        if (StartsWith(src, "%")) {
+                                                          int tmp_strlen25477 = (strlen(src)) - (1) + 1;
+                                                          char* tmp_str25477 = calloc(tmp_strlen25477, sizeof(char));
+                                                          strncpy(tmp_str25477, src + 1, tmp_strlen25477 - 1);
+                                                          tmp_str25477[tmp_strlen25477 - 1] = 0;
+                                                          return (Next_results){tmp_str25477, TOK_REM, "%"};
                                                         } else {
-                                                          if (StartsWith(src, "|")) {
-                                                            int tmp_strlen24774 = (strlen(src)) - (1) + 1;
-                                                            char* tmp_str24774 = calloc(tmp_strlen24774, sizeof(char));
-                                                            strncpy(tmp_str24774, src + 1, tmp_strlen24774 - 1);
-                                                            tmp_str24774[tmp_strlen24774 - 1] = 0;
-                                                            return (Next_results){tmp_str24774, TOK_IOR, "|"};
+                                                          if (StartsWith(src, "~")) {
+                                                            int tmp_strlen25403 = (strlen(src)) - (1) + 1;
+                                                            char* tmp_str25403 = calloc(tmp_strlen25403, sizeof(char));
+                                                            strncpy(tmp_str25403, src + 1, tmp_strlen25403 - 1);
+                                                            tmp_str25403[tmp_strlen25403 - 1] = 0;
+                                                            return (Next_results){tmp_str25403, TOK_INOT, "~"};
                                                           } else {
-                                                            if (StartsWith(src, "&")) {
-                                                              int tmp_strlen24700 = (strlen(src)) - (1) + 1;
-                                                              char* tmp_str24700 = calloc(tmp_strlen24700, sizeof(char));
-                                                              strncpy(tmp_str24700, src + 1, tmp_strlen24700 - 1);
-                                                              tmp_str24700[tmp_strlen24700 - 1] = 0;
-                                                              return (Next_results){tmp_str24700, TOK_IAND, "&"};
+                                                            if (StartsWith(src, "|")) {
+                                                              int tmp_strlen25328 = (strlen(src)) - (1) + 1;
+                                                              char* tmp_str25328 = calloc(tmp_strlen25328, sizeof(char));
+                                                              strncpy(tmp_str25328, src + 1, tmp_strlen25328 - 1);
+                                                              tmp_str25328[tmp_strlen25328 - 1] = 0;
+                                                              return (Next_results){tmp_str25328, TOK_IOR, "|"};
                                                             } else {
-                                                              if (StartsWith(src, "^")) {
-                                                                int tmp_strlen24625 = (strlen(src)) - (1) + 1;
-                                                                char* tmp_str24625 = calloc(tmp_strlen24625, sizeof(char));
-                                                                strncpy(tmp_str24625, src + 1, tmp_strlen24625 - 1);
-                                                                tmp_str24625[tmp_strlen24625 - 1] = 0;
-                                                                return (Next_results){tmp_str24625, TOK_IXOR, "^"};
+                                                              if (StartsWith(src, "&")) {
+                                                                int tmp_strlen25254 = (strlen(src)) - (1) + 1;
+                                                                char* tmp_str25254 = calloc(tmp_strlen25254, sizeof(char));
+                                                                strncpy(tmp_str25254, src + 1, tmp_strlen25254 - 1);
+                                                                tmp_str25254[tmp_strlen25254 - 1] = 0;
+                                                                return (Next_results){tmp_str25254, TOK_IAND, "&"};
                                                               } else {
-                                                                if (StartsWith(src, "<")) {
-                                                                  int tmp_strlen24550 = (strlen(src)) - (1) + 1;
-                                                                  char* tmp_str24550 = calloc(tmp_strlen24550, sizeof(char));
-                                                                  strncpy(tmp_str24550, src + 1, tmp_strlen24550 - 1);
-                                                                  tmp_str24550[tmp_strlen24550 - 1] = 0;
-                                                                  return (Next_results){tmp_str24550, TOK_LESS, "<"};
+                                                                if (StartsWith(src, "^")) {
+                                                                  int tmp_strlen25179 = (strlen(src)) - (1) + 1;
+                                                                  char* tmp_str25179 = calloc(tmp_strlen25179, sizeof(char));
+                                                                  strncpy(tmp_str25179, src + 1, tmp_strlen25179 - 1);
+                                                                  tmp_str25179[tmp_strlen25179 - 1] = 0;
+                                                                  return (Next_results){tmp_str25179, TOK_IXOR, "^"};
                                                                 } else {
-                                                                  if (StartsWith(src, ">")) {
-                                                                    int tmp_strlen24475 = (strlen(src)) - (1) + 1;
-                                                                    char* tmp_str24475 = calloc(tmp_strlen24475, sizeof(char));
-                                                                    strncpy(tmp_str24475, src + 1, tmp_strlen24475 - 1);
-                                                                    tmp_str24475[tmp_strlen24475 - 1] = 0;
-                                                                    return (Next_results){tmp_str24475, TOK_GREATER, ">"};
+                                                                  if (StartsWith(src, "<")) {
+                                                                    int tmp_strlen25104 = (strlen(src)) - (1) + 1;
+                                                                    char* tmp_str25104 = calloc(tmp_strlen25104, sizeof(char));
+                                                                    strncpy(tmp_str25104, src + 1, tmp_strlen25104 - 1);
+                                                                    tmp_str25104[tmp_strlen25104 - 1] = 0;
+                                                                    return (Next_results){tmp_str25104, TOK_LESS, "<"};
                                                                   } else {
-                                                                    if (IsAlpha(src[0])) {
-                                                                      int i = 1;
-                                                                      while (((i) < (strlen(src))) && ((IsAlphaNumeric(src[(i) - (1)])) || ((src[(i) - (1)]) == (95)))) {
-                                                                        i = (i) + (1);
-                                                                      }
-                                                                      i = (i) - (1);
-                                                                      int tmp_strlen24244 = (i) - (0) + 1;
-                                                                      char* tmp_str24244 = calloc(tmp_strlen24244, sizeof(char));
-                                                                      strncpy(tmp_str24244, src + 0, tmp_strlen24244 - 1);
-                                                                      tmp_str24244[tmp_strlen24244 - 1] = 0;
-                                                                      char* ts = tmp_str24244;
-                                                                      int tt;
-                                                                      if ((strcmp(ts, "fn") == 0)) {
-                                                                        tt = TOK_FN;
-                                                                      } else {
-                                                                        if ((strcmp(ts, "let") == 0)) {
-                                                                          tt = TOK_LET;
+                                                                    if (StartsWith(src, ">")) {
+                                                                      int tmp_strlen25029 = (strlen(src)) - (1) + 1;
+                                                                      char* tmp_str25029 = calloc(tmp_strlen25029, sizeof(char));
+                                                                      strncpy(tmp_str25029, src + 1, tmp_strlen25029 - 1);
+                                                                      tmp_str25029[tmp_strlen25029 - 1] = 0;
+                                                                      return (Next_results){tmp_str25029, TOK_GREATER, ">"};
+                                                                    } else {
+                                                                      if (IsAlpha(src[0])) {
+                                                                        int i = 1;
+                                                                        while (((i) < (strlen(src))) && ((IsAlphaNumeric(src[(i) - (1)])) || ((src[(i) - (1)]) == (95)))) {
+                                                                          i = (i) + (1);
+                                                                        }
+                                                                        i = (i) - (1);
+                                                                        int tmp_strlen24798 = (i) - (0) + 1;
+                                                                        char* tmp_str24798 = calloc(tmp_strlen24798, sizeof(char));
+                                                                        strncpy(tmp_str24798, src + 0, tmp_strlen24798 - 1);
+                                                                        tmp_str24798[tmp_strlen24798 - 1] = 0;
+                                                                        char* ts = tmp_str24798;
+                                                                        int tt;
+                                                                        if ((strcmp(ts, "fn") == 0)) {
+                                                                          tt = TOK_FN;
                                                                         } else {
-                                                                          if ((strcmp(ts, "var") == 0)) {
-                                                                            tt = TOK_VAR;
+                                                                          if ((strcmp(ts, "let") == 0)) {
+                                                                            tt = TOK_LET;
                                                                           } else {
-                                                                            if ((strcmp(ts, "if") == 0)) {
-                                                                              tt = TOK_IF;
+                                                                            if ((strcmp(ts, "var") == 0)) {
+                                                                              tt = TOK_VAR;
                                                                             } else {
-                                                                              if ((strcmp(ts, "else") == 0)) {
-                                                                                tt = TOK_ELSE;
+                                                                              if ((strcmp(ts, "if") == 0)) {
+                                                                                tt = TOK_IF;
                                                                               } else {
-                                                                                if ((strcmp(ts, "for") == 0)) {
-                                                                                  tt = TOK_FOR;
+                                                                                if ((strcmp(ts, "else") == 0)) {
+                                                                                  tt = TOK_ELSE;
                                                                                 } else {
-                                                                                  if ((strcmp(ts, "return") == 0)) {
-                                                                                    tt = TOK_RETURN;
+                                                                                  if ((strcmp(ts, "for") == 0)) {
+                                                                                    tt = TOK_FOR;
                                                                                   } else {
-                                                                                    if ((strcmp(ts, "bool") == 0)) {
-                                                                                      tt = TOK_BOOL;
+                                                                                    if ((strcmp(ts, "return") == 0)) {
+                                                                                      tt = TOK_RETURN;
                                                                                     } else {
-                                                                                      if ((strcmp(ts, "int") == 0)) {
-                                                                                        tt = TOK_INT;
+                                                                                      if ((strcmp(ts, "bool") == 0)) {
+                                                                                        tt = TOK_BOOL;
                                                                                       } else {
-                                                                                        if ((strcmp(ts, "string") == 0)) {
-                                                                                          tt = TOK_STRING;
+                                                                                        if ((strcmp(ts, "int") == 0)) {
+                                                                                          tt = TOK_INT;
                                                                                         } else {
-                                                                                          if ((strcmp(ts, "false") == 0)) {
-                                                                                            tt = TOK_FALSE;
+                                                                                          if ((strcmp(ts, "string") == 0)) {
+                                                                                            tt = TOK_STRING;
                                                                                           } else {
-                                                                                            if ((strcmp(ts, "true") == 0)) {
-                                                                                              tt = TOK_TRUE;
+                                                                                            if ((strcmp(ts, "false") == 0)) {
+                                                                                              tt = TOK_FALSE;
                                                                                             } else {
-                                                                                              tt = TOK_IDENT;
+                                                                                              if ((strcmp(ts, "true") == 0)) {
+                                                                                                tt = TOK_TRUE;
+                                                                                              } else {
+                                                                                                tt = TOK_IDENT;
+                                                                                              }
                                                                                             }
                                                                                           }
                                                                                         }
@@ -685,66 +699,66 @@ Next_results Next(char* src) {
                                                                             }
                                                                           }
                                                                         }
-                                                                      }
-                                                                      int tmp_strlen23452 = (strlen(src)) - (i) + 1;
-                                                                      char* tmp_str23452 = calloc(tmp_strlen23452, sizeof(char));
-                                                                      strncpy(tmp_str23452, src + i, tmp_strlen23452 - 1);
-                                                                      tmp_str23452[tmp_strlen23452 - 1] = 0;
-                                                                      return (Next_results){tmp_str23452, tt, ts};
-                                                                    } else {
-                                                                      if (IsNumeric(src[0])) {
-                                                                        int i = 1;
-                                                                        while (((i) < (strlen(src))) && (IsNumeric(src[i]))) {
-                                                                          i = (i) + (1);
-                                                                        }
-                                                                        int tmp_strlen23284 = (strlen(src)) - (i) + 1;
-                                                                        char* tmp_str23284 = calloc(tmp_strlen23284, sizeof(char));
-                                                                        strncpy(tmp_str23284, src + i, tmp_strlen23284 - 1);
-                                                                        tmp_str23284[tmp_strlen23284 - 1] = 0;
-                                                                        int tmp_strlen23263 = (i) - (0) + 1;
-                                                                        char* tmp_str23263 = calloc(tmp_strlen23263, sizeof(char));
-                                                                        strncpy(tmp_str23263, src + 0, tmp_strlen23263 - 1);
-                                                                        tmp_str23263[tmp_strlen23263 - 1] = 0;
-                                                                        return (Next_results){tmp_str23284, TOK_INTLIT, tmp_str23263};
+                                                                        int tmp_strlen24006 = (strlen(src)) - (i) + 1;
+                                                                        char* tmp_str24006 = calloc(tmp_strlen24006, sizeof(char));
+                                                                        strncpy(tmp_str24006, src + i, tmp_strlen24006 - 1);
+                                                                        tmp_str24006[tmp_strlen24006 - 1] = 0;
+                                                                        return (Next_results){tmp_str24006, tt, ts};
                                                                       } else {
-                                                                        if (StartsWith(src, "\"")) {
+                                                                        if (IsNumeric(src[0])) {
                                                                           int i = 1;
-                                                                          while (true) {
-                                                                            int tmp_strlen23182 = ((i) + (1)) - (i) + 1;
-                                                                            char* tmp_str23182 = calloc(tmp_strlen23182, sizeof(char));
-                                                                            strncpy(tmp_str23182, src + i, tmp_strlen23182 - 1);
-                                                                            tmp_str23182[tmp_strlen23182 - 1] = 0;
-                                                                            if (!((strcmp(tmp_str23182, "\"") != 0))) break;
+                                                                          while (((i) < (strlen(src))) && (IsNumeric(src[i]))) {
                                                                             i = (i) + (1);
-                                                                            int tmp_strlen23123 = (i) - ((i) - (1)) + 1;
-                                                                            char* tmp_str23123 = calloc(tmp_strlen23123, sizeof(char));
-                                                                            strncpy(tmp_str23123, src + (i) - (1), tmp_strlen23123 - 1);
-                                                                            tmp_str23123[tmp_strlen23123 - 1] = 0;
-                                                                            if ((strcmp(tmp_str23123, "\\") == 0)) {
-                                                                              i = (i) + (1);
-                                                                            }
                                                                           }
-                                                                          i = (i) + (1);
-                                                                          int tmp_strlen23019 = (strlen(src)) - (i) + 1;
-                                                                          char* tmp_str23019 = calloc(tmp_strlen23019, sizeof(char));
-                                                                          strncpy(tmp_str23019, src + i, tmp_strlen23019 - 1);
-                                                                          tmp_str23019[tmp_strlen23019 - 1] = 0;
-                                                                          int tmp_strlen22998 = (i) - (0) + 1;
-                                                                          char* tmp_str22998 = calloc(tmp_strlen22998, sizeof(char));
-                                                                          strncpy(tmp_str22998, src + 0, tmp_strlen22998 - 1);
-                                                                          tmp_str22998[tmp_strlen22998 - 1] = 0;
-                                                                          return (Next_results){tmp_str23019, TOK_STRLIT, tmp_str22998};
+                                                                          int tmp_strlen23838 = (strlen(src)) - (i) + 1;
+                                                                          char* tmp_str23838 = calloc(tmp_strlen23838, sizeof(char));
+                                                                          strncpy(tmp_str23838, src + i, tmp_strlen23838 - 1);
+                                                                          tmp_str23838[tmp_strlen23838 - 1] = 0;
+                                                                          int tmp_strlen23817 = (i) - (0) + 1;
+                                                                          char* tmp_str23817 = calloc(tmp_strlen23817, sizeof(char));
+                                                                          strncpy(tmp_str23817, src + 0, tmp_strlen23817 - 1);
+                                                                          tmp_str23817[tmp_strlen23817 - 1] = 0;
+                                                                          return (Next_results){tmp_str23838, TOK_INTLIT, tmp_str23817};
                                                                         } else {
-                                                                          int tmp_strlen22933 = (1) - (0) + 1;
-                                                                          char* tmp_str22933 = calloc(tmp_strlen22933, sizeof(char));
-                                                                          strncpy(tmp_str22933, src + 0, tmp_strlen22933 - 1);
-                                                                          tmp_str22933[tmp_strlen22933 - 1] = 0;
-                                                                          int tmp_strlen22929 = strlen("unexpected token start: ") + strlen(tmp_str22933) + 1;
-                                                                          char* tmp_str22929 = calloc(tmp_strlen22929, sizeof(char));
-                                                                          strcpy(tmp_str22929, "unexpected token start: ");
-                                                                          strcat(tmp_str22929, tmp_str22933);
-                                                                          printf("%s", tmp_str22929);
-                                                                          exit(1);
+                                                                          if (StartsWith(src, "\"")) {
+                                                                            int i = 1;
+                                                                            while (true) {
+                                                                              int tmp_strlen23736 = ((i) + (1)) - (i) + 1;
+                                                                              char* tmp_str23736 = calloc(tmp_strlen23736, sizeof(char));
+                                                                              strncpy(tmp_str23736, src + i, tmp_strlen23736 - 1);
+                                                                              tmp_str23736[tmp_strlen23736 - 1] = 0;
+                                                                              if (!((strcmp(tmp_str23736, "\"") != 0))) break;
+                                                                              i = (i) + (1);
+                                                                              int tmp_strlen23677 = (i) - ((i) - (1)) + 1;
+                                                                              char* tmp_str23677 = calloc(tmp_strlen23677, sizeof(char));
+                                                                              strncpy(tmp_str23677, src + (i) - (1), tmp_strlen23677 - 1);
+                                                                              tmp_str23677[tmp_strlen23677 - 1] = 0;
+                                                                              if ((strcmp(tmp_str23677, "\\") == 0)) {
+                                                                                i = (i) + (1);
+                                                                              }
+                                                                            }
+                                                                            i = (i) + (1);
+                                                                            int tmp_strlen23573 = (strlen(src)) - (i) + 1;
+                                                                            char* tmp_str23573 = calloc(tmp_strlen23573, sizeof(char));
+                                                                            strncpy(tmp_str23573, src + i, tmp_strlen23573 - 1);
+                                                                            tmp_str23573[tmp_strlen23573 - 1] = 0;
+                                                                            int tmp_strlen23552 = (i) - (0) + 1;
+                                                                            char* tmp_str23552 = calloc(tmp_strlen23552, sizeof(char));
+                                                                            strncpy(tmp_str23552, src + 0, tmp_strlen23552 - 1);
+                                                                            tmp_str23552[tmp_strlen23552 - 1] = 0;
+                                                                            return (Next_results){tmp_str23573, TOK_STRLIT, tmp_str23552};
+                                                                          } else {
+                                                                            int tmp_strlen23487 = (1) - (0) + 1;
+                                                                            char* tmp_str23487 = calloc(tmp_strlen23487, sizeof(char));
+                                                                            strncpy(tmp_str23487, src + 0, tmp_strlen23487 - 1);
+                                                                            tmp_str23487[tmp_strlen23487 - 1] = 0;
+                                                                            int tmp_strlen23483 = strlen("unexpected token start: ") + strlen(tmp_str23487) + 1;
+                                                                            char* tmp_str23483 = calloc(tmp_strlen23483, sizeof(char));
+                                                                            strcpy(tmp_str23483, "unexpected token start: ");
+                                                                            strcat(tmp_str23483, tmp_str23487);
+                                                                            printf("%s", tmp_str23483);
+                                                                            exit(1);
+                                                                          }
                                                                         }
                                                                       }
                                                                     }
@@ -786,46 +800,46 @@ Next_results Next(char* src) {
 Peek_results Peek(char* src) {
   int tok;
   char* tok_str;
-  Next_results tmp_results22817 = Next(src);
-  src = tmp_results22817.result1;
-  tok = tmp_results22817.result2;
-  tok_str = tmp_results22817.result3;
+  Next_results tmp_results23371 = Next(src);
+  src = tmp_results23371.result1;
+  tok = tmp_results23371.result2;
+  tok_str = tmp_results23371.result3;
   return (Peek_results){tok, tok_str};
 }
 
 ConsumeToken_results ConsumeToken(char* src, int expected_tok) {
   int actual_tok;
   char* actual_tok_str;
-  Next_results tmp_results22631 = Next(src);
-  src = tmp_results22631.result1;
-  actual_tok = tmp_results22631.result2;
-  actual_tok_str = tmp_results22631.result3;
+  Next_results tmp_results23185 = Next(src);
+  src = tmp_results23185.result1;
+  actual_tok = tmp_results23185.result2;
+  actual_tok_str = tmp_results23185.result3;
   if ((actual_tok) != (expected_tok)) {
-    int tmp_strlen22497 = strlen("expected token: ") + strlen(itoa(expected_tok)) + 1;
-    char* tmp_str22497 = calloc(tmp_strlen22497, sizeof(char));
-    strcpy(tmp_str22497, "expected token: ");
-    strcat(tmp_str22497, itoa(expected_tok));
-    int tmp_strlen22470 = strlen(tmp_str22497) + strlen(" got: ") + 1;
-    char* tmp_str22470 = calloc(tmp_strlen22470, sizeof(char));
-    strcpy(tmp_str22470, tmp_str22497);
-    strcat(tmp_str22470, " got: ");
-    int tmp_strlen22450 = strlen(tmp_str22470) + strlen(itoa(actual_tok)) + 1;
-    char* tmp_str22450 = calloc(tmp_strlen22450, sizeof(char));
-    strcpy(tmp_str22450, tmp_str22470);
-    strcat(tmp_str22450, itoa(actual_tok));
-    int tmp_strlen22441 = strlen(tmp_str22450) + strlen(" \"") + 1;
-    char* tmp_str22441 = calloc(tmp_strlen22441, sizeof(char));
-    strcpy(tmp_str22441, tmp_str22450);
-    strcat(tmp_str22441, " \"");
-    int tmp_strlen22423 = strlen(tmp_str22441) + strlen(actual_tok_str) + 1;
-    char* tmp_str22423 = calloc(tmp_strlen22423, sizeof(char));
-    strcpy(tmp_str22423, tmp_str22441);
-    strcat(tmp_str22423, actual_tok_str);
-    int tmp_strlen22415 = strlen(tmp_str22423) + strlen("\"") + 1;
-    char* tmp_str22415 = calloc(tmp_strlen22415, sizeof(char));
-    strcpy(tmp_str22415, tmp_str22423);
-    strcat(tmp_str22415, "\"");
-    printf("%s", tmp_str22415);
+    int tmp_strlen23051 = strlen("expected token: ") + strlen(itoa(expected_tok)) + 1;
+    char* tmp_str23051 = calloc(tmp_strlen23051, sizeof(char));
+    strcpy(tmp_str23051, "expected token: ");
+    strcat(tmp_str23051, itoa(expected_tok));
+    int tmp_strlen23024 = strlen(tmp_str23051) + strlen(" got: ") + 1;
+    char* tmp_str23024 = calloc(tmp_strlen23024, sizeof(char));
+    strcpy(tmp_str23024, tmp_str23051);
+    strcat(tmp_str23024, " got: ");
+    int tmp_strlen23004 = strlen(tmp_str23024) + strlen(itoa(actual_tok)) + 1;
+    char* tmp_str23004 = calloc(tmp_strlen23004, sizeof(char));
+    strcpy(tmp_str23004, tmp_str23024);
+    strcat(tmp_str23004, itoa(actual_tok));
+    int tmp_strlen22995 = strlen(tmp_str23004) + strlen(" \"") + 1;
+    char* tmp_str22995 = calloc(tmp_strlen22995, sizeof(char));
+    strcpy(tmp_str22995, tmp_str23004);
+    strcat(tmp_str22995, " \"");
+    int tmp_strlen22977 = strlen(tmp_str22995) + strlen(actual_tok_str) + 1;
+    char* tmp_str22977 = calloc(tmp_strlen22977, sizeof(char));
+    strcpy(tmp_str22977, tmp_str22995);
+    strcat(tmp_str22977, actual_tok_str);
+    int tmp_strlen22969 = strlen(tmp_str22977) + strlen("\"") + 1;
+    char* tmp_str22969 = calloc(tmp_strlen22969, sizeof(char));
+    strcpy(tmp_str22969, tmp_str22977);
+    strcat(tmp_str22969, "\"");
+    printf("%s", tmp_str22969);
     exit(1);
   }
   return (ConsumeToken_results){src, actual_tok_str};
@@ -834,40 +848,70 @@ ConsumeToken_results ConsumeToken(char* src, int expected_tok) {
 ConsumeIdent_results ConsumeIdent(char* src) {
   int actual_tok;
   char* actual_tok_str;
-  Next_results tmp_results22247 = Next(src);
-  src = tmp_results22247.result1;
-  actual_tok = tmp_results22247.result2;
-  actual_tok_str = tmp_results22247.result3;
+  Next_results tmp_results22801 = Next(src);
+  src = tmp_results22801.result1;
+  actual_tok = tmp_results22801.result2;
+  actual_tok_str = tmp_results22801.result3;
   if ((actual_tok) != (TOK_IDENT)) {
-    int tmp_strlen22113 = strlen("expected ident, got: ") + strlen(itoa(actual_tok)) + 1;
-    char* tmp_str22113 = calloc(tmp_strlen22113, sizeof(char));
-    strcpy(tmp_str22113, "expected ident, got: ");
-    strcat(tmp_str22113, itoa(actual_tok));
-    int tmp_strlen22104 = strlen(tmp_str22113) + strlen(" \"") + 1;
-    char* tmp_str22104 = calloc(tmp_strlen22104, sizeof(char));
-    strcpy(tmp_str22104, tmp_str22113);
-    strcat(tmp_str22104, " \"");
-    int tmp_strlen22086 = strlen(tmp_str22104) + strlen(actual_tok_str) + 1;
-    char* tmp_str22086 = calloc(tmp_strlen22086, sizeof(char));
-    strcpy(tmp_str22086, tmp_str22104);
-    strcat(tmp_str22086, actual_tok_str);
-    int tmp_strlen22078 = strlen(tmp_str22086) + strlen("\"") + 1;
-    char* tmp_str22078 = calloc(tmp_strlen22078, sizeof(char));
-    strcpy(tmp_str22078, tmp_str22086);
-    strcat(tmp_str22078, "\"");
-    printf("%s", tmp_str22078);
+    int tmp_strlen22667 = strlen("expected ident, got: ") + strlen(itoa(actual_tok)) + 1;
+    char* tmp_str22667 = calloc(tmp_strlen22667, sizeof(char));
+    strcpy(tmp_str22667, "expected ident, got: ");
+    strcat(tmp_str22667, itoa(actual_tok));
+    int tmp_strlen22658 = strlen(tmp_str22667) + strlen(" \"") + 1;
+    char* tmp_str22658 = calloc(tmp_strlen22658, sizeof(char));
+    strcpy(tmp_str22658, tmp_str22667);
+    strcat(tmp_str22658, " \"");
+    int tmp_strlen22640 = strlen(tmp_str22658) + strlen(actual_tok_str) + 1;
+    char* tmp_str22640 = calloc(tmp_strlen22640, sizeof(char));
+    strcpy(tmp_str22640, tmp_str22658);
+    strcat(tmp_str22640, actual_tok_str);
+    int tmp_strlen22632 = strlen(tmp_str22640) + strlen("\"") + 1;
+    char* tmp_str22632 = calloc(tmp_strlen22632, sizeof(char));
+    strcpy(tmp_str22632, tmp_str22640);
+    strcat(tmp_str22632, "\"");
+    printf("%s", tmp_str22632);
     exit(1);
   }
   return (ConsumeIdent_results){src, actual_tok_str};
 }
 
+ConsumeIdentOrUnderscore_results ConsumeIdentOrUnderscore(char* src) {
+  int actual_tok;
+  char* actual_tok_str;
+  Next_results tmp_results22452 = Next(src);
+  src = tmp_results22452.result1;
+  actual_tok = tmp_results22452.result2;
+  actual_tok_str = tmp_results22452.result3;
+  if (((actual_tok) != (TOK_UNDERSCORE)) && ((actual_tok) != (TOK_IDENT))) {
+    int tmp_strlen22272 = strlen("expected ident or underscore, got: ") + strlen(itoa(actual_tok)) + 1;
+    char* tmp_str22272 = calloc(tmp_strlen22272, sizeof(char));
+    strcpy(tmp_str22272, "expected ident or underscore, got: ");
+    strcat(tmp_str22272, itoa(actual_tok));
+    int tmp_strlen22263 = strlen(tmp_str22272) + strlen(" \"") + 1;
+    char* tmp_str22263 = calloc(tmp_strlen22263, sizeof(char));
+    strcpy(tmp_str22263, tmp_str22272);
+    strcat(tmp_str22263, " \"");
+    int tmp_strlen22245 = strlen(tmp_str22263) + strlen(actual_tok_str) + 1;
+    char* tmp_str22245 = calloc(tmp_strlen22245, sizeof(char));
+    strcpy(tmp_str22245, tmp_str22263);
+    strcat(tmp_str22245, actual_tok_str);
+    int tmp_strlen22237 = strlen(tmp_str22245) + strlen("\"") + 1;
+    char* tmp_str22237 = calloc(tmp_strlen22237, sizeof(char));
+    strcpy(tmp_str22237, tmp_str22245);
+    strcat(tmp_str22237, "\"");
+    printf("%s", tmp_str22237);
+    exit(1);
+  }
+  return (ConsumeIdentOrUnderscore_results){src, actual_tok_str};
+}
+
 TranslateType_results TranslateType(char* src) {
   int tok;
   char* tok_str;
-  Next_results tmp_results21918 = Next(src);
-  src = tmp_results21918.result1;
-  tok = tmp_results21918.result2;
-  tok_str = tmp_results21918.result3;
+  Next_results tmp_results22077 = Next(src);
+  src = tmp_results22077.result1;
+  tok = tmp_results22077.result2;
+  tok_str = tmp_results22077.result3;
   if ((tok) == (TOK_BOOL)) {
     return (TranslateType_results){src, TYPE_BOOL, "bool"};
   } else {
@@ -877,23 +921,23 @@ TranslateType_results TranslateType(char* src) {
       if ((tok) == (TOK_STRING)) {
         return (TranslateType_results){src, TYPE_STRING, "char*"};
       } else {
-        int tmp_strlen21621 = strlen("expected type, got: ") + strlen(itoa(tok)) + 1;
-        char* tmp_str21621 = calloc(tmp_strlen21621, sizeof(char));
-        strcpy(tmp_str21621, "expected type, got: ");
-        strcat(tmp_str21621, itoa(tok));
-        int tmp_strlen21612 = strlen(tmp_str21621) + strlen(" \"") + 1;
-        char* tmp_str21612 = calloc(tmp_strlen21612, sizeof(char));
-        strcpy(tmp_str21612, tmp_str21621);
-        strcat(tmp_str21612, " \"");
-        int tmp_strlen21601 = strlen(tmp_str21612) + strlen(tok_str) + 1;
-        char* tmp_str21601 = calloc(tmp_strlen21601, sizeof(char));
-        strcpy(tmp_str21601, tmp_str21612);
-        strcat(tmp_str21601, tok_str);
-        int tmp_strlen21593 = strlen(tmp_str21601) + strlen("\"") + 1;
-        char* tmp_str21593 = calloc(tmp_strlen21593, sizeof(char));
-        strcpy(tmp_str21593, tmp_str21601);
-        strcat(tmp_str21593, "\"");
-        printf("%s", tmp_str21593);
+        int tmp_strlen21780 = strlen("expected type, got: ") + strlen(itoa(tok)) + 1;
+        char* tmp_str21780 = calloc(tmp_strlen21780, sizeof(char));
+        strcpy(tmp_str21780, "expected type, got: ");
+        strcat(tmp_str21780, itoa(tok));
+        int tmp_strlen21771 = strlen(tmp_str21780) + strlen(" \"") + 1;
+        char* tmp_str21771 = calloc(tmp_strlen21771, sizeof(char));
+        strcpy(tmp_str21771, tmp_str21780);
+        strcat(tmp_str21771, " \"");
+        int tmp_strlen21760 = strlen(tmp_str21771) + strlen(tok_str) + 1;
+        char* tmp_str21760 = calloc(tmp_strlen21760, sizeof(char));
+        strcpy(tmp_str21760, tmp_str21771);
+        strcat(tmp_str21760, tok_str);
+        int tmp_strlen21752 = strlen(tmp_str21760) + strlen("\"") + 1;
+        char* tmp_str21752 = calloc(tmp_strlen21752, sizeof(char));
+        strcpy(tmp_str21752, tmp_str21760);
+        strcat(tmp_str21752, "\"");
+        printf("%s", tmp_str21752);
         exit(1);
       }
     }
@@ -903,108 +947,108 @@ TranslateType_results TranslateType(char* src) {
 TranslateBoolLiteral_results TranslateBoolLiteral(char* src) {
   int tok;
   char* tok_str;
-  Next_results tmp_results21462 = Next(src);
-  src = tmp_results21462.result1;
-  tok = tmp_results21462.result2;
-  tok_str = tmp_results21462.result3;
+  Next_results tmp_results21621 = Next(src);
+  src = tmp_results21621.result1;
+  tok = tmp_results21621.result2;
+  tok_str = tmp_results21621.result3;
   if (((tok) == (TOK_FALSE)) || ((tok) == (TOK_TRUE))) {
     return (TranslateBoolLiteral_results){src, tok_str};
   } else {
-    int tmp_strlen21288 = strlen("expected false or true, got: ") + strlen(itoa(tok)) + 1;
-    char* tmp_str21288 = calloc(tmp_strlen21288, sizeof(char));
-    strcpy(tmp_str21288, "expected false or true, got: ");
-    strcat(tmp_str21288, itoa(tok));
-    int tmp_strlen21279 = strlen(tmp_str21288) + strlen(" \"") + 1;
-    char* tmp_str21279 = calloc(tmp_strlen21279, sizeof(char));
-    strcpy(tmp_str21279, tmp_str21288);
-    strcat(tmp_str21279, " \"");
-    int tmp_strlen21268 = strlen(tmp_str21279) + strlen(tok_str) + 1;
-    char* tmp_str21268 = calloc(tmp_strlen21268, sizeof(char));
-    strcpy(tmp_str21268, tmp_str21279);
-    strcat(tmp_str21268, tok_str);
-    int tmp_strlen21260 = strlen(tmp_str21268) + strlen("\"") + 1;
-    char* tmp_str21260 = calloc(tmp_strlen21260, sizeof(char));
-    strcpy(tmp_str21260, tmp_str21268);
-    strcat(tmp_str21260, "\"");
-    printf("%s", tmp_str21260);
+    int tmp_strlen21447 = strlen("expected false or true, got: ") + strlen(itoa(tok)) + 1;
+    char* tmp_str21447 = calloc(tmp_strlen21447, sizeof(char));
+    strcpy(tmp_str21447, "expected false or true, got: ");
+    strcat(tmp_str21447, itoa(tok));
+    int tmp_strlen21438 = strlen(tmp_str21447) + strlen(" \"") + 1;
+    char* tmp_str21438 = calloc(tmp_strlen21438, sizeof(char));
+    strcpy(tmp_str21438, tmp_str21447);
+    strcat(tmp_str21438, " \"");
+    int tmp_strlen21427 = strlen(tmp_str21438) + strlen(tok_str) + 1;
+    char* tmp_str21427 = calloc(tmp_strlen21427, sizeof(char));
+    strcpy(tmp_str21427, tmp_str21438);
+    strcat(tmp_str21427, tok_str);
+    int tmp_strlen21419 = strlen(tmp_str21427) + strlen("\"") + 1;
+    char* tmp_str21419 = calloc(tmp_strlen21419, sizeof(char));
+    strcpy(tmp_str21419, tmp_str21427);
+    strcat(tmp_str21419, "\"");
+    printf("%s", tmp_str21419);
     exit(1);
   }
 }
 
 TranslateIntLiteral_results TranslateIntLiteral(char* src) {
   char* lit;
-  ConsumeToken_results tmp_results21151 = ConsumeToken(src, TOK_INTLIT);
-  src = tmp_results21151.result1;
-  lit = tmp_results21151.result2;
+  ConsumeToken_results tmp_results21310 = ConsumeToken(src, TOK_INTLIT);
+  src = tmp_results21310.result1;
+  lit = tmp_results21310.result2;
   return (TranslateIntLiteral_results){src, lit};
 }
 
 TranslateStringLiteral_results TranslateStringLiteral(char* src) {
   char* lit;
-  ConsumeToken_results tmp_results21002 = ConsumeToken(src, TOK_STRLIT);
-  src = tmp_results21002.result1;
-  lit = tmp_results21002.result2;
+  ConsumeToken_results tmp_results21161 = ConsumeToken(src, TOK_STRLIT);
+  src = tmp_results21161.result1;
+  lit = tmp_results21161.result2;
   return (TranslateStringLiteral_results){src, lit};
 }
 
 TranslateCall_results TranslateCall(char* src, char* indent, char* callee) {
   int tok;
   char* tok_str;
-  ConsumeToken_results tmp_results20801 = ConsumeToken(src, TOK_LPAREN);
-  src = tmp_results20801.result1;
-  tok_str = tmp_results20801.result2;
-  Peek_results tmp_results20752 = Peek(src);
-  tok = tmp_results20752.result1;
-  tok_str = tmp_results20752.result2;
+  ConsumeToken_results tmp_results20960 = ConsumeToken(src, TOK_LPAREN);
+  src = tmp_results20960.result1;
+  tok_str = tmp_results20960.result2;
+  Peek_results tmp_results20911 = Peek(src);
+  tok = tmp_results20911.result1;
+  tok_str = tmp_results20911.result2;
   char* args_setup = "";
   char* arg_values = "";
   if ((tok) != (TOK_RPAREN)) {
     int expr_count;
-    TranslateExprs_results tmp_results20600 = TranslateExprs(src, indent);
-    src = tmp_results20600.result1;
-    expr_count = tmp_results20600.result2;
-    args_setup = tmp_results20600.result3;
-    arg_values = tmp_results20600.result4;
+    TranslateExprs_results tmp_results20759 = TranslateExprs(src, indent);
+    src = tmp_results20759.result1;
+    expr_count = tmp_results20759.result2;
+    args_setup = tmp_results20759.result3;
+    arg_values = tmp_results20759.result4;
   }
-  ConsumeToken_results tmp_results20520 = ConsumeToken(src, TOK_RPAREN);
-  src = tmp_results20520.result1;
-  tok_str = tmp_results20520.result2;
+  ConsumeToken_results tmp_results20679 = ConsumeToken(src, TOK_RPAREN);
+  src = tmp_results20679.result1;
+  tok_str = tmp_results20679.result2;
   char* val;
   if ((strcmp(callee, "print") == 0)) {
-    int tmp_strlen20383 = strlen("printf(\"%s\", ") + strlen(arg_values) + 1;
-    char* tmp_str20383 = calloc(tmp_strlen20383, sizeof(char));
-    strcpy(tmp_str20383, "printf(\"%s\", ");
-    strcat(tmp_str20383, arg_values);
-    int tmp_strlen20376 = strlen(tmp_str20383) + strlen(")") + 1;
-    char* tmp_str20376 = calloc(tmp_strlen20376, sizeof(char));
-    strcpy(tmp_str20376, tmp_str20383);
-    strcat(tmp_str20376, ")");
-    val = tmp_str20376;
+    int tmp_strlen20542 = strlen("printf(\"%s\", ") + strlen(arg_values) + 1;
+    char* tmp_str20542 = calloc(tmp_strlen20542, sizeof(char));
+    strcpy(tmp_str20542, "printf(\"%s\", ");
+    strcat(tmp_str20542, arg_values);
+    int tmp_strlen20535 = strlen(tmp_str20542) + strlen(")") + 1;
+    char* tmp_str20535 = calloc(tmp_strlen20535, sizeof(char));
+    strcpy(tmp_str20535, tmp_str20542);
+    strcat(tmp_str20535, ")");
+    val = tmp_str20535;
   } else {
     if ((strcmp(callee, "len") == 0)) {
-      int tmp_strlen20306 = strlen("strlen(") + strlen(arg_values) + 1;
-      char* tmp_str20306 = calloc(tmp_strlen20306, sizeof(char));
-      strcpy(tmp_str20306, "strlen(");
-      strcat(tmp_str20306, arg_values);
-      int tmp_strlen20299 = strlen(tmp_str20306) + strlen(")") + 1;
-      char* tmp_str20299 = calloc(tmp_strlen20299, sizeof(char));
-      strcpy(tmp_str20299, tmp_str20306);
-      strcat(tmp_str20299, ")");
-      val = tmp_str20299;
+      int tmp_strlen20465 = strlen("strlen(") + strlen(arg_values) + 1;
+      char* tmp_str20465 = calloc(tmp_strlen20465, sizeof(char));
+      strcpy(tmp_str20465, "strlen(");
+      strcat(tmp_str20465, arg_values);
+      int tmp_strlen20458 = strlen(tmp_str20465) + strlen(")") + 1;
+      char* tmp_str20458 = calloc(tmp_strlen20458, sizeof(char));
+      strcpy(tmp_str20458, tmp_str20465);
+      strcat(tmp_str20458, ")");
+      val = tmp_str20458;
     } else {
-      int tmp_strlen20258 = strlen(callee) + strlen("(") + 1;
-      char* tmp_str20258 = calloc(tmp_strlen20258, sizeof(char));
-      strcpy(tmp_str20258, callee);
-      strcat(tmp_str20258, "(");
-      int tmp_strlen20244 = strlen(tmp_str20258) + strlen(arg_values) + 1;
-      char* tmp_str20244 = calloc(tmp_strlen20244, sizeof(char));
-      strcpy(tmp_str20244, tmp_str20258);
-      strcat(tmp_str20244, arg_values);
-      int tmp_strlen20237 = strlen(tmp_str20244) + strlen(")") + 1;
-      char* tmp_str20237 = calloc(tmp_strlen20237, sizeof(char));
-      strcpy(tmp_str20237, tmp_str20244);
-      strcat(tmp_str20237, ")");
-      val = tmp_str20237;
+      int tmp_strlen20417 = strlen(callee) + strlen("(") + 1;
+      char* tmp_str20417 = calloc(tmp_strlen20417, sizeof(char));
+      strcpy(tmp_str20417, callee);
+      strcat(tmp_str20417, "(");
+      int tmp_strlen20403 = strlen(tmp_str20417) + strlen(arg_values) + 1;
+      char* tmp_str20403 = calloc(tmp_strlen20403, sizeof(char));
+      strcpy(tmp_str20403, tmp_str20417);
+      strcat(tmp_str20403, arg_values);
+      int tmp_strlen20396 = strlen(tmp_str20403) + strlen(")") + 1;
+      char* tmp_str20396 = calloc(tmp_strlen20396, sizeof(char));
+      strcpy(tmp_str20396, tmp_str20403);
+      strcat(tmp_str20396, ")");
+      val = tmp_str20396;
     }
   }
   return (TranslateCall_results){src, args_setup, val};
@@ -1014,304 +1058,304 @@ TranslateSubstrExpr_results TranslateSubstrExpr(char* src, char* indent, char* s
   int tok;
   char* tok_str;
   int p = strlen(src);
-  ConsumeToken_results tmp_results20026 = ConsumeToken(src, TOK_LBRACKET);
-  src = tmp_results20026.result1;
-  tok_str = tmp_results20026.result2;
+  ConsumeToken_results tmp_results20185 = ConsumeToken(src, TOK_LBRACKET);
+  src = tmp_results20185.result1;
+  tok_str = tmp_results20185.result2;
   char* low_setup = "";
   char* low_expr = "0";
   char* high_setup = "";
-  int tmp_strlen19838 = strlen("strlen(") + strlen(strvar) + 1;
-  char* tmp_str19838 = calloc(tmp_strlen19838, sizeof(char));
-  strcpy(tmp_str19838, "strlen(");
-  strcat(tmp_str19838, strvar);
-  int tmp_strlen19831 = strlen(tmp_str19838) + strlen(")") + 1;
-  char* tmp_str19831 = calloc(tmp_strlen19831, sizeof(char));
-  strcpy(tmp_str19831, tmp_str19838);
-  strcat(tmp_str19831, ")");
-  char* high_expr = tmp_str19831;
-  Peek_results tmp_results19826 = Peek(src);
-  tok = tmp_results19826.result1;
-  tok_str = tmp_results19826.result2;
+  int tmp_strlen19997 = strlen("strlen(") + strlen(strvar) + 1;
+  char* tmp_str19997 = calloc(tmp_strlen19997, sizeof(char));
+  strcpy(tmp_str19997, "strlen(");
+  strcat(tmp_str19997, strvar);
+  int tmp_strlen19990 = strlen(tmp_str19997) + strlen(")") + 1;
+  char* tmp_str19990 = calloc(tmp_strlen19990, sizeof(char));
+  strcpy(tmp_str19990, tmp_str19997);
+  strcat(tmp_str19990, ")");
+  char* high_expr = tmp_str19990;
+  Peek_results tmp_results19985 = Peek(src);
+  tok = tmp_results19985.result1;
+  tok_str = tmp_results19985.result2;
   if ((tok) == (TOK_COLON)) {
-    ConsumeToken_results tmp_results19767 = ConsumeToken(src, TOK_COLON);
-    src = tmp_results19767.result1;
-    tok_str = tmp_results19767.result2;
-    TranslateExpr_results tmp_results19715 = TranslateExpr(src, indent);
-    src = tmp_results19715.result1;
-    high_setup = tmp_results19715.result2;
-    high_expr = tmp_results19715.result3;
-    ConsumeToken_results tmp_results19651 = ConsumeToken(src, TOK_RBRACKET);
-    src = tmp_results19651.result1;
-    tok_str = tmp_results19651.result2;
+    ConsumeToken_results tmp_results19926 = ConsumeToken(src, TOK_COLON);
+    src = tmp_results19926.result1;
+    tok_str = tmp_results19926.result2;
+    TranslateExpr_results tmp_results19874 = TranslateExpr(src, indent);
+    src = tmp_results19874.result1;
+    high_setup = tmp_results19874.result2;
+    high_expr = tmp_results19874.result3;
+    ConsumeToken_results tmp_results19810 = ConsumeToken(src, TOK_RBRACKET);
+    src = tmp_results19810.result1;
+    tok_str = tmp_results19810.result2;
   } else {
-    TranslateExpr_results tmp_results19583 = TranslateExpr(src, indent);
-    src = tmp_results19583.result1;
-    low_setup = tmp_results19583.result2;
-    low_expr = tmp_results19583.result3;
-    Peek_results tmp_results19521 = Peek(src);
-    tok = tmp_results19521.result1;
-    tok_str = tmp_results19521.result2;
+    TranslateExpr_results tmp_results19742 = TranslateExpr(src, indent);
+    src = tmp_results19742.result1;
+    low_setup = tmp_results19742.result2;
+    low_expr = tmp_results19742.result3;
+    Peek_results tmp_results19680 = Peek(src);
+    tok = tmp_results19680.result1;
+    tok_str = tmp_results19680.result2;
     if ((tok) == (TOK_RBRACKET)) {
-      ConsumeToken_results tmp_results19451 = ConsumeToken(src, TOK_RBRACKET);
-      src = tmp_results19451.result1;
-      tok_str = tmp_results19451.result2;
-      int tmp_strlen19356 = strlen(strvar) + strlen("[") + 1;
-      char* tmp_str19356 = calloc(tmp_strlen19356, sizeof(char));
-      strcpy(tmp_str19356, strvar);
-      strcat(tmp_str19356, "[");
-      int tmp_strlen19344 = strlen(tmp_str19356) + strlen(low_expr) + 1;
-      char* tmp_str19344 = calloc(tmp_strlen19344, sizeof(char));
-      strcpy(tmp_str19344, tmp_str19356);
-      strcat(tmp_str19344, low_expr);
-      int tmp_strlen19337 = strlen(tmp_str19344) + strlen("]") + 1;
-      char* tmp_str19337 = calloc(tmp_strlen19337, sizeof(char));
-      strcpy(tmp_str19337, tmp_str19344);
-      strcat(tmp_str19337, "]");
-      return (TranslateSubstrExpr_results){src, low_setup, tmp_str19337};
+      ConsumeToken_results tmp_results19610 = ConsumeToken(src, TOK_RBRACKET);
+      src = tmp_results19610.result1;
+      tok_str = tmp_results19610.result2;
+      int tmp_strlen19515 = strlen(strvar) + strlen("[") + 1;
+      char* tmp_str19515 = calloc(tmp_strlen19515, sizeof(char));
+      strcpy(tmp_str19515, strvar);
+      strcat(tmp_str19515, "[");
+      int tmp_strlen19503 = strlen(tmp_str19515) + strlen(low_expr) + 1;
+      char* tmp_str19503 = calloc(tmp_strlen19503, sizeof(char));
+      strcpy(tmp_str19503, tmp_str19515);
+      strcat(tmp_str19503, low_expr);
+      int tmp_strlen19496 = strlen(tmp_str19503) + strlen("]") + 1;
+      char* tmp_str19496 = calloc(tmp_strlen19496, sizeof(char));
+      strcpy(tmp_str19496, tmp_str19503);
+      strcat(tmp_str19496, "]");
+      return (TranslateSubstrExpr_results){src, low_setup, tmp_str19496};
     }
-    ConsumeToken_results tmp_results19318 = ConsumeToken(src, TOK_COLON);
-    src = tmp_results19318.result1;
-    tok_str = tmp_results19318.result2;
-    Peek_results tmp_results19266 = Peek(src);
-    tok = tmp_results19266.result1;
-    tok_str = tmp_results19266.result2;
+    ConsumeToken_results tmp_results19477 = ConsumeToken(src, TOK_COLON);
+    src = tmp_results19477.result1;
+    tok_str = tmp_results19477.result2;
+    Peek_results tmp_results19425 = Peek(src);
+    tok = tmp_results19425.result1;
+    tok_str = tmp_results19425.result2;
     if ((tok) != (TOK_RBRACKET)) {
-      TranslateExpr_results tmp_results19196 = TranslateExpr(src, indent);
-      src = tmp_results19196.result1;
-      high_setup = tmp_results19196.result2;
-      high_expr = tmp_results19196.result3;
+      TranslateExpr_results tmp_results19355 = TranslateExpr(src, indent);
+      src = tmp_results19355.result1;
+      high_setup = tmp_results19355.result2;
+      high_expr = tmp_results19355.result3;
     }
-    ConsumeToken_results tmp_results19122 = ConsumeToken(src, TOK_RBRACKET);
-    src = tmp_results19122.result1;
-    tok_str = tmp_results19122.result2;
+    ConsumeToken_results tmp_results19281 = ConsumeToken(src, TOK_RBRACKET);
+    src = tmp_results19281.result1;
+    tok_str = tmp_results19281.result2;
   }
-  int tmp_strlen19023 = strlen("tmp_str") + strlen(itoa(p)) + 1;
-  char* tmp_str19023 = calloc(tmp_strlen19023, sizeof(char));
-  strcpy(tmp_str19023, "tmp_str");
-  strcat(tmp_str19023, itoa(p));
-  char* tmp_str = tmp_str19023;
-  int tmp_strlen18970 = strlen("tmp_strlen") + strlen(itoa(p)) + 1;
-  char* tmp_str18970 = calloc(tmp_strlen18970, sizeof(char));
-  strcpy(tmp_str18970, "tmp_strlen");
-  strcat(tmp_str18970, itoa(p));
-  char* tmp_strlen = tmp_str18970;
-  int tmp_strlen18922 = strlen(low_setup) + strlen(high_setup) + 1;
-  char* tmp_str18922 = calloc(tmp_strlen18922, sizeof(char));
-  strcpy(tmp_str18922, low_setup);
-  strcat(tmp_str18922, high_setup);
-  char* setup = tmp_str18922;
-  int tmp_strlen18894 = strlen(setup) + strlen(indent) + 1;
-  char* tmp_str18894 = calloc(tmp_strlen18894, sizeof(char));
-  strcpy(tmp_str18894, setup);
-  strcat(tmp_str18894, indent);
-  int tmp_strlen18884 = strlen(tmp_str18894) + strlen("int ") + 1;
-  char* tmp_str18884 = calloc(tmp_strlen18884, sizeof(char));
-  strcpy(tmp_str18884, tmp_str18894);
-  strcat(tmp_str18884, "int ");
-  int tmp_strlen18870 = strlen(tmp_str18884) + strlen(tmp_strlen) + 1;
-  char* tmp_str18870 = calloc(tmp_strlen18870, sizeof(char));
-  strcpy(tmp_str18870, tmp_str18884);
-  strcat(tmp_str18870, tmp_strlen);
-  int tmp_strlen18860 = strlen(tmp_str18870) + strlen(" = (") + 1;
-  char* tmp_str18860 = calloc(tmp_strlen18860, sizeof(char));
-  strcpy(tmp_str18860, tmp_str18870);
-  strcat(tmp_str18860, " = (");
-  int tmp_strlen18847 = strlen(tmp_str18860) + strlen(high_expr) + 1;
-  char* tmp_str18847 = calloc(tmp_strlen18847, sizeof(char));
-  strcpy(tmp_str18847, tmp_str18860);
-  strcat(tmp_str18847, high_expr);
-  int tmp_strlen18836 = strlen(tmp_str18847) + strlen(") - (") + 1;
+  int tmp_strlen19182 = strlen("tmp_str") + strlen(itoa(p)) + 1;
+  char* tmp_str19182 = calloc(tmp_strlen19182, sizeof(char));
+  strcpy(tmp_str19182, "tmp_str");
+  strcat(tmp_str19182, itoa(p));
+  char* tmp_str = tmp_str19182;
+  int tmp_strlen19129 = strlen("tmp_strlen") + strlen(itoa(p)) + 1;
+  char* tmp_str19129 = calloc(tmp_strlen19129, sizeof(char));
+  strcpy(tmp_str19129, "tmp_strlen");
+  strcat(tmp_str19129, itoa(p));
+  char* tmp_strlen = tmp_str19129;
+  int tmp_strlen19081 = strlen(low_setup) + strlen(high_setup) + 1;
+  char* tmp_str19081 = calloc(tmp_strlen19081, sizeof(char));
+  strcpy(tmp_str19081, low_setup);
+  strcat(tmp_str19081, high_setup);
+  char* setup = tmp_str19081;
+  int tmp_strlen19053 = strlen(setup) + strlen(indent) + 1;
+  char* tmp_str19053 = calloc(tmp_strlen19053, sizeof(char));
+  strcpy(tmp_str19053, setup);
+  strcat(tmp_str19053, indent);
+  int tmp_strlen19043 = strlen(tmp_str19053) + strlen("int ") + 1;
+  char* tmp_str19043 = calloc(tmp_strlen19043, sizeof(char));
+  strcpy(tmp_str19043, tmp_str19053);
+  strcat(tmp_str19043, "int ");
+  int tmp_strlen19029 = strlen(tmp_str19043) + strlen(tmp_strlen) + 1;
+  char* tmp_str19029 = calloc(tmp_strlen19029, sizeof(char));
+  strcpy(tmp_str19029, tmp_str19043);
+  strcat(tmp_str19029, tmp_strlen);
+  int tmp_strlen19019 = strlen(tmp_str19029) + strlen(" = (") + 1;
+  char* tmp_str19019 = calloc(tmp_strlen19019, sizeof(char));
+  strcpy(tmp_str19019, tmp_str19029);
+  strcat(tmp_str19019, " = (");
+  int tmp_strlen19006 = strlen(tmp_str19019) + strlen(high_expr) + 1;
+  char* tmp_str19006 = calloc(tmp_strlen19006, sizeof(char));
+  strcpy(tmp_str19006, tmp_str19019);
+  strcat(tmp_str19006, high_expr);
+  int tmp_strlen18995 = strlen(tmp_str19006) + strlen(") - (") + 1;
+  char* tmp_str18995 = calloc(tmp_strlen18995, sizeof(char));
+  strcpy(tmp_str18995, tmp_str19006);
+  strcat(tmp_str18995, ") - (");
+  int tmp_strlen18983 = strlen(tmp_str18995) + strlen(low_expr) + 1;
+  char* tmp_str18983 = calloc(tmp_strlen18983, sizeof(char));
+  strcpy(tmp_str18983, tmp_str18995);
+  strcat(tmp_str18983, low_expr);
+  int tmp_strlen18969 = strlen(tmp_str18983) + strlen(") + 1;\n") + 1;
+  char* tmp_str18969 = calloc(tmp_strlen18969, sizeof(char));
+  strcpy(tmp_str18969, tmp_str18983);
+  strcat(tmp_str18969, ") + 1;\n");
+  setup = tmp_str18969;
+  int tmp_strlen18941 = strlen(setup) + strlen(indent) + 1;
+  char* tmp_str18941 = calloc(tmp_strlen18941, sizeof(char));
+  strcpy(tmp_str18941, setup);
+  strcat(tmp_str18941, indent);
+  int tmp_strlen18929 = strlen(tmp_str18941) + strlen("char* ") + 1;
+  char* tmp_str18929 = calloc(tmp_strlen18929, sizeof(char));
+  strcpy(tmp_str18929, tmp_str18941);
+  strcat(tmp_str18929, "char* ");
+  int tmp_strlen18918 = strlen(tmp_str18929) + strlen(tmp_str) + 1;
+  char* tmp_str18918 = calloc(tmp_strlen18918, sizeof(char));
+  strcpy(tmp_str18918, tmp_str18929);
+  strcat(tmp_str18918, tmp_str);
+  int tmp_strlen18902 = strlen(tmp_str18918) + strlen(" = calloc(") + 1;
+  char* tmp_str18902 = calloc(tmp_strlen18902, sizeof(char));
+  strcpy(tmp_str18902, tmp_str18918);
+  strcat(tmp_str18902, " = calloc(");
+  int tmp_strlen18888 = strlen(tmp_str18902) + strlen(tmp_strlen) + 1;
+  char* tmp_str18888 = calloc(tmp_strlen18888, sizeof(char));
+  strcpy(tmp_str18888, tmp_str18902);
+  strcat(tmp_str18888, tmp_strlen);
+  int tmp_strlen18864 = strlen(tmp_str18888) + strlen(", sizeof(char));\n") + 1;
+  char* tmp_str18864 = calloc(tmp_strlen18864, sizeof(char));
+  strcpy(tmp_str18864, tmp_str18888);
+  strcat(tmp_str18864, ", sizeof(char));\n");
+  setup = tmp_str18864;
+  int tmp_strlen18836 = strlen(setup) + strlen(indent) + 1;
   char* tmp_str18836 = calloc(tmp_strlen18836, sizeof(char));
-  strcpy(tmp_str18836, tmp_str18847);
-  strcat(tmp_str18836, ") - (");
-  int tmp_strlen18824 = strlen(tmp_str18836) + strlen(low_expr) + 1;
-  char* tmp_str18824 = calloc(tmp_strlen18824, sizeof(char));
-  strcpy(tmp_str18824, tmp_str18836);
-  strcat(tmp_str18824, low_expr);
-  int tmp_strlen18810 = strlen(tmp_str18824) + strlen(") + 1;\n") + 1;
-  char* tmp_str18810 = calloc(tmp_strlen18810, sizeof(char));
-  strcpy(tmp_str18810, tmp_str18824);
-  strcat(tmp_str18810, ") + 1;\n");
-  setup = tmp_str18810;
-  int tmp_strlen18782 = strlen(setup) + strlen(indent) + 1;
-  char* tmp_str18782 = calloc(tmp_strlen18782, sizeof(char));
-  strcpy(tmp_str18782, setup);
-  strcat(tmp_str18782, indent);
-  int tmp_strlen18770 = strlen(tmp_str18782) + strlen("char* ") + 1;
-  char* tmp_str18770 = calloc(tmp_strlen18770, sizeof(char));
-  strcpy(tmp_str18770, tmp_str18782);
-  strcat(tmp_str18770, "char* ");
-  int tmp_strlen18759 = strlen(tmp_str18770) + strlen(tmp_str) + 1;
-  char* tmp_str18759 = calloc(tmp_strlen18759, sizeof(char));
-  strcpy(tmp_str18759, tmp_str18770);
-  strcat(tmp_str18759, tmp_str);
-  int tmp_strlen18743 = strlen(tmp_str18759) + strlen(" = calloc(") + 1;
-  char* tmp_str18743 = calloc(tmp_strlen18743, sizeof(char));
-  strcpy(tmp_str18743, tmp_str18759);
-  strcat(tmp_str18743, " = calloc(");
-  int tmp_strlen18729 = strlen(tmp_str18743) + strlen(tmp_strlen) + 1;
-  char* tmp_str18729 = calloc(tmp_strlen18729, sizeof(char));
-  strcpy(tmp_str18729, tmp_str18743);
-  strcat(tmp_str18729, tmp_strlen);
-  int tmp_strlen18705 = strlen(tmp_str18729) + strlen(", sizeof(char));\n") + 1;
-  char* tmp_str18705 = calloc(tmp_strlen18705, sizeof(char));
-  strcpy(tmp_str18705, tmp_str18729);
-  strcat(tmp_str18705, ", sizeof(char));\n");
-  setup = tmp_str18705;
-  int tmp_strlen18677 = strlen(setup) + strlen(indent) + 1;
-  char* tmp_str18677 = calloc(tmp_strlen18677, sizeof(char));
-  strcpy(tmp_str18677, setup);
-  strcat(tmp_str18677, indent);
-  int tmp_strlen18663 = strlen(tmp_str18677) + strlen("strncpy(") + 1;
-  char* tmp_str18663 = calloc(tmp_strlen18663, sizeof(char));
-  strcpy(tmp_str18663, tmp_str18677);
-  strcat(tmp_str18663, "strncpy(");
-  int tmp_strlen18652 = strlen(tmp_str18663) + strlen(tmp_str) + 1;
-  char* tmp_str18652 = calloc(tmp_strlen18652, sizeof(char));
-  strcpy(tmp_str18652, tmp_str18663);
-  strcat(tmp_str18652, tmp_str);
-  int tmp_strlen18644 = strlen(tmp_str18652) + strlen(", ") + 1;
-  char* tmp_str18644 = calloc(tmp_strlen18644, sizeof(char));
-  strcpy(tmp_str18644, tmp_str18652);
-  strcat(tmp_str18644, ", ");
-  int tmp_strlen18634 = strlen(tmp_str18644) + strlen(strvar) + 1;
-  char* tmp_str18634 = calloc(tmp_strlen18634, sizeof(char));
-  strcpy(tmp_str18634, tmp_str18644);
-  strcat(tmp_str18634, strvar);
-  int tmp_strlen18625 = strlen(tmp_str18634) + strlen(" + ") + 1;
-  char* tmp_str18625 = calloc(tmp_strlen18625, sizeof(char));
-  strcpy(tmp_str18625, tmp_str18634);
-  strcat(tmp_str18625, " + ");
-  int tmp_strlen18613 = strlen(tmp_str18625) + strlen(low_expr) + 1;
-  char* tmp_str18613 = calloc(tmp_strlen18613, sizeof(char));
-  strcpy(tmp_str18613, tmp_str18625);
-  strcat(tmp_str18613, low_expr);
-  int tmp_strlen18605 = strlen(tmp_str18613) + strlen(", ") + 1;
-  char* tmp_str18605 = calloc(tmp_strlen18605, sizeof(char));
-  strcpy(tmp_str18605, tmp_str18613);
-  strcat(tmp_str18605, ", ");
-  int tmp_strlen18591 = strlen(tmp_str18605) + strlen(tmp_strlen) + 1;
-  char* tmp_str18591 = calloc(tmp_strlen18591, sizeof(char));
-  strcpy(tmp_str18591, tmp_str18605);
-  strcat(tmp_str18591, tmp_strlen);
-  int tmp_strlen18577 = strlen(tmp_str18591) + strlen(" - 1);\n") + 1;
-  char* tmp_str18577 = calloc(tmp_strlen18577, sizeof(char));
-  strcpy(tmp_str18577, tmp_str18591);
-  strcat(tmp_str18577, " - 1);\n");
-  setup = tmp_str18577;
-  int tmp_strlen18549 = strlen(setup) + strlen(indent) + 1;
-  char* tmp_str18549 = calloc(tmp_strlen18549, sizeof(char));
-  strcpy(tmp_str18549, setup);
-  strcat(tmp_str18549, indent);
-  int tmp_strlen18538 = strlen(tmp_str18549) + strlen(tmp_str) + 1;
-  char* tmp_str18538 = calloc(tmp_strlen18538, sizeof(char));
-  strcpy(tmp_str18538, tmp_str18549);
-  strcat(tmp_str18538, tmp_str);
-  int tmp_strlen18531 = strlen(tmp_str18538) + strlen("[") + 1;
-  char* tmp_str18531 = calloc(tmp_strlen18531, sizeof(char));
-  strcpy(tmp_str18531, tmp_str18538);
-  strcat(tmp_str18531, "[");
-  int tmp_strlen18517 = strlen(tmp_str18531) + strlen(tmp_strlen) + 1;
-  char* tmp_str18517 = calloc(tmp_strlen18517, sizeof(char));
-  strcpy(tmp_str18517, tmp_str18531);
-  strcat(tmp_str18517, tmp_strlen);
-  int tmp_strlen18499 = strlen(tmp_str18517) + strlen(" - 1] = 0;\n") + 1;
-  char* tmp_str18499 = calloc(tmp_strlen18499, sizeof(char));
-  strcpy(tmp_str18499, tmp_str18517);
-  strcat(tmp_str18499, " - 1] = 0;\n");
-  setup = tmp_str18499;
+  strcpy(tmp_str18836, setup);
+  strcat(tmp_str18836, indent);
+  int tmp_strlen18822 = strlen(tmp_str18836) + strlen("strncpy(") + 1;
+  char* tmp_str18822 = calloc(tmp_strlen18822, sizeof(char));
+  strcpy(tmp_str18822, tmp_str18836);
+  strcat(tmp_str18822, "strncpy(");
+  int tmp_strlen18811 = strlen(tmp_str18822) + strlen(tmp_str) + 1;
+  char* tmp_str18811 = calloc(tmp_strlen18811, sizeof(char));
+  strcpy(tmp_str18811, tmp_str18822);
+  strcat(tmp_str18811, tmp_str);
+  int tmp_strlen18803 = strlen(tmp_str18811) + strlen(", ") + 1;
+  char* tmp_str18803 = calloc(tmp_strlen18803, sizeof(char));
+  strcpy(tmp_str18803, tmp_str18811);
+  strcat(tmp_str18803, ", ");
+  int tmp_strlen18793 = strlen(tmp_str18803) + strlen(strvar) + 1;
+  char* tmp_str18793 = calloc(tmp_strlen18793, sizeof(char));
+  strcpy(tmp_str18793, tmp_str18803);
+  strcat(tmp_str18793, strvar);
+  int tmp_strlen18784 = strlen(tmp_str18793) + strlen(" + ") + 1;
+  char* tmp_str18784 = calloc(tmp_strlen18784, sizeof(char));
+  strcpy(tmp_str18784, tmp_str18793);
+  strcat(tmp_str18784, " + ");
+  int tmp_strlen18772 = strlen(tmp_str18784) + strlen(low_expr) + 1;
+  char* tmp_str18772 = calloc(tmp_strlen18772, sizeof(char));
+  strcpy(tmp_str18772, tmp_str18784);
+  strcat(tmp_str18772, low_expr);
+  int tmp_strlen18764 = strlen(tmp_str18772) + strlen(", ") + 1;
+  char* tmp_str18764 = calloc(tmp_strlen18764, sizeof(char));
+  strcpy(tmp_str18764, tmp_str18772);
+  strcat(tmp_str18764, ", ");
+  int tmp_strlen18750 = strlen(tmp_str18764) + strlen(tmp_strlen) + 1;
+  char* tmp_str18750 = calloc(tmp_strlen18750, sizeof(char));
+  strcpy(tmp_str18750, tmp_str18764);
+  strcat(tmp_str18750, tmp_strlen);
+  int tmp_strlen18736 = strlen(tmp_str18750) + strlen(" - 1);\n") + 1;
+  char* tmp_str18736 = calloc(tmp_strlen18736, sizeof(char));
+  strcpy(tmp_str18736, tmp_str18750);
+  strcat(tmp_str18736, " - 1);\n");
+  setup = tmp_str18736;
+  int tmp_strlen18708 = strlen(setup) + strlen(indent) + 1;
+  char* tmp_str18708 = calloc(tmp_strlen18708, sizeof(char));
+  strcpy(tmp_str18708, setup);
+  strcat(tmp_str18708, indent);
+  int tmp_strlen18697 = strlen(tmp_str18708) + strlen(tmp_str) + 1;
+  char* tmp_str18697 = calloc(tmp_strlen18697, sizeof(char));
+  strcpy(tmp_str18697, tmp_str18708);
+  strcat(tmp_str18697, tmp_str);
+  int tmp_strlen18690 = strlen(tmp_str18697) + strlen("[") + 1;
+  char* tmp_str18690 = calloc(tmp_strlen18690, sizeof(char));
+  strcpy(tmp_str18690, tmp_str18697);
+  strcat(tmp_str18690, "[");
+  int tmp_strlen18676 = strlen(tmp_str18690) + strlen(tmp_strlen) + 1;
+  char* tmp_str18676 = calloc(tmp_strlen18676, sizeof(char));
+  strcpy(tmp_str18676, tmp_str18690);
+  strcat(tmp_str18676, tmp_strlen);
+  int tmp_strlen18658 = strlen(tmp_str18676) + strlen(" - 1] = 0;\n") + 1;
+  char* tmp_str18658 = calloc(tmp_strlen18658, sizeof(char));
+  strcpy(tmp_str18658, tmp_str18676);
+  strcat(tmp_str18658, " - 1] = 0;\n");
+  setup = tmp_str18658;
   return (TranslateSubstrExpr_results){src, setup, tmp_str};
 }
 
 TranslateOperand_results TranslateOperand(char* src, char* indent) {
   int tok;
   char* tok_str;
-  Peek_results tmp_results18340 = Peek(src);
-  tok = tmp_results18340.result1;
-  tok_str = tmp_results18340.result2;
+  Peek_results tmp_results18499 = Peek(src);
+  tok = tmp_results18499.result1;
+  tok_str = tmp_results18499.result2;
   if ((tok) == (TOK_LPAREN)) {
     char* setup;
     char* val;
-    ConsumeToken_results tmp_results18230 = ConsumeToken(src, TOK_LPAREN);
-    src = tmp_results18230.result1;
-    tok_str = tmp_results18230.result2;
-    TranslateExpr_results tmp_results18177 = TranslateExpr(src, indent);
-    src = tmp_results18177.result1;
-    setup = tmp_results18177.result2;
-    val = tmp_results18177.result3;
-    ConsumeToken_results tmp_results18124 = ConsumeToken(src, TOK_RPAREN);
-    src = tmp_results18124.result1;
-    tok_str = tmp_results18124.result2;
+    ConsumeToken_results tmp_results18389 = ConsumeToken(src, TOK_LPAREN);
+    src = tmp_results18389.result1;
+    tok_str = tmp_results18389.result2;
+    TranslateExpr_results tmp_results18336 = TranslateExpr(src, indent);
+    src = tmp_results18336.result1;
+    setup = tmp_results18336.result2;
+    val = tmp_results18336.result3;
+    ConsumeToken_results tmp_results18283 = ConsumeToken(src, TOK_RPAREN);
+    src = tmp_results18283.result1;
+    tok_str = tmp_results18283.result2;
     return (TranslateOperand_results){src, setup, val};
   } else {
     if (((tok) == (TOK_FALSE)) || ((tok) == (TOK_TRUE))) {
       char* lit;
-      TranslateBoolLiteral_results tmp_results17964 = TranslateBoolLiteral(src);
-      src = tmp_results17964.result1;
-      lit = tmp_results17964.result2;
+      TranslateBoolLiteral_results tmp_results18123 = TranslateBoolLiteral(src);
+      src = tmp_results18123.result1;
+      lit = tmp_results18123.result2;
       return (TranslateOperand_results){src, "", lit};
     } else {
       if ((tok) == (TOK_INTLIT)) {
         char* lit;
-        TranslateIntLiteral_results tmp_results17833 = TranslateIntLiteral(src);
-        src = tmp_results17833.result1;
-        lit = tmp_results17833.result2;
+        TranslateIntLiteral_results tmp_results17992 = TranslateIntLiteral(src);
+        src = tmp_results17992.result1;
+        lit = tmp_results17992.result2;
         return (TranslateOperand_results){src, "", lit};
       } else {
         if ((tok) == (TOK_STRLIT)) {
           char* lit;
-          TranslateStringLiteral_results tmp_results17703 = TranslateStringLiteral(src);
-          src = tmp_results17703.result1;
-          lit = tmp_results17703.result2;
+          TranslateStringLiteral_results tmp_results17862 = TranslateStringLiteral(src);
+          src = tmp_results17862.result1;
+          lit = tmp_results17862.result2;
           return (TranslateOperand_results){src, "", lit};
         } else {
           if ((tok) == (TOK_IDENT)) {
             char* ident;
-            ConsumeIdent_results tmp_results17569 = ConsumeIdent(src);
-            src = tmp_results17569.result1;
-            ident = tmp_results17569.result2;
-            Peek_results tmp_results17530 = Peek(src);
-            tok = tmp_results17530.result1;
-            tok_str = tmp_results17530.result2;
+            ConsumeIdent_results tmp_results17728 = ConsumeIdent(src);
+            src = tmp_results17728.result1;
+            ident = tmp_results17728.result2;
+            Peek_results tmp_results17689 = Peek(src);
+            tok = tmp_results17689.result1;
+            tok_str = tmp_results17689.result2;
             if ((tok) == (TOK_LPAREN)) {
               char* setup;
               char* expr;
-              TranslateCall_results tmp_results17403 = TranslateCall(src, indent, ident);
-              src = tmp_results17403.result1;
-              setup = tmp_results17403.result2;
-              expr = tmp_results17403.result3;
+              TranslateCall_results tmp_results17562 = TranslateCall(src, indent, ident);
+              src = tmp_results17562.result1;
+              setup = tmp_results17562.result2;
+              expr = tmp_results17562.result3;
               return (TranslateOperand_results){src, setup, expr};
             } else {
               if ((tok) == (TOK_LBRACKET)) {
                 char* setup;
                 char* expr;
-                TranslateSubstrExpr_results tmp_results17203 = TranslateSubstrExpr(src, indent, ident);
-                src = tmp_results17203.result1;
-                setup = tmp_results17203.result2;
-                expr = tmp_results17203.result3;
+                TranslateSubstrExpr_results tmp_results17362 = TranslateSubstrExpr(src, indent, ident);
+                src = tmp_results17362.result1;
+                setup = tmp_results17362.result2;
+                expr = tmp_results17362.result3;
                 return (TranslateOperand_results){src, setup, expr};
               } else {
                 return (TranslateOperand_results){src, "", ident};
               }
             }
           } else {
-            int tmp_strlen16983 = strlen("unexpected expr, got: ") + strlen(itoa(tok)) + 1;
-            char* tmp_str16983 = calloc(tmp_strlen16983, sizeof(char));
-            strcpy(tmp_str16983, "unexpected expr, got: ");
-            strcat(tmp_str16983, itoa(tok));
-            int tmp_strlen16974 = strlen(tmp_str16983) + strlen(" \"") + 1;
-            char* tmp_str16974 = calloc(tmp_strlen16974, sizeof(char));
-            strcpy(tmp_str16974, tmp_str16983);
-            strcat(tmp_str16974, " \"");
-            int tmp_strlen16963 = strlen(tmp_str16974) + strlen(tok_str) + 1;
-            char* tmp_str16963 = calloc(tmp_strlen16963, sizeof(char));
-            strcpy(tmp_str16963, tmp_str16974);
-            strcat(tmp_str16963, tok_str);
-            int tmp_strlen16955 = strlen(tmp_str16963) + strlen("\"") + 1;
-            char* tmp_str16955 = calloc(tmp_strlen16955, sizeof(char));
-            strcpy(tmp_str16955, tmp_str16963);
-            strcat(tmp_str16955, "\"");
-            printf("%s", tmp_str16955);
+            int tmp_strlen17142 = strlen("unexpected expr, got: ") + strlen(itoa(tok)) + 1;
+            char* tmp_str17142 = calloc(tmp_strlen17142, sizeof(char));
+            strcpy(tmp_str17142, "unexpected expr, got: ");
+            strcat(tmp_str17142, itoa(tok));
+            int tmp_strlen17133 = strlen(tmp_str17142) + strlen(" \"") + 1;
+            char* tmp_str17133 = calloc(tmp_strlen17133, sizeof(char));
+            strcpy(tmp_str17133, tmp_str17142);
+            strcat(tmp_str17133, " \"");
+            int tmp_strlen17122 = strlen(tmp_str17133) + strlen(tok_str) + 1;
+            char* tmp_str17122 = calloc(tmp_strlen17122, sizeof(char));
+            strcpy(tmp_str17122, tmp_str17133);
+            strcat(tmp_str17122, tok_str);
+            int tmp_strlen17114 = strlen(tmp_str17122) + strlen("\"") + 1;
+            char* tmp_str17114 = calloc(tmp_strlen17114, sizeof(char));
+            strcpy(tmp_str17114, tmp_str17122);
+            strcat(tmp_str17114, "\"");
+            printf("%s", tmp_str17114);
             exit(1);
           }
         }
@@ -1323,40 +1367,40 @@ TranslateOperand_results TranslateOperand(char* src, char* indent) {
 TranslateUnaryExpr_results TranslateUnaryExpr(char* src, char* indent) {
   int tok;
   char* tok_str;
-  Peek_results tmp_results16802 = Peek(src);
-  tok = tmp_results16802.result1;
-  tok_str = tmp_results16802.result2;
+  Peek_results tmp_results16961 = Peek(src);
+  tok = tmp_results16961.result1;
+  tok_str = tmp_results16961.result2;
   if (IsUnaryOp(tok)) {
-    ConsumeToken_results tmp_results16745 = ConsumeToken(src, tok);
-    src = tmp_results16745.result1;
-    tok_str = tmp_results16745.result2;
+    ConsumeToken_results tmp_results16904 = ConsumeToken(src, tok);
+    src = tmp_results16904.result1;
+    tok_str = tmp_results16904.result2;
     char* setup;
     char* val;
-    TranslateExpr_results tmp_results16649 = TranslateExpr(src, indent);
-    src = tmp_results16649.result1;
-    setup = tmp_results16649.result2;
-    val = tmp_results16649.result3;
-    int tmp_strlen16576 = strlen(tok_str) + strlen("(") + 1;
-    char* tmp_str16576 = calloc(tmp_strlen16576, sizeof(char));
-    strcpy(tmp_str16576, tok_str);
-    strcat(tmp_str16576, "(");
-    int tmp_strlen16569 = strlen(tmp_str16576) + strlen(val) + 1;
-    char* tmp_str16569 = calloc(tmp_strlen16569, sizeof(char));
-    strcpy(tmp_str16569, tmp_str16576);
-    strcat(tmp_str16569, val);
-    int tmp_strlen16562 = strlen(tmp_str16569) + strlen(")") + 1;
-    char* tmp_str16562 = calloc(tmp_strlen16562, sizeof(char));
-    strcpy(tmp_str16562, tmp_str16569);
-    strcat(tmp_str16562, ")");
-    val = tmp_str16562;
+    TranslateExpr_results tmp_results16808 = TranslateExpr(src, indent);
+    src = tmp_results16808.result1;
+    setup = tmp_results16808.result2;
+    val = tmp_results16808.result3;
+    int tmp_strlen16735 = strlen(tok_str) + strlen("(") + 1;
+    char* tmp_str16735 = calloc(tmp_strlen16735, sizeof(char));
+    strcpy(tmp_str16735, tok_str);
+    strcat(tmp_str16735, "(");
+    int tmp_strlen16728 = strlen(tmp_str16735) + strlen(val) + 1;
+    char* tmp_str16728 = calloc(tmp_strlen16728, sizeof(char));
+    strcpy(tmp_str16728, tmp_str16735);
+    strcat(tmp_str16728, val);
+    int tmp_strlen16721 = strlen(tmp_str16728) + strlen(")") + 1;
+    char* tmp_str16721 = calloc(tmp_strlen16721, sizeof(char));
+    strcpy(tmp_str16721, tmp_str16728);
+    strcat(tmp_str16721, ")");
+    val = tmp_str16721;
     return (TranslateUnaryExpr_results){src, setup, val};
   } else {
     char* setup;
     char* expr;
-    TranslateOperand_results tmp_results16458 = TranslateOperand(src, indent);
-    src = tmp_results16458.result1;
-    setup = tmp_results16458.result2;
-    expr = tmp_results16458.result3;
+    TranslateOperand_results tmp_results16617 = TranslateOperand(src, indent);
+    src = tmp_results16617.result1;
+    setup = tmp_results16617.result2;
+    expr = tmp_results16617.result3;
     return (TranslateUnaryExpr_results){src, setup, expr};
   }
 }
@@ -1364,233 +1408,233 @@ TranslateUnaryExpr_results TranslateUnaryExpr(char* src, char* indent) {
 TranslateExprWithPrecedence_results TranslateExprWithPrecedence(char* src, char* indent, int precedence) {
   char* setup;
   char* val;
-  TranslateUnaryExpr_results tmp_results16215 = TranslateUnaryExpr(src, indent);
-  src = tmp_results16215.result1;
-  setup = tmp_results16215.result2;
-  val = tmp_results16215.result3;
+  TranslateUnaryExpr_results tmp_results16374 = TranslateUnaryExpr(src, indent);
+  src = tmp_results16374.result1;
+  setup = tmp_results16374.result2;
+  val = tmp_results16374.result3;
   int op;
   char* op_str;
-  Peek_results tmp_results16122 = Peek(src);
-  op = tmp_results16122.result1;
-  op_str = tmp_results16122.result2;
+  Peek_results tmp_results16281 = Peek(src);
+  op = tmp_results16281.result1;
+  op_str = tmp_results16281.result2;
   while ((IsBinaryOp(op)) && ((Precedence(op)) > (precedence))) {
-    ConsumeToken_results tmp_results16035 = ConsumeToken(src, op);
-    src = tmp_results16035.result1;
-    op_str = tmp_results16035.result2;
+    ConsumeToken_results tmp_results16194 = ConsumeToken(src, op);
+    src = tmp_results16194.result1;
+    op_str = tmp_results16194.result2;
     int tok;
     char* tok_str;
-    Peek_results tmp_results15942 = Peek(src);
-    tok = tmp_results15942.result1;
-    tok_str = tmp_results15942.result2;
+    Peek_results tmp_results16101 = Peek(src);
+    tok = tmp_results16101.result1;
+    tok_str = tmp_results16101.result2;
     while ((tok) == (TOK_NEWLINE)) {
-      ConsumeToken_results tmp_results15872 = ConsumeToken(src, TOK_NEWLINE);
-      src = tmp_results15872.result1;
-      tok_str = tmp_results15872.result2;
-      Peek_results tmp_results15814 = Peek(src);
-      tok = tmp_results15814.result1;
-      tok_str = tmp_results15814.result2;
+      ConsumeToken_results tmp_results16031 = ConsumeToken(src, TOK_NEWLINE);
+      src = tmp_results16031.result1;
+      tok_str = tmp_results16031.result2;
+      Peek_results tmp_results15973 = Peek(src);
+      tok = tmp_results15973.result1;
+      tok_str = tmp_results15973.result2;
     }
     char* setup_b;
     char* val_b;
-    TranslateExprWithPrecedence_results tmp_results15717 = TranslateExprWithPrecedence(src, indent, Precedence(op));
-    src = tmp_results15717.result1;
-    setup_b = tmp_results15717.result2;
-    val_b = tmp_results15717.result3;
-    int tmp_strlen15606 = strlen(setup) + strlen(setup_b) + 1;
-    char* tmp_str15606 = calloc(tmp_strlen15606, sizeof(char));
-    strcpy(tmp_str15606, setup);
-    strcat(tmp_str15606, setup_b);
-    setup = tmp_str15606;
+    TranslateExprWithPrecedence_results tmp_results15876 = TranslateExprWithPrecedence(src, indent, Precedence(op));
+    src = tmp_results15876.result1;
+    setup_b = tmp_results15876.result2;
+    val_b = tmp_results15876.result3;
+    int tmp_strlen15765 = strlen(setup) + strlen(setup_b) + 1;
+    char* tmp_str15765 = calloc(tmp_strlen15765, sizeof(char));
+    strcpy(tmp_str15765, setup);
+    strcat(tmp_str15765, setup_b);
+    setup = tmp_str15765;
     if ((op) == (TOK_STRCAT)) {
-      int tmp_strlen15514 = strlen("tmp_str") + strlen(itoa(strlen(src))) + 1;
-      char* tmp_str15514 = calloc(tmp_strlen15514, sizeof(char));
-      strcpy(tmp_str15514, "tmp_str");
-      strcat(tmp_str15514, itoa(strlen(src)));
-      char* tmp_str = tmp_str15514;
-      int tmp_strlen15446 = strlen("tmp_strlen") + strlen(itoa(strlen(src))) + 1;
+      int tmp_strlen15673 = strlen("tmp_str") + strlen(itoa(strlen(src))) + 1;
+      char* tmp_str15673 = calloc(tmp_strlen15673, sizeof(char));
+      strcpy(tmp_str15673, "tmp_str");
+      strcat(tmp_str15673, itoa(strlen(src)));
+      char* tmp_str = tmp_str15673;
+      int tmp_strlen15605 = strlen("tmp_strlen") + strlen(itoa(strlen(src))) + 1;
+      char* tmp_str15605 = calloc(tmp_strlen15605, sizeof(char));
+      strcpy(tmp_str15605, "tmp_strlen");
+      strcat(tmp_str15605, itoa(strlen(src)));
+      char* tmp_strlen = tmp_str15605;
+      int tmp_strlen15569 = strlen(setup) + strlen(indent) + 1;
+      char* tmp_str15569 = calloc(tmp_strlen15569, sizeof(char));
+      strcpy(tmp_str15569, setup);
+      strcat(tmp_str15569, indent);
+      int tmp_strlen15559 = strlen(tmp_str15569) + strlen("int ") + 1;
+      char* tmp_str15559 = calloc(tmp_strlen15559, sizeof(char));
+      strcpy(tmp_str15559, tmp_str15569);
+      strcat(tmp_str15559, "int ");
+      int tmp_strlen15545 = strlen(tmp_str15559) + strlen(tmp_strlen) + 1;
+      char* tmp_str15545 = calloc(tmp_strlen15545, sizeof(char));
+      strcpy(tmp_str15545, tmp_str15559);
+      strcat(tmp_str15545, tmp_strlen);
+      int tmp_strlen15529 = strlen(tmp_str15545) + strlen(" = strlen(") + 1;
+      char* tmp_str15529 = calloc(tmp_strlen15529, sizeof(char));
+      strcpy(tmp_str15529, tmp_str15545);
+      strcat(tmp_str15529, " = strlen(");
+      int tmp_strlen15522 = strlen(tmp_str15529) + strlen(val) + 1;
+      char* tmp_str15522 = calloc(tmp_strlen15522, sizeof(char));
+      strcpy(tmp_str15522, tmp_str15529);
+      strcat(tmp_str15522, val);
+      int tmp_strlen15505 = strlen(tmp_str15522) + strlen(") + strlen(") + 1;
+      char* tmp_str15505 = calloc(tmp_strlen15505, sizeof(char));
+      strcpy(tmp_str15505, tmp_str15522);
+      strcat(tmp_str15505, ") + strlen(");
+      int tmp_strlen15496 = strlen(tmp_str15505) + strlen(val_b) + 1;
+      char* tmp_str15496 = calloc(tmp_strlen15496, sizeof(char));
+      strcpy(tmp_str15496, tmp_str15505);
+      strcat(tmp_str15496, val_b);
+      int tmp_strlen15482 = strlen(tmp_str15496) + strlen(") + 1;\n") + 1;
+      char* tmp_str15482 = calloc(tmp_strlen15482, sizeof(char));
+      strcpy(tmp_str15482, tmp_str15496);
+      strcat(tmp_str15482, ") + 1;\n");
+      setup = tmp_str15482;
+      int tmp_strlen15446 = strlen(setup) + strlen(indent) + 1;
       char* tmp_str15446 = calloc(tmp_strlen15446, sizeof(char));
-      strcpy(tmp_str15446, "tmp_strlen");
-      strcat(tmp_str15446, itoa(strlen(src)));
-      char* tmp_strlen = tmp_str15446;
-      int tmp_strlen15410 = strlen(setup) + strlen(indent) + 1;
-      char* tmp_str15410 = calloc(tmp_strlen15410, sizeof(char));
-      strcpy(tmp_str15410, setup);
-      strcat(tmp_str15410, indent);
-      int tmp_strlen15400 = strlen(tmp_str15410) + strlen("int ") + 1;
-      char* tmp_str15400 = calloc(tmp_strlen15400, sizeof(char));
-      strcpy(tmp_str15400, tmp_str15410);
-      strcat(tmp_str15400, "int ");
-      int tmp_strlen15386 = strlen(tmp_str15400) + strlen(tmp_strlen) + 1;
-      char* tmp_str15386 = calloc(tmp_strlen15386, sizeof(char));
-      strcpy(tmp_str15386, tmp_str15400);
-      strcat(tmp_str15386, tmp_strlen);
-      int tmp_strlen15370 = strlen(tmp_str15386) + strlen(" = strlen(") + 1;
-      char* tmp_str15370 = calloc(tmp_strlen15370, sizeof(char));
-      strcpy(tmp_str15370, tmp_str15386);
-      strcat(tmp_str15370, " = strlen(");
-      int tmp_strlen15363 = strlen(tmp_str15370) + strlen(val) + 1;
-      char* tmp_str15363 = calloc(tmp_strlen15363, sizeof(char));
-      strcpy(tmp_str15363, tmp_str15370);
-      strcat(tmp_str15363, val);
-      int tmp_strlen15346 = strlen(tmp_str15363) + strlen(") + strlen(") + 1;
-      char* tmp_str15346 = calloc(tmp_strlen15346, sizeof(char));
-      strcpy(tmp_str15346, tmp_str15363);
-      strcat(tmp_str15346, ") + strlen(");
-      int tmp_strlen15337 = strlen(tmp_str15346) + strlen(val_b) + 1;
-      char* tmp_str15337 = calloc(tmp_strlen15337, sizeof(char));
-      strcpy(tmp_str15337, tmp_str15346);
-      strcat(tmp_str15337, val_b);
-      int tmp_strlen15323 = strlen(tmp_str15337) + strlen(") + 1;\n") + 1;
-      char* tmp_str15323 = calloc(tmp_strlen15323, sizeof(char));
-      strcpy(tmp_str15323, tmp_str15337);
-      strcat(tmp_str15323, ") + 1;\n");
-      setup = tmp_str15323;
-      int tmp_strlen15287 = strlen(setup) + strlen(indent) + 1;
-      char* tmp_str15287 = calloc(tmp_strlen15287, sizeof(char));
-      strcpy(tmp_str15287, setup);
-      strcat(tmp_str15287, indent);
-      int tmp_strlen15275 = strlen(tmp_str15287) + strlen("char* ") + 1;
-      char* tmp_str15275 = calloc(tmp_strlen15275, sizeof(char));
-      strcpy(tmp_str15275, tmp_str15287);
-      strcat(tmp_str15275, "char* ");
-      int tmp_strlen15264 = strlen(tmp_str15275) + strlen(tmp_str) + 1;
-      char* tmp_str15264 = calloc(tmp_strlen15264, sizeof(char));
-      strcpy(tmp_str15264, tmp_str15275);
-      strcat(tmp_str15264, tmp_str);
-      int tmp_strlen15248 = strlen(tmp_str15264) + strlen(" = calloc(") + 1;
+      strcpy(tmp_str15446, setup);
+      strcat(tmp_str15446, indent);
+      int tmp_strlen15434 = strlen(tmp_str15446) + strlen("char* ") + 1;
+      char* tmp_str15434 = calloc(tmp_strlen15434, sizeof(char));
+      strcpy(tmp_str15434, tmp_str15446);
+      strcat(tmp_str15434, "char* ");
+      int tmp_strlen15423 = strlen(tmp_str15434) + strlen(tmp_str) + 1;
+      char* tmp_str15423 = calloc(tmp_strlen15423, sizeof(char));
+      strcpy(tmp_str15423, tmp_str15434);
+      strcat(tmp_str15423, tmp_str);
+      int tmp_strlen15407 = strlen(tmp_str15423) + strlen(" = calloc(") + 1;
+      char* tmp_str15407 = calloc(tmp_strlen15407, sizeof(char));
+      strcpy(tmp_str15407, tmp_str15423);
+      strcat(tmp_str15407, " = calloc(");
+      int tmp_strlen15393 = strlen(tmp_str15407) + strlen(tmp_strlen) + 1;
+      char* tmp_str15393 = calloc(tmp_strlen15393, sizeof(char));
+      strcpy(tmp_str15393, tmp_str15407);
+      strcat(tmp_str15393, tmp_strlen);
+      int tmp_strlen15369 = strlen(tmp_str15393) + strlen(", sizeof(char));\n") + 1;
+      char* tmp_str15369 = calloc(tmp_strlen15369, sizeof(char));
+      strcpy(tmp_str15369, tmp_str15393);
+      strcat(tmp_str15369, ", sizeof(char));\n");
+      setup = tmp_str15369;
+      int tmp_strlen15333 = strlen(setup) + strlen(indent) + 1;
+      char* tmp_str15333 = calloc(tmp_strlen15333, sizeof(char));
+      strcpy(tmp_str15333, setup);
+      strcat(tmp_str15333, indent);
+      int tmp_strlen15320 = strlen(tmp_str15333) + strlen("strcpy(") + 1;
+      char* tmp_str15320 = calloc(tmp_strlen15320, sizeof(char));
+      strcpy(tmp_str15320, tmp_str15333);
+      strcat(tmp_str15320, "strcpy(");
+      int tmp_strlen15309 = strlen(tmp_str15320) + strlen(tmp_str) + 1;
+      char* tmp_str15309 = calloc(tmp_strlen15309, sizeof(char));
+      strcpy(tmp_str15309, tmp_str15320);
+      strcat(tmp_str15309, tmp_str);
+      int tmp_strlen15301 = strlen(tmp_str15309) + strlen(", ") + 1;
+      char* tmp_str15301 = calloc(tmp_strlen15301, sizeof(char));
+      strcpy(tmp_str15301, tmp_str15309);
+      strcat(tmp_str15301, ", ");
+      int tmp_strlen15294 = strlen(tmp_str15301) + strlen(val) + 1;
+      char* tmp_str15294 = calloc(tmp_strlen15294, sizeof(char));
+      strcpy(tmp_str15294, tmp_str15301);
+      strcat(tmp_str15294, val);
+      int tmp_strlen15284 = strlen(tmp_str15294) + strlen(");\n") + 1;
+      char* tmp_str15284 = calloc(tmp_strlen15284, sizeof(char));
+      strcpy(tmp_str15284, tmp_str15294);
+      strcat(tmp_str15284, ");\n");
+      setup = tmp_str15284;
+      int tmp_strlen15248 = strlen(setup) + strlen(indent) + 1;
       char* tmp_str15248 = calloc(tmp_strlen15248, sizeof(char));
-      strcpy(tmp_str15248, tmp_str15264);
-      strcat(tmp_str15248, " = calloc(");
-      int tmp_strlen15234 = strlen(tmp_str15248) + strlen(tmp_strlen) + 1;
-      char* tmp_str15234 = calloc(tmp_strlen15234, sizeof(char));
-      strcpy(tmp_str15234, tmp_str15248);
-      strcat(tmp_str15234, tmp_strlen);
-      int tmp_strlen15210 = strlen(tmp_str15234) + strlen(", sizeof(char));\n") + 1;
-      char* tmp_str15210 = calloc(tmp_strlen15210, sizeof(char));
-      strcpy(tmp_str15210, tmp_str15234);
-      strcat(tmp_str15210, ", sizeof(char));\n");
-      setup = tmp_str15210;
-      int tmp_strlen15174 = strlen(setup) + strlen(indent) + 1;
-      char* tmp_str15174 = calloc(tmp_strlen15174, sizeof(char));
-      strcpy(tmp_str15174, setup);
-      strcat(tmp_str15174, indent);
-      int tmp_strlen15161 = strlen(tmp_str15174) + strlen("strcpy(") + 1;
-      char* tmp_str15161 = calloc(tmp_strlen15161, sizeof(char));
-      strcpy(tmp_str15161, tmp_str15174);
-      strcat(tmp_str15161, "strcpy(");
-      int tmp_strlen15150 = strlen(tmp_str15161) + strlen(tmp_str) + 1;
-      char* tmp_str15150 = calloc(tmp_strlen15150, sizeof(char));
-      strcpy(tmp_str15150, tmp_str15161);
-      strcat(tmp_str15150, tmp_str);
-      int tmp_strlen15142 = strlen(tmp_str15150) + strlen(", ") + 1;
-      char* tmp_str15142 = calloc(tmp_strlen15142, sizeof(char));
-      strcpy(tmp_str15142, tmp_str15150);
-      strcat(tmp_str15142, ", ");
-      int tmp_strlen15135 = strlen(tmp_str15142) + strlen(val) + 1;
-      char* tmp_str15135 = calloc(tmp_strlen15135, sizeof(char));
-      strcpy(tmp_str15135, tmp_str15142);
-      strcat(tmp_str15135, val);
-      int tmp_strlen15125 = strlen(tmp_str15135) + strlen(");\n") + 1;
-      char* tmp_str15125 = calloc(tmp_strlen15125, sizeof(char));
-      strcpy(tmp_str15125, tmp_str15135);
-      strcat(tmp_str15125, ");\n");
-      setup = tmp_str15125;
-      int tmp_strlen15089 = strlen(setup) + strlen(indent) + 1;
-      char* tmp_str15089 = calloc(tmp_strlen15089, sizeof(char));
-      strcpy(tmp_str15089, setup);
-      strcat(tmp_str15089, indent);
-      int tmp_strlen15076 = strlen(tmp_str15089) + strlen("strcat(") + 1;
-      char* tmp_str15076 = calloc(tmp_strlen15076, sizeof(char));
-      strcpy(tmp_str15076, tmp_str15089);
-      strcat(tmp_str15076, "strcat(");
-      int tmp_strlen15065 = strlen(tmp_str15076) + strlen(tmp_str) + 1;
-      char* tmp_str15065 = calloc(tmp_strlen15065, sizeof(char));
-      strcpy(tmp_str15065, tmp_str15076);
-      strcat(tmp_str15065, tmp_str);
-      int tmp_strlen15057 = strlen(tmp_str15065) + strlen(", ") + 1;
-      char* tmp_str15057 = calloc(tmp_strlen15057, sizeof(char));
-      strcpy(tmp_str15057, tmp_str15065);
-      strcat(tmp_str15057, ", ");
-      int tmp_strlen15048 = strlen(tmp_str15057) + strlen(val_b) + 1;
-      char* tmp_str15048 = calloc(tmp_strlen15048, sizeof(char));
-      strcpy(tmp_str15048, tmp_str15057);
-      strcat(tmp_str15048, val_b);
-      int tmp_strlen15038 = strlen(tmp_str15048) + strlen(");\n") + 1;
-      char* tmp_str15038 = calloc(tmp_strlen15038, sizeof(char));
-      strcpy(tmp_str15038, tmp_str15048);
-      strcat(tmp_str15038, ");\n");
-      setup = tmp_str15038;
+      strcpy(tmp_str15248, setup);
+      strcat(tmp_str15248, indent);
+      int tmp_strlen15235 = strlen(tmp_str15248) + strlen("strcat(") + 1;
+      char* tmp_str15235 = calloc(tmp_strlen15235, sizeof(char));
+      strcpy(tmp_str15235, tmp_str15248);
+      strcat(tmp_str15235, "strcat(");
+      int tmp_strlen15224 = strlen(tmp_str15235) + strlen(tmp_str) + 1;
+      char* tmp_str15224 = calloc(tmp_strlen15224, sizeof(char));
+      strcpy(tmp_str15224, tmp_str15235);
+      strcat(tmp_str15224, tmp_str);
+      int tmp_strlen15216 = strlen(tmp_str15224) + strlen(", ") + 1;
+      char* tmp_str15216 = calloc(tmp_strlen15216, sizeof(char));
+      strcpy(tmp_str15216, tmp_str15224);
+      strcat(tmp_str15216, ", ");
+      int tmp_strlen15207 = strlen(tmp_str15216) + strlen(val_b) + 1;
+      char* tmp_str15207 = calloc(tmp_strlen15207, sizeof(char));
+      strcpy(tmp_str15207, tmp_str15216);
+      strcat(tmp_str15207, val_b);
+      int tmp_strlen15197 = strlen(tmp_str15207) + strlen(");\n") + 1;
+      char* tmp_str15197 = calloc(tmp_strlen15197, sizeof(char));
+      strcpy(tmp_str15197, tmp_str15207);
+      strcat(tmp_str15197, ");\n");
+      setup = tmp_str15197;
       val = tmp_str;
     } else {
       if ((op) == (TOK_STREQ)) {
-        int tmp_strlen14940 = strlen("(strcmp(") + strlen(val) + 1;
-        char* tmp_str14940 = calloc(tmp_strlen14940, sizeof(char));
-        strcpy(tmp_str14940, "(strcmp(");
-        strcat(tmp_str14940, val);
-        int tmp_strlen14932 = strlen(tmp_str14940) + strlen(", ") + 1;
-        char* tmp_str14932 = calloc(tmp_strlen14932, sizeof(char));
-        strcpy(tmp_str14932, tmp_str14940);
-        strcat(tmp_str14932, ", ");
-        int tmp_strlen14923 = strlen(tmp_str14932) + strlen(val_b) + 1;
-        char* tmp_str14923 = calloc(tmp_strlen14923, sizeof(char));
-        strcpy(tmp_str14923, tmp_str14932);
-        strcat(tmp_str14923, val_b);
-        int tmp_strlen14910 = strlen(tmp_str14923) + strlen(") == 0)") + 1;
-        char* tmp_str14910 = calloc(tmp_strlen14910, sizeof(char));
-        strcpy(tmp_str14910, tmp_str14923);
-        strcat(tmp_str14910, ") == 0)");
-        val = tmp_str14910;
+        int tmp_strlen15099 = strlen("(strcmp(") + strlen(val) + 1;
+        char* tmp_str15099 = calloc(tmp_strlen15099, sizeof(char));
+        strcpy(tmp_str15099, "(strcmp(");
+        strcat(tmp_str15099, val);
+        int tmp_strlen15091 = strlen(tmp_str15099) + strlen(", ") + 1;
+        char* tmp_str15091 = calloc(tmp_strlen15091, sizeof(char));
+        strcpy(tmp_str15091, tmp_str15099);
+        strcat(tmp_str15091, ", ");
+        int tmp_strlen15082 = strlen(tmp_str15091) + strlen(val_b) + 1;
+        char* tmp_str15082 = calloc(tmp_strlen15082, sizeof(char));
+        strcpy(tmp_str15082, tmp_str15091);
+        strcat(tmp_str15082, val_b);
+        int tmp_strlen15069 = strlen(tmp_str15082) + strlen(") == 0)") + 1;
+        char* tmp_str15069 = calloc(tmp_strlen15069, sizeof(char));
+        strcpy(tmp_str15069, tmp_str15082);
+        strcat(tmp_str15069, ") == 0)");
+        val = tmp_str15069;
       } else {
         if ((op) == (TOK_STRNEQ)) {
-          int tmp_strlen14837 = strlen("(strcmp(") + strlen(val) + 1;
-          char* tmp_str14837 = calloc(tmp_strlen14837, sizeof(char));
-          strcpy(tmp_str14837, "(strcmp(");
-          strcat(tmp_str14837, val);
-          int tmp_strlen14829 = strlen(tmp_str14837) + strlen(", ") + 1;
-          char* tmp_str14829 = calloc(tmp_strlen14829, sizeof(char));
-          strcpy(tmp_str14829, tmp_str14837);
-          strcat(tmp_str14829, ", ");
-          int tmp_strlen14820 = strlen(tmp_str14829) + strlen(val_b) + 1;
-          char* tmp_str14820 = calloc(tmp_strlen14820, sizeof(char));
-          strcpy(tmp_str14820, tmp_str14829);
-          strcat(tmp_str14820, val_b);
-          int tmp_strlen14807 = strlen(tmp_str14820) + strlen(") != 0)") + 1;
-          char* tmp_str14807 = calloc(tmp_strlen14807, sizeof(char));
-          strcpy(tmp_str14807, tmp_str14820);
-          strcat(tmp_str14807, ") != 0)");
-          val = tmp_str14807;
+          int tmp_strlen14996 = strlen("(strcmp(") + strlen(val) + 1;
+          char* tmp_str14996 = calloc(tmp_strlen14996, sizeof(char));
+          strcpy(tmp_str14996, "(strcmp(");
+          strcat(tmp_str14996, val);
+          int tmp_strlen14988 = strlen(tmp_str14996) + strlen(", ") + 1;
+          char* tmp_str14988 = calloc(tmp_strlen14988, sizeof(char));
+          strcpy(tmp_str14988, tmp_str14996);
+          strcat(tmp_str14988, ", ");
+          int tmp_strlen14979 = strlen(tmp_str14988) + strlen(val_b) + 1;
+          char* tmp_str14979 = calloc(tmp_strlen14979, sizeof(char));
+          strcpy(tmp_str14979, tmp_str14988);
+          strcat(tmp_str14979, val_b);
+          int tmp_strlen14966 = strlen(tmp_str14979) + strlen(") != 0)") + 1;
+          char* tmp_str14966 = calloc(tmp_strlen14966, sizeof(char));
+          strcpy(tmp_str14966, tmp_str14979);
+          strcat(tmp_str14966, ") != 0)");
+          val = tmp_str14966;
         } else {
-          int tmp_strlen14761 = strlen("(") + strlen(val) + 1;
-          char* tmp_str14761 = calloc(tmp_strlen14761, sizeof(char));
-          strcpy(tmp_str14761, "(");
-          strcat(tmp_str14761, val);
-          int tmp_strlen14753 = strlen(tmp_str14761) + strlen(") ") + 1;
-          char* tmp_str14753 = calloc(tmp_strlen14753, sizeof(char));
-          strcpy(tmp_str14753, tmp_str14761);
-          strcat(tmp_str14753, ") ");
-          int tmp_strlen14743 = strlen(tmp_str14753) + strlen(op_str) + 1;
-          char* tmp_str14743 = calloc(tmp_strlen14743, sizeof(char));
-          strcpy(tmp_str14743, tmp_str14753);
-          strcat(tmp_str14743, op_str);
-          int tmp_strlen14735 = strlen(tmp_str14743) + strlen(" (") + 1;
-          char* tmp_str14735 = calloc(tmp_strlen14735, sizeof(char));
-          strcpy(tmp_str14735, tmp_str14743);
-          strcat(tmp_str14735, " (");
-          int tmp_strlen14726 = strlen(tmp_str14735) + strlen(val_b) + 1;
-          char* tmp_str14726 = calloc(tmp_strlen14726, sizeof(char));
-          strcpy(tmp_str14726, tmp_str14735);
-          strcat(tmp_str14726, val_b);
-          int tmp_strlen14719 = strlen(tmp_str14726) + strlen(")") + 1;
-          char* tmp_str14719 = calloc(tmp_strlen14719, sizeof(char));
-          strcpy(tmp_str14719, tmp_str14726);
-          strcat(tmp_str14719, ")");
-          val = tmp_str14719;
+          int tmp_strlen14920 = strlen("(") + strlen(val) + 1;
+          char* tmp_str14920 = calloc(tmp_strlen14920, sizeof(char));
+          strcpy(tmp_str14920, "(");
+          strcat(tmp_str14920, val);
+          int tmp_strlen14912 = strlen(tmp_str14920) + strlen(") ") + 1;
+          char* tmp_str14912 = calloc(tmp_strlen14912, sizeof(char));
+          strcpy(tmp_str14912, tmp_str14920);
+          strcat(tmp_str14912, ") ");
+          int tmp_strlen14902 = strlen(tmp_str14912) + strlen(op_str) + 1;
+          char* tmp_str14902 = calloc(tmp_strlen14902, sizeof(char));
+          strcpy(tmp_str14902, tmp_str14912);
+          strcat(tmp_str14902, op_str);
+          int tmp_strlen14894 = strlen(tmp_str14902) + strlen(" (") + 1;
+          char* tmp_str14894 = calloc(tmp_strlen14894, sizeof(char));
+          strcpy(tmp_str14894, tmp_str14902);
+          strcat(tmp_str14894, " (");
+          int tmp_strlen14885 = strlen(tmp_str14894) + strlen(val_b) + 1;
+          char* tmp_str14885 = calloc(tmp_strlen14885, sizeof(char));
+          strcpy(tmp_str14885, tmp_str14894);
+          strcat(tmp_str14885, val_b);
+          int tmp_strlen14878 = strlen(tmp_str14885) + strlen(")") + 1;
+          char* tmp_str14878 = calloc(tmp_strlen14878, sizeof(char));
+          strcpy(tmp_str14878, tmp_str14885);
+          strcat(tmp_str14878, ")");
+          val = tmp_str14878;
         }
       }
     }
-    Peek_results tmp_results14700 = Peek(src);
-    op = tmp_results14700.result1;
-    tok_str = tmp_results14700.result2;
+    Peek_results tmp_results14859 = Peek(src);
+    op = tmp_results14859.result1;
+    tok_str = tmp_results14859.result2;
   }
   return (TranslateExprWithPrecedence_results){src, setup, val};
 }
@@ -1598,783 +1642,787 @@ TranslateExprWithPrecedence_results TranslateExprWithPrecedence(char* src, char*
 TranslateExpr_results TranslateExpr(char* src, char* indent) {
   char* setup;
   char* expr;
-  TranslateExprWithPrecedence_results tmp_results14517 = TranslateExprWithPrecedence(src, indent, 0);
-  src = tmp_results14517.result1;
-  setup = tmp_results14517.result2;
-  expr = tmp_results14517.result3;
+  TranslateExprWithPrecedence_results tmp_results14676 = TranslateExprWithPrecedence(src, indent, 0);
+  src = tmp_results14676.result1;
+  setup = tmp_results14676.result2;
+  expr = tmp_results14676.result3;
   return (TranslateExpr_results){src, setup, expr};
 }
 
 TranslateExprs_results TranslateExprs(char* src, char* indent) {
   char* expr_setup;
   char* expr_value;
-  TranslateExpr_results tmp_results14283 = TranslateExpr(src, indent);
-  src = tmp_results14283.result1;
-  expr_setup = tmp_results14283.result2;
-  expr_value = tmp_results14283.result3;
+  TranslateExpr_results tmp_results14442 = TranslateExpr(src, indent);
+  src = tmp_results14442.result1;
+  expr_setup = tmp_results14442.result2;
+  expr_value = tmp_results14442.result3;
   int tok;
   char* tok_str;
-  Peek_results tmp_results14181 = Peek(src);
-  tok = tmp_results14181.result1;
-  tok_str = tmp_results14181.result2;
+  Peek_results tmp_results14340 = Peek(src);
+  tok = tmp_results14340.result1;
+  tok_str = tmp_results14340.result2;
   int exprs_count = 1;
   char* exprs_setup = expr_setup;
   char* exprs_value = expr_value;
   while ((tok) == (TOK_COMMA)) {
-    ConsumeToken_results tmp_results14010 = ConsumeToken(src, TOK_COMMA);
-    src = tmp_results14010.result1;
-    tok_str = tmp_results14010.result2;
-    TranslateExpr_results tmp_results13958 = TranslateExpr(src, indent);
-    src = tmp_results13958.result1;
-    expr_setup = tmp_results13958.result2;
-    expr_value = tmp_results13958.result3;
+    ConsumeToken_results tmp_results14169 = ConsumeToken(src, TOK_COMMA);
+    src = tmp_results14169.result1;
+    tok_str = tmp_results14169.result2;
+    TranslateExpr_results tmp_results14117 = TranslateExpr(src, indent);
+    src = tmp_results14117.result1;
+    expr_setup = tmp_results14117.result2;
+    expr_value = tmp_results14117.result3;
     exprs_count = (exprs_count) + (1);
-    int tmp_strlen13816 = strlen(exprs_setup) + strlen(expr_setup) + 1;
-    char* tmp_str13816 = calloc(tmp_strlen13816, sizeof(char));
-    strcpy(tmp_str13816, exprs_setup);
-    strcat(tmp_str13816, expr_setup);
-    exprs_setup = tmp_str13816;
-    int tmp_strlen13774 = strlen(exprs_value) + strlen(", ") + 1;
-    char* tmp_str13774 = calloc(tmp_strlen13774, sizeof(char));
-    strcpy(tmp_str13774, exprs_value);
-    strcat(tmp_str13774, ", ");
-    int tmp_strlen13760 = strlen(tmp_str13774) + strlen(expr_value) + 1;
-    char* tmp_str13760 = calloc(tmp_strlen13760, sizeof(char));
-    strcpy(tmp_str13760, tmp_str13774);
-    strcat(tmp_str13760, expr_value);
-    exprs_value = tmp_str13760;
-    Peek_results tmp_results13751 = Peek(src);
-    tok = tmp_results13751.result1;
-    tok_str = tmp_results13751.result2;
+    int tmp_strlen13975 = strlen(exprs_setup) + strlen(expr_setup) + 1;
+    char* tmp_str13975 = calloc(tmp_strlen13975, sizeof(char));
+    strcpy(tmp_str13975, exprs_setup);
+    strcat(tmp_str13975, expr_setup);
+    exprs_setup = tmp_str13975;
+    int tmp_strlen13933 = strlen(exprs_value) + strlen(", ") + 1;
+    char* tmp_str13933 = calloc(tmp_strlen13933, sizeof(char));
+    strcpy(tmp_str13933, exprs_value);
+    strcat(tmp_str13933, ", ");
+    int tmp_strlen13919 = strlen(tmp_str13933) + strlen(expr_value) + 1;
+    char* tmp_str13919 = calloc(tmp_strlen13919, sizeof(char));
+    strcpy(tmp_str13919, tmp_str13933);
+    strcat(tmp_str13919, expr_value);
+    exprs_value = tmp_str13919;
+    Peek_results tmp_results13910 = Peek(src);
+    tok = tmp_results13910.result1;
+    tok_str = tmp_results13910.result2;
   }
   return (TranslateExprs_results){src, exprs_count, exprs_setup, exprs_value};
 }
 
 TranslateConstOrVar_results TranslateConstOrVar(char* src) {
   char* name;
-  ConsumeIdent_results tmp_results13580 = ConsumeIdent(src);
-  src = tmp_results13580.result1;
-  name = tmp_results13580.result2;
+  ConsumeIdent_results tmp_results13739 = ConsumeIdent(src);
+  src = tmp_results13739.result1;
+  name = tmp_results13739.result2;
   char* tok_str;
-  ConsumeToken_results tmp_results13522 = ConsumeToken(src, TOK_COLON);
-  src = tmp_results13522.result1;
-  tok_str = tmp_results13522.result2;
+  ConsumeToken_results tmp_results13681 = ConsumeToken(src, TOK_COLON);
+  src = tmp_results13681.result1;
+  tok_str = tmp_results13681.result2;
   int typ;
   char* typ_str;
-  TranslateType_results tmp_results13433 = TranslateType(src);
-  src = tmp_results13433.result1;
-  typ = tmp_results13433.result2;
-  typ_str = tmp_results13433.result3;
-  int tmp_strlen13358 = strlen(typ_str) + strlen(" ") + 1;
-  char* tmp_str13358 = calloc(tmp_strlen13358, sizeof(char));
-  strcpy(tmp_str13358, typ_str);
-  strcat(tmp_str13358, " ");
-  int tmp_strlen13350 = strlen(tmp_str13358) + strlen(name) + 1;
-  char* tmp_str13350 = calloc(tmp_strlen13350, sizeof(char));
-  strcpy(tmp_str13350, tmp_str13358);
-  strcat(tmp_str13350, name);
-  char* out = tmp_str13350;
+  TranslateType_results tmp_results13592 = TranslateType(src);
+  src = tmp_results13592.result1;
+  typ = tmp_results13592.result2;
+  typ_str = tmp_results13592.result3;
+  int tmp_strlen13517 = strlen(typ_str) + strlen(" ") + 1;
+  char* tmp_str13517 = calloc(tmp_strlen13517, sizeof(char));
+  strcpy(tmp_str13517, typ_str);
+  strcat(tmp_str13517, " ");
+  int tmp_strlen13509 = strlen(tmp_str13517) + strlen(name) + 1;
+  char* tmp_str13509 = calloc(tmp_strlen13509, sizeof(char));
+  strcpy(tmp_str13509, tmp_str13517);
+  strcat(tmp_str13509, name);
+  char* out = tmp_str13509;
   return (TranslateConstOrVar_results){src, out};
 }
 
 TranslateConstDecl_results TranslateConstDecl(char* src, char* indent) {
   char* tok_str;
-  ConsumeToken_results tmp_results13225 = ConsumeToken(src, TOK_LET);
-  src = tmp_results13225.result1;
-  tok_str = tmp_results13225.result2;
+  ConsumeToken_results tmp_results13384 = ConsumeToken(src, TOK_LET);
+  src = tmp_results13384.result1;
+  tok_str = tmp_results13384.result2;
   char* out;
-  TranslateConstOrVar_results tmp_results13159 = TranslateConstOrVar(src);
-  src = tmp_results13159.result1;
-  out = tmp_results13159.result2;
-  int tmp_strlen13098 = strlen("const ") + strlen(out) + 1;
-  char* tmp_str13098 = calloc(tmp_strlen13098, sizeof(char));
-  strcpy(tmp_str13098, "const ");
-  strcat(tmp_str13098, out);
-  out = tmp_str13098;
-  ConsumeToken_results tmp_results13093 = ConsumeToken(src, TOK_ASSIGN);
-  src = tmp_results13093.result1;
-  tok_str = tmp_results13093.result2;
+  TranslateConstOrVar_results tmp_results13318 = TranslateConstOrVar(src);
+  src = tmp_results13318.result1;
+  out = tmp_results13318.result2;
+  int tmp_strlen13257 = strlen("const ") + strlen(out) + 1;
+  char* tmp_str13257 = calloc(tmp_strlen13257, sizeof(char));
+  strcpy(tmp_str13257, "const ");
+  strcat(tmp_str13257, out);
+  out = tmp_str13257;
+  ConsumeToken_results tmp_results13252 = ConsumeToken(src, TOK_ASSIGN);
+  src = tmp_results13252.result1;
+  tok_str = tmp_results13252.result2;
   char* setup;
   char* val;
-  TranslateExpr_results tmp_results13002 = TranslateExpr(src, indent);
-  src = tmp_results13002.result1;
-  setup = tmp_results13002.result2;
-  val = tmp_results13002.result3;
-  ConsumeToken_results tmp_results12953 = ConsumeToken(src, TOK_NEWLINE);
-  src = tmp_results12953.result1;
-  tok_str = tmp_results12953.result2;
-  int tmp_strlen12885 = strlen(out) + strlen(" = ") + 1;
-  char* tmp_str12885 = calloc(tmp_strlen12885, sizeof(char));
-  strcpy(tmp_str12885, out);
-  strcat(tmp_str12885, " = ");
-  int tmp_strlen12878 = strlen(tmp_str12885) + strlen(val) + 1;
-  char* tmp_str12878 = calloc(tmp_strlen12878, sizeof(char));
-  strcpy(tmp_str12878, tmp_str12885);
-  strcat(tmp_str12878, val);
-  int tmp_strlen12869 = strlen(tmp_str12878) + strlen(";\n") + 1;
-  char* tmp_str12869 = calloc(tmp_strlen12869, sizeof(char));
-  strcpy(tmp_str12869, tmp_str12878);
-  strcat(tmp_str12869, ";\n");
-  out = tmp_str12869;
+  TranslateExpr_results tmp_results13161 = TranslateExpr(src, indent);
+  src = tmp_results13161.result1;
+  setup = tmp_results13161.result2;
+  val = tmp_results13161.result3;
+  ConsumeToken_results tmp_results13112 = ConsumeToken(src, TOK_NEWLINE);
+  src = tmp_results13112.result1;
+  tok_str = tmp_results13112.result2;
+  int tmp_strlen13044 = strlen(out) + strlen(" = ") + 1;
+  char* tmp_str13044 = calloc(tmp_strlen13044, sizeof(char));
+  strcpy(tmp_str13044, out);
+  strcat(tmp_str13044, " = ");
+  int tmp_strlen13037 = strlen(tmp_str13044) + strlen(val) + 1;
+  char* tmp_str13037 = calloc(tmp_strlen13037, sizeof(char));
+  strcpy(tmp_str13037, tmp_str13044);
+  strcat(tmp_str13037, val);
+  int tmp_strlen13028 = strlen(tmp_str13037) + strlen(";\n") + 1;
+  char* tmp_str13028 = calloc(tmp_strlen13028, sizeof(char));
+  strcpy(tmp_str13028, tmp_str13037);
+  strcat(tmp_str13028, ";\n");
+  out = tmp_str13028;
   return (TranslateConstDecl_results){src, out};
 }
 
 TranslateConstDeclStmt_results TranslateConstDeclStmt(char* src, char* indent) {
   char* out;
-  TranslateConstDecl_results tmp_results12744 = TranslateConstDecl(src, indent);
-  src = tmp_results12744.result1;
-  out = tmp_results12744.result2;
-  int tmp_strlen12672 = strlen(indent) + strlen(out) + 1;
-  char* tmp_str12672 = calloc(tmp_strlen12672, sizeof(char));
-  strcpy(tmp_str12672, indent);
-  strcat(tmp_str12672, out);
-  return (TranslateConstDeclStmt_results){src, tmp_str12672};
+  TranslateConstDecl_results tmp_results12903 = TranslateConstDecl(src, indent);
+  src = tmp_results12903.result1;
+  out = tmp_results12903.result2;
+  int tmp_strlen12831 = strlen(indent) + strlen(out) + 1;
+  char* tmp_str12831 = calloc(tmp_strlen12831, sizeof(char));
+  strcpy(tmp_str12831, indent);
+  strcat(tmp_str12831, out);
+  return (TranslateConstDeclStmt_results){src, tmp_str12831};
 }
 
 TranslateVarDeclStmt_results TranslateVarDeclStmt(char* src, char* indent) {
   int tok;
   char* tok_str;
-  ConsumeToken_results tmp_results12548 = ConsumeToken(src, TOK_VAR);
-  src = tmp_results12548.result1;
-  tok_str = tmp_results12548.result2;
+  ConsumeToken_results tmp_results12707 = ConsumeToken(src, TOK_VAR);
+  src = tmp_results12707.result1;
+  tok_str = tmp_results12707.result2;
   char* setup = "";
   char* val;
   char* out;
-  TranslateConstOrVar_results tmp_results12435 = TranslateConstOrVar(src);
-  src = tmp_results12435.result1;
-  out = tmp_results12435.result2;
-  Peek_results tmp_results12395 = Peek(src);
-  tok = tmp_results12395.result1;
-  tok_str = tmp_results12395.result2;
+  TranslateConstOrVar_results tmp_results12594 = TranslateConstOrVar(src);
+  src = tmp_results12594.result1;
+  out = tmp_results12594.result2;
+  Peek_results tmp_results12554 = Peek(src);
+  tok = tmp_results12554.result1;
+  tok_str = tmp_results12554.result2;
   if ((tok) == (TOK_ASSIGN)) {
-    ConsumeToken_results tmp_results12335 = ConsumeToken(src, TOK_ASSIGN);
-    src = tmp_results12335.result1;
-    tok_str = tmp_results12335.result2;
-    TranslateExpr_results tmp_results12282 = TranslateExpr(src, indent);
-    src = tmp_results12282.result1;
-    setup = tmp_results12282.result2;
-    val = tmp_results12282.result3;
-    ConsumeToken_results tmp_results12229 = ConsumeToken(src, TOK_NEWLINE);
-    src = tmp_results12229.result1;
-    tok_str = tmp_results12229.result2;
-    int tmp_strlen12157 = strlen(out) + strlen(" = ") + 1;
-    char* tmp_str12157 = calloc(tmp_strlen12157, sizeof(char));
-    strcpy(tmp_str12157, out);
-    strcat(tmp_str12157, " = ");
-    int tmp_strlen12150 = strlen(tmp_str12157) + strlen(val) + 1;
-    char* tmp_str12150 = calloc(tmp_strlen12150, sizeof(char));
-    strcpy(tmp_str12150, tmp_str12157);
-    strcat(tmp_str12150, val);
-    out = tmp_str12150;
+    ConsumeToken_results tmp_results12494 = ConsumeToken(src, TOK_ASSIGN);
+    src = tmp_results12494.result1;
+    tok_str = tmp_results12494.result2;
+    TranslateExpr_results tmp_results12441 = TranslateExpr(src, indent);
+    src = tmp_results12441.result1;
+    setup = tmp_results12441.result2;
+    val = tmp_results12441.result3;
+    ConsumeToken_results tmp_results12388 = ConsumeToken(src, TOK_NEWLINE);
+    src = tmp_results12388.result1;
+    tok_str = tmp_results12388.result2;
+    int tmp_strlen12316 = strlen(out) + strlen(" = ") + 1;
+    char* tmp_str12316 = calloc(tmp_strlen12316, sizeof(char));
+    strcpy(tmp_str12316, out);
+    strcat(tmp_str12316, " = ");
+    int tmp_strlen12309 = strlen(tmp_str12316) + strlen(val) + 1;
+    char* tmp_str12309 = calloc(tmp_strlen12309, sizeof(char));
+    strcpy(tmp_str12309, tmp_str12316);
+    strcat(tmp_str12309, val);
+    out = tmp_str12309;
   }
-  int tmp_strlen12118 = strlen(setup) + strlen(indent) + 1;
-  char* tmp_str12118 = calloc(tmp_strlen12118, sizeof(char));
-  strcpy(tmp_str12118, setup);
-  strcat(tmp_str12118, indent);
-  int tmp_strlen12111 = strlen(tmp_str12118) + strlen(out) + 1;
-  char* tmp_str12111 = calloc(tmp_strlen12111, sizeof(char));
-  strcpy(tmp_str12111, tmp_str12118);
-  strcat(tmp_str12111, out);
-  int tmp_strlen12102 = strlen(tmp_str12111) + strlen(";\n") + 1;
-  char* tmp_str12102 = calloc(tmp_strlen12102, sizeof(char));
-  strcpy(tmp_str12102, tmp_str12111);
-  strcat(tmp_str12102, ";\n");
-  out = tmp_str12102;
+  int tmp_strlen12277 = strlen(setup) + strlen(indent) + 1;
+  char* tmp_str12277 = calloc(tmp_strlen12277, sizeof(char));
+  strcpy(tmp_str12277, setup);
+  strcat(tmp_str12277, indent);
+  int tmp_strlen12270 = strlen(tmp_str12277) + strlen(out) + 1;
+  char* tmp_str12270 = calloc(tmp_strlen12270, sizeof(char));
+  strcpy(tmp_str12270, tmp_str12277);
+  strcat(tmp_str12270, out);
+  int tmp_strlen12261 = strlen(tmp_str12270) + strlen(";\n") + 1;
+  char* tmp_str12261 = calloc(tmp_strlen12261, sizeof(char));
+  strcpy(tmp_str12261, tmp_str12270);
+  strcat(tmp_str12261, ";\n");
+  out = tmp_str12261;
   return (TranslateVarDeclStmt_results){src, out};
 }
 
 TranslateAssignStmt_results TranslateAssignStmt(char* src, char* indent) {
   int x = Find(src, "=");
-  int tmp_strlen11947 = (x) - (0) + 1;
-  char* tmp_str11947 = calloc(tmp_strlen11947, sizeof(char));
-  strncpy(tmp_str11947, src + 0, tmp_strlen11947 - 1);
-  tmp_str11947[tmp_strlen11947 - 1] = 0;
-  char* lhs = tmp_str11947;
-  int tmp_strlen11917 = (strlen(src)) - ((x) + (1)) + 1;
-  char* tmp_str11917 = calloc(tmp_strlen11917, sizeof(char));
-  strncpy(tmp_str11917, src + (x) + (1), tmp_strlen11917 - 1);
-  tmp_str11917[tmp_strlen11917 - 1] = 0;
-  char* rhs = tmp_str11917;
+  int tmp_strlen12106 = (x) - (0) + 1;
+  char* tmp_str12106 = calloc(tmp_strlen12106, sizeof(char));
+  strncpy(tmp_str12106, src + 0, tmp_strlen12106 - 1);
+  tmp_str12106[tmp_strlen12106 - 1] = 0;
+  char* lhs = tmp_str12106;
+  int tmp_strlen12076 = (strlen(src)) - ((x) + (1)) + 1;
+  char* tmp_str12076 = calloc(tmp_strlen12076, sizeof(char));
+  strncpy(tmp_str12076, src + (x) + (1), tmp_strlen12076 - 1);
+  tmp_str12076[tmp_strlen12076 - 1] = 0;
+  char* rhs = tmp_str12076;
   char* lhs_ident;
-  ConsumeIdent_results tmp_results11880 = ConsumeIdent(lhs);
-  lhs = tmp_results11880.result1;
-  lhs_ident = tmp_results11880.result2;
+  ConsumeIdentOrUnderscore_results tmp_results12039 = ConsumeIdentOrUnderscore(lhs);
+  lhs = tmp_results12039.result1;
+  lhs_ident = tmp_results12039.result2;
   char* old_rhs = rhs;
   char* setup;
   char* rhs_expr;
-  TranslateExpr_results tmp_results11764 = TranslateExpr(rhs, indent);
-  rhs = tmp_results11764.result1;
-  setup = tmp_results11764.result2;
-  rhs_expr = tmp_results11764.result3;
+  TranslateExpr_results tmp_results11911 = TranslateExpr(rhs, indent);
+  rhs = tmp_results11911.result1;
+  setup = tmp_results11911.result2;
+  rhs_expr = tmp_results11911.result3;
   int lhs_tok;
   char* lhs_tok_str;
   int rhs_tok;
   char* rhs_tok_str;
-  Peek_results tmp_results11612 = Peek(lhs);
-  lhs_tok = tmp_results11612.result1;
-  lhs_tok_str = tmp_results11612.result2;
-  Peek_results tmp_results11575 = Peek(rhs);
-  rhs_tok = tmp_results11575.result1;
-  rhs_tok_str = tmp_results11575.result2;
+  Peek_results tmp_results11759 = Peek(lhs);
+  lhs_tok = tmp_results11759.result1;
+  lhs_tok_str = tmp_results11759.result2;
+  Peek_results tmp_results11722 = Peek(rhs);
+  rhs_tok = tmp_results11722.result1;
+  rhs_tok_str = tmp_results11722.result2;
   if (((lhs_tok) == (TOK_COMMA)) && ((rhs_tok) != (TOK_COMMA))) {
     char* func_name;
-    ConsumeIdent_results tmp_results11450 = ConsumeIdent(old_rhs);
-    old_rhs = tmp_results11450.result1;
-    func_name = tmp_results11450.result2;
-    int tmp_strlen11342 = strlen("tmp_results") + strlen(itoa(strlen(src))) + 1;
-    char* tmp_str11342 = calloc(tmp_strlen11342, sizeof(char));
-    strcpy(tmp_str11342, "tmp_results");
-    strcat(tmp_str11342, itoa(strlen(src)));
-    char* tmp_results = tmp_str11342;
+    ConsumeIdent_results tmp_results11597 = ConsumeIdent(old_rhs);
+    old_rhs = tmp_results11597.result1;
+    func_name = tmp_results11597.result2;
+    int tmp_strlen11489 = strlen("tmp_results") + strlen(itoa(strlen(src))) + 1;
+    char* tmp_str11489 = calloc(tmp_strlen11489, sizeof(char));
+    strcpy(tmp_str11489, "tmp_results");
+    strcat(tmp_str11489, itoa(strlen(src)));
+    char* tmp_results = tmp_str11489;
     char* out = setup;
-    int tmp_strlen11282 = strlen(out) + strlen(indent) + 1;
-    char* tmp_str11282 = calloc(tmp_strlen11282, sizeof(char));
-    strcpy(tmp_str11282, out);
-    strcat(tmp_str11282, indent);
-    int tmp_strlen11269 = strlen(tmp_str11282) + strlen(func_name) + 1;
-    char* tmp_str11269 = calloc(tmp_strlen11269, sizeof(char));
-    strcpy(tmp_str11269, tmp_str11282);
-    strcat(tmp_str11269, func_name);
-    int tmp_strlen11254 = strlen(tmp_str11269) + strlen("_results ") + 1;
-    char* tmp_str11254 = calloc(tmp_strlen11254, sizeof(char));
-    strcpy(tmp_str11254, tmp_str11269);
-    strcat(tmp_str11254, "_results ");
-    int tmp_strlen11239 = strlen(tmp_str11254) + strlen(tmp_results) + 1;
-    char* tmp_str11239 = calloc(tmp_strlen11239, sizeof(char));
-    strcpy(tmp_str11239, tmp_str11254);
-    strcat(tmp_str11239, tmp_results);
-    int tmp_strlen11230 = strlen(tmp_str11239) + strlen(" = ") + 1;
-    char* tmp_str11230 = calloc(tmp_strlen11230, sizeof(char));
-    strcpy(tmp_str11230, tmp_str11239);
-    strcat(tmp_str11230, " = ");
-    int tmp_strlen11218 = strlen(tmp_str11230) + strlen(rhs_expr) + 1;
-    char* tmp_str11218 = calloc(tmp_strlen11218, sizeof(char));
-    strcpy(tmp_str11218, tmp_str11230);
-    strcat(tmp_str11218, rhs_expr);
-    int tmp_strlen11209 = strlen(tmp_str11218) + strlen(";\n") + 1;
-    char* tmp_str11209 = calloc(tmp_strlen11209, sizeof(char));
-    strcpy(tmp_str11209, tmp_str11218);
-    strcat(tmp_str11209, ";\n");
-    out = tmp_str11209;
-    int tmp_strlen11181 = strlen(out) + strlen(indent) + 1;
-    char* tmp_str11181 = calloc(tmp_strlen11181, sizeof(char));
-    strcpy(tmp_str11181, out);
-    strcat(tmp_str11181, indent);
-    int tmp_strlen11168 = strlen(tmp_str11181) + strlen(lhs_ident) + 1;
-    char* tmp_str11168 = calloc(tmp_strlen11168, sizeof(char));
-    strcpy(tmp_str11168, tmp_str11181);
-    strcat(tmp_str11168, lhs_ident);
-    int tmp_strlen11159 = strlen(tmp_str11168) + strlen(" = ") + 1;
-    char* tmp_str11159 = calloc(tmp_strlen11159, sizeof(char));
-    strcpy(tmp_str11159, tmp_str11168);
-    strcat(tmp_str11159, " = ");
-    int tmp_strlen11144 = strlen(tmp_str11159) + strlen(tmp_results) + 1;
-    char* tmp_str11144 = calloc(tmp_strlen11144, sizeof(char));
-    strcpy(tmp_str11144, tmp_str11159);
-    strcat(tmp_str11144, tmp_results);
-    int tmp_strlen11127 = strlen(tmp_str11144) + strlen(".result1;\n") + 1;
-    char* tmp_str11127 = calloc(tmp_strlen11127, sizeof(char));
-    strcpy(tmp_str11127, tmp_str11144);
-    strcat(tmp_str11127, ".result1;\n");
-    out = tmp_str11127;
+    int tmp_strlen11429 = strlen(out) + strlen(indent) + 1;
+    char* tmp_str11429 = calloc(tmp_strlen11429, sizeof(char));
+    strcpy(tmp_str11429, out);
+    strcat(tmp_str11429, indent);
+    int tmp_strlen11416 = strlen(tmp_str11429) + strlen(func_name) + 1;
+    char* tmp_str11416 = calloc(tmp_strlen11416, sizeof(char));
+    strcpy(tmp_str11416, tmp_str11429);
+    strcat(tmp_str11416, func_name);
+    int tmp_strlen11401 = strlen(tmp_str11416) + strlen("_results ") + 1;
+    char* tmp_str11401 = calloc(tmp_strlen11401, sizeof(char));
+    strcpy(tmp_str11401, tmp_str11416);
+    strcat(tmp_str11401, "_results ");
+    int tmp_strlen11386 = strlen(tmp_str11401) + strlen(tmp_results) + 1;
+    char* tmp_str11386 = calloc(tmp_strlen11386, sizeof(char));
+    strcpy(tmp_str11386, tmp_str11401);
+    strcat(tmp_str11386, tmp_results);
+    int tmp_strlen11377 = strlen(tmp_str11386) + strlen(" = ") + 1;
+    char* tmp_str11377 = calloc(tmp_strlen11377, sizeof(char));
+    strcpy(tmp_str11377, tmp_str11386);
+    strcat(tmp_str11377, " = ");
+    int tmp_strlen11365 = strlen(tmp_str11377) + strlen(rhs_expr) + 1;
+    char* tmp_str11365 = calloc(tmp_strlen11365, sizeof(char));
+    strcpy(tmp_str11365, tmp_str11377);
+    strcat(tmp_str11365, rhs_expr);
+    int tmp_strlen11356 = strlen(tmp_str11365) + strlen(";\n") + 1;
+    char* tmp_str11356 = calloc(tmp_strlen11356, sizeof(char));
+    strcpy(tmp_str11356, tmp_str11365);
+    strcat(tmp_str11356, ";\n");
+    out = tmp_str11356;
+    if ((strcmp(lhs_ident, "_") != 0)) {
+      int tmp_strlen11293 = strlen(out) + strlen(indent) + 1;
+      char* tmp_str11293 = calloc(tmp_strlen11293, sizeof(char));
+      strcpy(tmp_str11293, out);
+      strcat(tmp_str11293, indent);
+      int tmp_strlen11280 = strlen(tmp_str11293) + strlen(lhs_ident) + 1;
+      char* tmp_str11280 = calloc(tmp_strlen11280, sizeof(char));
+      strcpy(tmp_str11280, tmp_str11293);
+      strcat(tmp_str11280, lhs_ident);
+      int tmp_strlen11271 = strlen(tmp_str11280) + strlen(" = ") + 1;
+      char* tmp_str11271 = calloc(tmp_strlen11271, sizeof(char));
+      strcpy(tmp_str11271, tmp_str11280);
+      strcat(tmp_str11271, " = ");
+      int tmp_strlen11256 = strlen(tmp_str11271) + strlen(tmp_results) + 1;
+      char* tmp_str11256 = calloc(tmp_strlen11256, sizeof(char));
+      strcpy(tmp_str11256, tmp_str11271);
+      strcat(tmp_str11256, tmp_results);
+      int tmp_strlen11239 = strlen(tmp_str11256) + strlen(".result1;\n") + 1;
+      char* tmp_str11239 = calloc(tmp_strlen11239, sizeof(char));
+      strcpy(tmp_str11239, tmp_str11256);
+      strcat(tmp_str11239, ".result1;\n");
+      out = tmp_str11239;
+    }
     int result_count = 1;
     while ((lhs_tok) == (TOK_COMMA)) {
       result_count = (result_count) + (1);
-      ConsumeToken_results tmp_results11001 = ConsumeToken(lhs, TOK_COMMA);
-      lhs = tmp_results11001.result1;
-      lhs_tok_str = tmp_results11001.result2;
-      ConsumeIdent_results tmp_results10941 = ConsumeIdent(lhs);
-      lhs = tmp_results10941.result1;
-      lhs_ident = tmp_results10941.result2;
-      int tmp_strlen10875 = strlen(out) + strlen(indent) + 1;
-      char* tmp_str10875 = calloc(tmp_strlen10875, sizeof(char));
-      strcpy(tmp_str10875, out);
-      strcat(tmp_str10875, indent);
-      int tmp_strlen10862 = strlen(tmp_str10875) + strlen(lhs_ident) + 1;
-      char* tmp_str10862 = calloc(tmp_strlen10862, sizeof(char));
-      strcpy(tmp_str10862, tmp_str10875);
-      strcat(tmp_str10862, lhs_ident);
-      int tmp_strlen10853 = strlen(tmp_str10862) + strlen(" = ") + 1;
-      char* tmp_str10853 = calloc(tmp_strlen10853, sizeof(char));
-      strcpy(tmp_str10853, tmp_str10862);
-      strcat(tmp_str10853, " = ");
-      int tmp_strlen10838 = strlen(tmp_str10853) + strlen(tmp_results) + 1;
-      char* tmp_str10838 = calloc(tmp_strlen10838, sizeof(char));
-      strcpy(tmp_str10838, tmp_str10853);
-      strcat(tmp_str10838, tmp_results);
-      int tmp_strlen10825 = strlen(tmp_str10838) + strlen(".result") + 1;
-      char* tmp_str10825 = calloc(tmp_strlen10825, sizeof(char));
-      strcpy(tmp_str10825, tmp_str10838);
-      strcat(tmp_str10825, ".result");
-      int tmp_strlen10803 = strlen(tmp_str10825) + strlen(itoa(result_count)) + 1;
-      char* tmp_str10803 = calloc(tmp_strlen10803, sizeof(char));
-      strcpy(tmp_str10803, tmp_str10825);
-      strcat(tmp_str10803, itoa(result_count));
-      int tmp_strlen10794 = strlen(tmp_str10803) + strlen(";\n") + 1;
-      char* tmp_str10794 = calloc(tmp_strlen10794, sizeof(char));
-      strcpy(tmp_str10794, tmp_str10803);
-      strcat(tmp_str10794, ";\n");
-      out = tmp_str10794;
-      Peek_results tmp_results10781 = Peek(lhs);
-      lhs_tok = tmp_results10781.result1;
-      lhs_tok_str = tmp_results10781.result2;
+      ConsumeToken_results tmp_results11103 = ConsumeToken(lhs, TOK_COMMA);
+      lhs = tmp_results11103.result1;
+      lhs_tok_str = tmp_results11103.result2;
+      ConsumeIdentOrUnderscore_results tmp_results11043 = ConsumeIdentOrUnderscore(lhs);
+      lhs = tmp_results11043.result1;
+      lhs_ident = tmp_results11043.result2;
+      if ((strcmp(lhs_ident, "_") != 0)) {
+        int tmp_strlen10926 = strlen(out) + strlen(indent) + 1;
+        char* tmp_str10926 = calloc(tmp_strlen10926, sizeof(char));
+        strcpy(tmp_str10926, out);
+        strcat(tmp_str10926, indent);
+        int tmp_strlen10913 = strlen(tmp_str10926) + strlen(lhs_ident) + 1;
+        char* tmp_str10913 = calloc(tmp_strlen10913, sizeof(char));
+        strcpy(tmp_str10913, tmp_str10926);
+        strcat(tmp_str10913, lhs_ident);
+        int tmp_strlen10904 = strlen(tmp_str10913) + strlen(" = ") + 1;
+        char* tmp_str10904 = calloc(tmp_strlen10904, sizeof(char));
+        strcpy(tmp_str10904, tmp_str10913);
+        strcat(tmp_str10904, " = ");
+        int tmp_strlen10889 = strlen(tmp_str10904) + strlen(tmp_results) + 1;
+        char* tmp_str10889 = calloc(tmp_strlen10889, sizeof(char));
+        strcpy(tmp_str10889, tmp_str10904);
+        strcat(tmp_str10889, tmp_results);
+        int tmp_strlen10876 = strlen(tmp_str10889) + strlen(".result") + 1;
+        char* tmp_str10876 = calloc(tmp_strlen10876, sizeof(char));
+        strcpy(tmp_str10876, tmp_str10889);
+        strcat(tmp_str10876, ".result");
+        int tmp_strlen10854 = strlen(tmp_str10876) + strlen(itoa(result_count)) + 1;
+        char* tmp_str10854 = calloc(tmp_strlen10854, sizeof(char));
+        strcpy(tmp_str10854, tmp_str10876);
+        strcat(tmp_str10854, itoa(result_count));
+        int tmp_strlen10845 = strlen(tmp_str10854) + strlen(";\n") + 1;
+        char* tmp_str10845 = calloc(tmp_strlen10845, sizeof(char));
+        strcpy(tmp_str10845, tmp_str10854);
+        strcat(tmp_str10845, ";\n");
+        out = tmp_str10845;
+      }
+      Peek_results tmp_results10818 = Peek(lhs);
+      lhs_tok = tmp_results10818.result1;
+      lhs_tok_str = tmp_results10818.result2;
     }
     char* tok_str;
-    ConsumeToken_results tmp_results10702 = ConsumeToken(rhs, TOK_NEWLINE);
-    src = tmp_results10702.result1;
-    tok_str = tmp_results10702.result2;
+    ConsumeToken_results tmp_results10739 = ConsumeToken(rhs, TOK_NEWLINE);
+    src = tmp_results10739.result1;
+    tok_str = tmp_results10739.result2;
     return (TranslateAssignStmt_results){src, out};
   }
-  int tmp_strlen10577 = strlen(indent) + strlen(lhs_ident) + 1;
-  char* tmp_str10577 = calloc(tmp_strlen10577, sizeof(char));
-  strcpy(tmp_str10577, indent);
-  strcat(tmp_str10577, lhs_ident);
-  int tmp_strlen10568 = strlen(tmp_str10577) + strlen(" = ") + 1;
-  char* tmp_str10568 = calloc(tmp_strlen10568, sizeof(char));
-  strcpy(tmp_str10568, tmp_str10577);
-  strcat(tmp_str10568, " = ");
-  int tmp_strlen10556 = strlen(tmp_str10568) + strlen(rhs_expr) + 1;
-  char* tmp_str10556 = calloc(tmp_strlen10556, sizeof(char));
-  strcpy(tmp_str10556, tmp_str10568);
-  strcat(tmp_str10556, rhs_expr);
-  int tmp_strlen10547 = strlen(tmp_str10556) + strlen(";\n") + 1;
-  char* tmp_str10547 = calloc(tmp_strlen10547, sizeof(char));
-  strcpy(tmp_str10547, tmp_str10556);
-  strcat(tmp_str10547, ";\n");
-  char* assignments = tmp_str10547;
+  int tmp_strlen10614 = strlen(indent) + strlen(lhs_ident) + 1;
+  char* tmp_str10614 = calloc(tmp_strlen10614, sizeof(char));
+  strcpy(tmp_str10614, indent);
+  strcat(tmp_str10614, lhs_ident);
+  int tmp_strlen10605 = strlen(tmp_str10614) + strlen(" = ") + 1;
+  char* tmp_str10605 = calloc(tmp_strlen10605, sizeof(char));
+  strcpy(tmp_str10605, tmp_str10614);
+  strcat(tmp_str10605, " = ");
+  int tmp_strlen10593 = strlen(tmp_str10605) + strlen(rhs_expr) + 1;
+  char* tmp_str10593 = calloc(tmp_strlen10593, sizeof(char));
+  strcpy(tmp_str10593, tmp_str10605);
+  strcat(tmp_str10593, rhs_expr);
+  int tmp_strlen10584 = strlen(tmp_str10593) + strlen(";\n") + 1;
+  char* tmp_str10584 = calloc(tmp_strlen10584, sizeof(char));
+  strcpy(tmp_str10584, tmp_str10593);
+  strcat(tmp_str10584, ";\n");
+  char* assignments = tmp_str10584;
   while ((lhs_tok) == (TOK_COMMA)) {
-    ConsumeToken_results tmp_results10507 = ConsumeToken(lhs, TOK_COMMA);
-    lhs = tmp_results10507.result1;
-    lhs_tok_str = tmp_results10507.result2;
-    ConsumeToken_results tmp_results10451 = ConsumeToken(rhs, TOK_COMMA);
-    rhs = tmp_results10451.result1;
-    rhs_tok_str = tmp_results10451.result2;
-    ConsumeIdent_results tmp_results10395 = ConsumeIdent(lhs);
-    lhs = tmp_results10395.result1;
-    lhs_ident = tmp_results10395.result2;
+    ConsumeToken_results tmp_results10544 = ConsumeToken(lhs, TOK_COMMA);
+    lhs = tmp_results10544.result1;
+    lhs_tok_str = tmp_results10544.result2;
+    ConsumeToken_results tmp_results10488 = ConsumeToken(rhs, TOK_COMMA);
+    rhs = tmp_results10488.result1;
+    rhs_tok_str = tmp_results10488.result2;
+    ConsumeIdent_results tmp_results10432 = ConsumeIdent(lhs);
+    lhs = tmp_results10432.result1;
+    lhs_ident = tmp_results10432.result2;
     char* rhs_expr_setup;
-    TranslateExpr_results tmp_results10317 = TranslateExpr(rhs, indent);
-    rhs = tmp_results10317.result1;
-    rhs_expr_setup = tmp_results10317.result2;
-    rhs_expr = tmp_results10317.result3;
-    int tmp_strlen10219 = strlen(setup) + strlen(rhs_expr_setup) + 1;
-    char* tmp_str10219 = calloc(tmp_strlen10219, sizeof(char));
-    strcpy(tmp_str10219, setup);
-    strcat(tmp_str10219, rhs_expr_setup);
-    setup = tmp_str10219;
-    int tmp_strlen10175 = strlen(assignments) + strlen(indent) + 1;
-    char* tmp_str10175 = calloc(tmp_strlen10175, sizeof(char));
-    strcpy(tmp_str10175, assignments);
-    strcat(tmp_str10175, indent);
-    int tmp_strlen10162 = strlen(tmp_str10175) + strlen(lhs_ident) + 1;
-    char* tmp_str10162 = calloc(tmp_strlen10162, sizeof(char));
-    strcpy(tmp_str10162, tmp_str10175);
-    strcat(tmp_str10162, lhs_ident);
-    int tmp_strlen10153 = strlen(tmp_str10162) + strlen(" = ") + 1;
-    char* tmp_str10153 = calloc(tmp_strlen10153, sizeof(char));
-    strcpy(tmp_str10153, tmp_str10162);
-    strcat(tmp_str10153, " = ");
-    int tmp_strlen10141 = strlen(tmp_str10153) + strlen(rhs_expr) + 1;
-    char* tmp_str10141 = calloc(tmp_strlen10141, sizeof(char));
-    strcpy(tmp_str10141, tmp_str10153);
-    strcat(tmp_str10141, rhs_expr);
-    int tmp_strlen10132 = strlen(tmp_str10141) + strlen(";\n") + 1;
-    char* tmp_str10132 = calloc(tmp_strlen10132, sizeof(char));
-    strcpy(tmp_str10132, tmp_str10141);
-    strcat(tmp_str10132, ";\n");
-    assignments = tmp_str10132;
-    Peek_results tmp_results10123 = Peek(lhs);
-    lhs_tok = tmp_results10123.result1;
-    lhs_tok_str = tmp_results10123.result2;
+    TranslateExpr_results tmp_results10354 = TranslateExpr(rhs, indent);
+    rhs = tmp_results10354.result1;
+    rhs_expr_setup = tmp_results10354.result2;
+    rhs_expr = tmp_results10354.result3;
+    int tmp_strlen10256 = strlen(setup) + strlen(rhs_expr_setup) + 1;
+    char* tmp_str10256 = calloc(tmp_strlen10256, sizeof(char));
+    strcpy(tmp_str10256, setup);
+    strcat(tmp_str10256, rhs_expr_setup);
+    setup = tmp_str10256;
+    int tmp_strlen10212 = strlen(assignments) + strlen(indent) + 1;
+    char* tmp_str10212 = calloc(tmp_strlen10212, sizeof(char));
+    strcpy(tmp_str10212, assignments);
+    strcat(tmp_str10212, indent);
+    int tmp_strlen10199 = strlen(tmp_str10212) + strlen(lhs_ident) + 1;
+    char* tmp_str10199 = calloc(tmp_strlen10199, sizeof(char));
+    strcpy(tmp_str10199, tmp_str10212);
+    strcat(tmp_str10199, lhs_ident);
+    int tmp_strlen10190 = strlen(tmp_str10199) + strlen(" = ") + 1;
+    char* tmp_str10190 = calloc(tmp_strlen10190, sizeof(char));
+    strcpy(tmp_str10190, tmp_str10199);
+    strcat(tmp_str10190, " = ");
+    int tmp_strlen10178 = strlen(tmp_str10190) + strlen(rhs_expr) + 1;
+    char* tmp_str10178 = calloc(tmp_strlen10178, sizeof(char));
+    strcpy(tmp_str10178, tmp_str10190);
+    strcat(tmp_str10178, rhs_expr);
+    int tmp_strlen10169 = strlen(tmp_str10178) + strlen(";\n") + 1;
+    char* tmp_str10169 = calloc(tmp_strlen10169, sizeof(char));
+    strcpy(tmp_str10169, tmp_str10178);
+    strcat(tmp_str10169, ";\n");
+    assignments = tmp_str10169;
+    Peek_results tmp_results10160 = Peek(lhs);
+    lhs_tok = tmp_results10160.result1;
+    lhs_tok_str = tmp_results10160.result2;
   }
   char* tok_str;
-  ConsumeToken_results tmp_results10056 = ConsumeToken(rhs, TOK_NEWLINE);
-  src = tmp_results10056.result1;
-  tok_str = tmp_results10056.result2;
-  int tmp_strlen9974 = strlen(setup) + strlen(assignments) + 1;
-  char* tmp_str9974 = calloc(tmp_strlen9974, sizeof(char));
-  strcpy(tmp_str9974, setup);
-  strcat(tmp_str9974, assignments);
-  return (TranslateAssignStmt_results){src, tmp_str9974};
+  ConsumeToken_results tmp_results10093 = ConsumeToken(rhs, TOK_NEWLINE);
+  src = tmp_results10093.result1;
+  tok_str = tmp_results10093.result2;
+  int tmp_strlen10011 = strlen(setup) + strlen(assignments) + 1;
+  char* tmp_str10011 = calloc(tmp_strlen10011, sizeof(char));
+  strcpy(tmp_str10011, setup);
+  strcat(tmp_str10011, assignments);
+  return (TranslateAssignStmt_results){src, tmp_str10011};
 }
 
 TranslateIfStmt_results TranslateIfStmt(char* src, char* indent, char* func_name) {
   char* tok_str;
-  ConsumeToken_results tmp_results9853 = ConsumeToken(src, TOK_IF);
-  src = tmp_results9853.result1;
-  tok_str = tmp_results9853.result2;
+  ConsumeToken_results tmp_results9890 = ConsumeToken(src, TOK_IF);
+  src = tmp_results9890.result1;
+  tok_str = tmp_results9890.result2;
   char* cond_setup;
   char* cond;
-  TranslateExpr_results tmp_results9760 = TranslateExpr(src, indent);
-  src = tmp_results9760.result1;
-  cond_setup = tmp_results9760.result2;
-  cond = tmp_results9760.result3;
-  ConsumeToken_results tmp_results9705 = ConsumeToken(src, TOK_LCURLY);
-  src = tmp_results9705.result1;
-  tok_str = tmp_results9705.result2;
+  TranslateExpr_results tmp_results9797 = TranslateExpr(src, indent);
+  src = tmp_results9797.result1;
+  cond_setup = tmp_results9797.result2;
+  cond = tmp_results9797.result3;
+  ConsumeToken_results tmp_results9742 = ConsumeToken(src, TOK_LCURLY);
+  src = tmp_results9742.result1;
+  tok_str = tmp_results9742.result2;
   char* out = cond_setup;
-  int tmp_strlen9604 = strlen(out) + strlen(indent) + 1;
-  char* tmp_str9604 = calloc(tmp_strlen9604, sizeof(char));
-  strcpy(tmp_str9604, out);
-  strcat(tmp_str9604, indent);
-  int tmp_strlen9594 = strlen(tmp_str9604) + strlen("if (") + 1;
-  char* tmp_str9594 = calloc(tmp_strlen9594, sizeof(char));
-  strcpy(tmp_str9594, tmp_str9604);
-  strcat(tmp_str9594, "if (");
-  int tmp_strlen9586 = strlen(tmp_str9594) + strlen(cond) + 1;
-  char* tmp_str9586 = calloc(tmp_strlen9586, sizeof(char));
-  strcpy(tmp_str9586, tmp_str9594);
-  strcat(tmp_str9586, cond);
-  int tmp_strlen9575 = strlen(tmp_str9586) + strlen(") {\n") + 1;
-  char* tmp_str9575 = calloc(tmp_strlen9575, sizeof(char));
-  strcpy(tmp_str9575, tmp_str9586);
-  strcat(tmp_str9575, ") {\n");
-  out = tmp_str9575;
+  int tmp_strlen9641 = strlen(out) + strlen(indent) + 1;
+  char* tmp_str9641 = calloc(tmp_strlen9641, sizeof(char));
+  strcpy(tmp_str9641, out);
+  strcat(tmp_str9641, indent);
+  int tmp_strlen9631 = strlen(tmp_str9641) + strlen("if (") + 1;
+  char* tmp_str9631 = calloc(tmp_strlen9631, sizeof(char));
+  strcpy(tmp_str9631, tmp_str9641);
+  strcat(tmp_str9631, "if (");
+  int tmp_strlen9623 = strlen(tmp_str9631) + strlen(cond) + 1;
+  char* tmp_str9623 = calloc(tmp_strlen9623, sizeof(char));
+  strcpy(tmp_str9623, tmp_str9631);
+  strcat(tmp_str9623, cond);
+  int tmp_strlen9612 = strlen(tmp_str9623) + strlen(") {\n") + 1;
+  char* tmp_str9612 = calloc(tmp_strlen9612, sizeof(char));
+  strcpy(tmp_str9612, tmp_str9623);
+  strcat(tmp_str9612, ") {\n");
+  out = tmp_str9612;
   char* body;
-  int tmp_strlen9494 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
-  char* tmp_str9494 = calloc(tmp_strlen9494, sizeof(char));
-  strcpy(tmp_str9494, indent);
-  strcat(tmp_str9494, SINGLE_INDENT);
-  TranslateStmts_results tmp_results9549 = TranslateStmts(src, tmp_str9494, func_name);
-  src = tmp_results9549.result1;
-  body = tmp_results9549.result2;
-  ConsumeToken_results tmp_results9477 = ConsumeToken(src, TOK_RCURLY);
-  src = tmp_results9477.result1;
-  tok_str = tmp_results9477.result2;
-  int tmp_strlen9411 = strlen(out) + strlen(body) + 1;
-  char* tmp_str9411 = calloc(tmp_strlen9411, sizeof(char));
-  strcpy(tmp_str9411, out);
-  strcat(tmp_str9411, body);
-  out = tmp_str9411;
-  int tmp_strlen9387 = strlen(out) + strlen(indent) + 1;
-  char* tmp_str9387 = calloc(tmp_strlen9387, sizeof(char));
-  strcpy(tmp_str9387, out);
-  strcat(tmp_str9387, indent);
-  int tmp_strlen9380 = strlen(tmp_str9387) + strlen("}") + 1;
-  char* tmp_str9380 = calloc(tmp_strlen9380, sizeof(char));
-  strcpy(tmp_str9380, tmp_str9387);
-  strcat(tmp_str9380, "}");
-  out = tmp_str9380;
+  int tmp_strlen9531 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
+  char* tmp_str9531 = calloc(tmp_strlen9531, sizeof(char));
+  strcpy(tmp_str9531, indent);
+  strcat(tmp_str9531, SINGLE_INDENT);
+  TranslateStmts_results tmp_results9586 = TranslateStmts(src, tmp_str9531, func_name);
+  src = tmp_results9586.result1;
+  body = tmp_results9586.result2;
+  ConsumeToken_results tmp_results9514 = ConsumeToken(src, TOK_RCURLY);
+  src = tmp_results9514.result1;
+  tok_str = tmp_results9514.result2;
+  int tmp_strlen9448 = strlen(out) + strlen(body) + 1;
+  char* tmp_str9448 = calloc(tmp_strlen9448, sizeof(char));
+  strcpy(tmp_str9448, out);
+  strcat(tmp_str9448, body);
+  out = tmp_str9448;
+  int tmp_strlen9424 = strlen(out) + strlen(indent) + 1;
+  char* tmp_str9424 = calloc(tmp_strlen9424, sizeof(char));
+  strcpy(tmp_str9424, out);
+  strcat(tmp_str9424, indent);
+  int tmp_strlen9417 = strlen(tmp_str9424) + strlen("}") + 1;
+  char* tmp_str9417 = calloc(tmp_strlen9417, sizeof(char));
+  strcpy(tmp_str9417, tmp_str9424);
+  strcat(tmp_str9417, "}");
+  out = tmp_str9417;
   int tok;
-  Peek_results tmp_results9358 = Peek(src);
-  tok = tmp_results9358.result1;
-  tok_str = tmp_results9358.result2;
+  Peek_results tmp_results9395 = Peek(src);
+  tok = tmp_results9395.result1;
+  tok_str = tmp_results9395.result2;
   if ((tok) != (TOK_ELSE)) {
-    int tmp_strlen9277 = strlen(out) + strlen("\n") + 1;
-    char* tmp_str9277 = calloc(tmp_strlen9277, sizeof(char));
-    strcpy(tmp_str9277, out);
-    strcat(tmp_str9277, "\n");
-    return (TranslateIfStmt_results){src, tmp_str9277};
+    int tmp_strlen9314 = strlen(out) + strlen("\n") + 1;
+    char* tmp_str9314 = calloc(tmp_strlen9314, sizeof(char));
+    strcpy(tmp_str9314, out);
+    strcat(tmp_str9314, "\n");
+    return (TranslateIfStmt_results){src, tmp_str9314};
   }
-  ConsumeToken_results tmp_results9266 = ConsumeToken(src, TOK_ELSE);
-  src = tmp_results9266.result1;
-  tok_str = tmp_results9266.result2;
-  Peek_results tmp_results9219 = Peek(src);
-  tok = tmp_results9219.result1;
-  tok_str = tmp_results9219.result2;
+  ConsumeToken_results tmp_results9303 = ConsumeToken(src, TOK_ELSE);
+  src = tmp_results9303.result1;
+  tok_str = tmp_results9303.result2;
+  Peek_results tmp_results9256 = Peek(src);
+  tok = tmp_results9256.result1;
+  tok_str = tmp_results9256.result2;
   char* else_out;
   if ((tok) == (TOK_IF)) {
-    int tmp_strlen9078 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
-    char* tmp_str9078 = calloc(tmp_strlen9078, sizeof(char));
-    strcpy(tmp_str9078, indent);
-    strcat(tmp_str9078, SINGLE_INDENT);
-    TranslateIfStmt_results tmp_results9138 = TranslateIfStmt(src, tmp_str9078, func_name);
-    src = tmp_results9138.result1;
-    else_out = tmp_results9138.result2;
-    int tmp_strlen9033 = strlen(out) + strlen(" else {\n") + 1;
-    char* tmp_str9033 = calloc(tmp_strlen9033, sizeof(char));
-    strcpy(tmp_str9033, out);
-    strcat(tmp_str9033, " else {\n");
-    out = tmp_str9033;
-    int tmp_strlen9003 = strlen(out) + strlen(else_out) + 1;
+    int tmp_strlen9115 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
+    char* tmp_str9115 = calloc(tmp_strlen9115, sizeof(char));
+    strcpy(tmp_str9115, indent);
+    strcat(tmp_str9115, SINGLE_INDENT);
+    TranslateIfStmt_results tmp_results9175 = TranslateIfStmt(src, tmp_str9115, func_name);
+    src = tmp_results9175.result1;
+    else_out = tmp_results9175.result2;
+    int tmp_strlen9070 = strlen(out) + strlen(" else {\n") + 1;
+    char* tmp_str9070 = calloc(tmp_strlen9070, sizeof(char));
+    strcpy(tmp_str9070, out);
+    strcat(tmp_str9070, " else {\n");
+    out = tmp_str9070;
+    int tmp_strlen9040 = strlen(out) + strlen(else_out) + 1;
+    char* tmp_str9040 = calloc(tmp_strlen9040, sizeof(char));
+    strcpy(tmp_str9040, out);
+    strcat(tmp_str9040, else_out);
+    out = tmp_str9040;
+    int tmp_strlen9012 = strlen(out) + strlen(indent) + 1;
+    char* tmp_str9012 = calloc(tmp_strlen9012, sizeof(char));
+    strcpy(tmp_str9012, out);
+    strcat(tmp_str9012, indent);
+    int tmp_strlen9003 = strlen(tmp_str9012) + strlen("}\n") + 1;
     char* tmp_str9003 = calloc(tmp_strlen9003, sizeof(char));
-    strcpy(tmp_str9003, out);
-    strcat(tmp_str9003, else_out);
+    strcpy(tmp_str9003, tmp_str9012);
+    strcat(tmp_str9003, "}\n");
     out = tmp_str9003;
-    int tmp_strlen8975 = strlen(out) + strlen(indent) + 1;
-    char* tmp_str8975 = calloc(tmp_strlen8975, sizeof(char));
-    strcpy(tmp_str8975, out);
-    strcat(tmp_str8975, indent);
-    int tmp_strlen8966 = strlen(tmp_str8975) + strlen("}\n") + 1;
-    char* tmp_str8966 = calloc(tmp_strlen8966, sizeof(char));
-    strcpy(tmp_str8966, tmp_str8975);
-    strcat(tmp_str8966, "}\n");
-    out = tmp_str8966;
     return (TranslateIfStmt_results){src, out};
   }
-  ConsumeToken_results tmp_results8931 = ConsumeToken(src, TOK_LCURLY);
-  src = tmp_results8931.result1;
-  tok_str = tmp_results8931.result2;
-  int tmp_strlen8823 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
-  char* tmp_str8823 = calloc(tmp_strlen8823, sizeof(char));
-  strcpy(tmp_str8823, indent);
-  strcat(tmp_str8823, SINGLE_INDENT);
-  TranslateStmts_results tmp_results8882 = TranslateStmts(src, tmp_str8823, func_name);
-  src = tmp_results8882.result1;
-  else_out = tmp_results8882.result2;
-  ConsumeToken_results tmp_results8806 = ConsumeToken(src, TOK_RCURLY);
-  src = tmp_results8806.result1;
-  tok_str = tmp_results8806.result2;
-  int tmp_strlen8733 = strlen(out) + strlen(" else {\n") + 1;
-  char* tmp_str8733 = calloc(tmp_strlen8733, sizeof(char));
-  strcpy(tmp_str8733, out);
-  strcat(tmp_str8733, " else {\n");
-  out = tmp_str8733;
-  int tmp_strlen8707 = strlen(out) + strlen(else_out) + 1;
-  char* tmp_str8707 = calloc(tmp_strlen8707, sizeof(char));
-  strcpy(tmp_str8707, out);
-  strcat(tmp_str8707, else_out);
-  out = tmp_str8707;
-  int tmp_strlen8683 = strlen(out) + strlen(indent) + 1;
-  char* tmp_str8683 = calloc(tmp_strlen8683, sizeof(char));
-  strcpy(tmp_str8683, out);
-  strcat(tmp_str8683, indent);
-  int tmp_strlen8674 = strlen(tmp_str8683) + strlen("}\n") + 1;
-  char* tmp_str8674 = calloc(tmp_strlen8674, sizeof(char));
-  strcpy(tmp_str8674, tmp_str8683);
-  strcat(tmp_str8674, "}\n");
-  out = tmp_str8674;
+  ConsumeToken_results tmp_results8968 = ConsumeToken(src, TOK_LCURLY);
+  src = tmp_results8968.result1;
+  tok_str = tmp_results8968.result2;
+  int tmp_strlen8860 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
+  char* tmp_str8860 = calloc(tmp_strlen8860, sizeof(char));
+  strcpy(tmp_str8860, indent);
+  strcat(tmp_str8860, SINGLE_INDENT);
+  TranslateStmts_results tmp_results8919 = TranslateStmts(src, tmp_str8860, func_name);
+  src = tmp_results8919.result1;
+  else_out = tmp_results8919.result2;
+  ConsumeToken_results tmp_results8843 = ConsumeToken(src, TOK_RCURLY);
+  src = tmp_results8843.result1;
+  tok_str = tmp_results8843.result2;
+  int tmp_strlen8770 = strlen(out) + strlen(" else {\n") + 1;
+  char* tmp_str8770 = calloc(tmp_strlen8770, sizeof(char));
+  strcpy(tmp_str8770, out);
+  strcat(tmp_str8770, " else {\n");
+  out = tmp_str8770;
+  int tmp_strlen8744 = strlen(out) + strlen(else_out) + 1;
+  char* tmp_str8744 = calloc(tmp_strlen8744, sizeof(char));
+  strcpy(tmp_str8744, out);
+  strcat(tmp_str8744, else_out);
+  out = tmp_str8744;
+  int tmp_strlen8720 = strlen(out) + strlen(indent) + 1;
+  char* tmp_str8720 = calloc(tmp_strlen8720, sizeof(char));
+  strcpy(tmp_str8720, out);
+  strcat(tmp_str8720, indent);
+  int tmp_strlen8711 = strlen(tmp_str8720) + strlen("}\n") + 1;
+  char* tmp_str8711 = calloc(tmp_strlen8711, sizeof(char));
+  strcpy(tmp_str8711, tmp_str8720);
+  strcat(tmp_str8711, "}\n");
+  out = tmp_str8711;
   return (TranslateIfStmt_results){src, out};
 }
 
 TranslateForStmt_results TranslateForStmt(char* src, char* indent, char* func_name) {
   int tok;
   char* tok_str;
-  ConsumeToken_results tmp_results8515 = ConsumeToken(src, TOK_FOR);
-  src = tmp_results8515.result1;
-  tok_str = tmp_results8515.result2;
-  Peek_results tmp_results8469 = Peek(src);
-  tok = tmp_results8469.result1;
-  tok_str = tmp_results8469.result2;
+  ConsumeToken_results tmp_results8552 = ConsumeToken(src, TOK_FOR);
+  src = tmp_results8552.result1;
+  tok_str = tmp_results8552.result2;
+  Peek_results tmp_results8506 = Peek(src);
+  tok = tmp_results8506.result1;
+  tok_str = tmp_results8506.result2;
   char* cond_setup = "";
   char* cond = "true";
   if ((tok) != (TOK_LCURLY)) {
-    int tmp_strlen8281 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
-    char* tmp_str8281 = calloc(tmp_strlen8281, sizeof(char));
-    strcpy(tmp_str8281, indent);
-    strcat(tmp_str8281, SINGLE_INDENT);
-    TranslateExpr_results tmp_results8347 = TranslateExpr(src, tmp_str8281);
-    src = tmp_results8347.result1;
-    cond_setup = tmp_results8347.result2;
-    cond = tmp_results8347.result3;
+    int tmp_strlen8318 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
+    char* tmp_str8318 = calloc(tmp_strlen8318, sizeof(char));
+    strcpy(tmp_str8318, indent);
+    strcat(tmp_str8318, SINGLE_INDENT);
+    TranslateExpr_results tmp_results8384 = TranslateExpr(src, tmp_str8318);
+    src = tmp_results8384.result1;
+    cond_setup = tmp_results8384.result2;
+    cond = tmp_results8384.result3;
   }
-  ConsumeToken_results tmp_results8269 = ConsumeToken(src, TOK_LCURLY);
-  src = tmp_results8269.result1;
-  tok_str = tmp_results8269.result2;
+  ConsumeToken_results tmp_results8306 = ConsumeToken(src, TOK_LCURLY);
+  src = tmp_results8306.result1;
+  tok_str = tmp_results8306.result2;
   char* out;
   if ((strcmp(cond_setup, "") == 0)) {
-    int tmp_strlen8145 = strlen(indent) + strlen("while (") + 1;
-    char* tmp_str8145 = calloc(tmp_strlen8145, sizeof(char));
-    strcpy(tmp_str8145, indent);
-    strcat(tmp_str8145, "while (");
-    int tmp_strlen8137 = strlen(tmp_str8145) + strlen(cond) + 1;
-    char* tmp_str8137 = calloc(tmp_strlen8137, sizeof(char));
-    strcpy(tmp_str8137, tmp_str8145);
-    strcat(tmp_str8137, cond);
-    int tmp_strlen8126 = strlen(tmp_str8137) + strlen(") {\n") + 1;
-    char* tmp_str8126 = calloc(tmp_strlen8126, sizeof(char));
-    strcpy(tmp_str8126, tmp_str8137);
-    strcat(tmp_str8126, ") {\n");
-    out = tmp_str8126;
+    int tmp_strlen8182 = strlen(indent) + strlen("while (") + 1;
+    char* tmp_str8182 = calloc(tmp_strlen8182, sizeof(char));
+    strcpy(tmp_str8182, indent);
+    strcat(tmp_str8182, "while (");
+    int tmp_strlen8174 = strlen(tmp_str8182) + strlen(cond) + 1;
+    char* tmp_str8174 = calloc(tmp_strlen8174, sizeof(char));
+    strcpy(tmp_str8174, tmp_str8182);
+    strcat(tmp_str8174, cond);
+    int tmp_strlen8163 = strlen(tmp_str8174) + strlen(") {\n") + 1;
+    char* tmp_str8163 = calloc(tmp_strlen8163, sizeof(char));
+    strcpy(tmp_str8163, tmp_str8174);
+    strcat(tmp_str8163, ") {\n");
+    out = tmp_str8163;
   } else {
-    int tmp_strlen8070 = strlen(indent) + strlen("while (true) {\n") + 1;
-    char* tmp_str8070 = calloc(tmp_strlen8070, sizeof(char));
-    strcpy(tmp_str8070, indent);
-    strcat(tmp_str8070, "while (true) {\n");
-    out = tmp_str8070;
-    int tmp_strlen8038 = strlen(out) + strlen(cond_setup) + 1;
-    char* tmp_str8038 = calloc(tmp_strlen8038, sizeof(char));
-    strcpy(tmp_str8038, out);
-    strcat(tmp_str8038, cond_setup);
-    out = tmp_str8038;
-    int tmp_strlen8010 = strlen(out) + strlen(indent) + 1;
+    int tmp_strlen8107 = strlen(indent) + strlen("while (true) {\n") + 1;
+    char* tmp_str8107 = calloc(tmp_strlen8107, sizeof(char));
+    strcpy(tmp_str8107, indent);
+    strcat(tmp_str8107, "while (true) {\n");
+    out = tmp_str8107;
+    int tmp_strlen8075 = strlen(out) + strlen(cond_setup) + 1;
+    char* tmp_str8075 = calloc(tmp_strlen8075, sizeof(char));
+    strcpy(tmp_str8075, out);
+    strcat(tmp_str8075, cond_setup);
+    out = tmp_str8075;
+    int tmp_strlen8047 = strlen(out) + strlen(indent) + 1;
+    char* tmp_str8047 = calloc(tmp_strlen8047, sizeof(char));
+    strcpy(tmp_str8047, out);
+    strcat(tmp_str8047, indent);
+    int tmp_strlen8030 = strlen(tmp_str8047) + strlen(SINGLE_INDENT) + 1;
+    char* tmp_str8030 = calloc(tmp_strlen8030, sizeof(char));
+    strcpy(tmp_str8030, tmp_str8047);
+    strcat(tmp_str8030, SINGLE_INDENT);
+    int tmp_strlen8018 = strlen(tmp_str8030) + strlen("if (!(") + 1;
+    char* tmp_str8018 = calloc(tmp_strlen8018, sizeof(char));
+    strcpy(tmp_str8018, tmp_str8030);
+    strcat(tmp_str8018, "if (!(");
+    int tmp_strlen8010 = strlen(tmp_str8018) + strlen(cond) + 1;
     char* tmp_str8010 = calloc(tmp_strlen8010, sizeof(char));
-    strcpy(tmp_str8010, out);
-    strcat(tmp_str8010, indent);
-    int tmp_strlen7993 = strlen(tmp_str8010) + strlen(SINGLE_INDENT) + 1;
+    strcpy(tmp_str8010, tmp_str8018);
+    strcat(tmp_str8010, cond);
+    int tmp_strlen7993 = strlen(tmp_str8010) + strlen(")) break;\n") + 1;
     char* tmp_str7993 = calloc(tmp_strlen7993, sizeof(char));
     strcpy(tmp_str7993, tmp_str8010);
-    strcat(tmp_str7993, SINGLE_INDENT);
-    int tmp_strlen7981 = strlen(tmp_str7993) + strlen("if (!(") + 1;
-    char* tmp_str7981 = calloc(tmp_strlen7981, sizeof(char));
-    strcpy(tmp_str7981, tmp_str7993);
-    strcat(tmp_str7981, "if (!(");
-    int tmp_strlen7973 = strlen(tmp_str7981) + strlen(cond) + 1;
-    char* tmp_str7973 = calloc(tmp_strlen7973, sizeof(char));
-    strcpy(tmp_str7973, tmp_str7981);
-    strcat(tmp_str7973, cond);
-    int tmp_strlen7956 = strlen(tmp_str7973) + strlen(")) break;\n") + 1;
-    char* tmp_str7956 = calloc(tmp_strlen7956, sizeof(char));
-    strcpy(tmp_str7956, tmp_str7973);
-    strcat(tmp_str7956, ")) break;\n");
-    out = tmp_str7956;
+    strcat(tmp_str7993, ")) break;\n");
+    out = tmp_str7993;
   }
   char* body;
-  int tmp_strlen7869 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
-  char* tmp_str7869 = calloc(tmp_strlen7869, sizeof(char));
-  strcpy(tmp_str7869, indent);
-  strcat(tmp_str7869, SINGLE_INDENT);
-  TranslateStmts_results tmp_results7924 = TranslateStmts(src, tmp_str7869, func_name);
-  src = tmp_results7924.result1;
-  body = tmp_results7924.result2;
-  ConsumeToken_results tmp_results7852 = ConsumeToken(src, TOK_RCURLY);
-  src = tmp_results7852.result1;
-  tok_str = tmp_results7852.result2;
-  int tmp_strlen7786 = strlen(out) + strlen(body) + 1;
-  char* tmp_str7786 = calloc(tmp_strlen7786, sizeof(char));
-  strcpy(tmp_str7786, out);
-  strcat(tmp_str7786, body);
-  out = tmp_str7786;
-  int tmp_strlen7762 = strlen(out) + strlen(indent) + 1;
-  char* tmp_str7762 = calloc(tmp_strlen7762, sizeof(char));
-  strcpy(tmp_str7762, out);
-  strcat(tmp_str7762, indent);
-  int tmp_strlen7753 = strlen(tmp_str7762) + strlen("}\n") + 1;
-  char* tmp_str7753 = calloc(tmp_strlen7753, sizeof(char));
-  strcpy(tmp_str7753, tmp_str7762);
-  strcat(tmp_str7753, "}\n");
-  out = tmp_str7753;
+  int tmp_strlen7906 = strlen(indent) + strlen(SINGLE_INDENT) + 1;
+  char* tmp_str7906 = calloc(tmp_strlen7906, sizeof(char));
+  strcpy(tmp_str7906, indent);
+  strcat(tmp_str7906, SINGLE_INDENT);
+  TranslateStmts_results tmp_results7961 = TranslateStmts(src, tmp_str7906, func_name);
+  src = tmp_results7961.result1;
+  body = tmp_results7961.result2;
+  ConsumeToken_results tmp_results7889 = ConsumeToken(src, TOK_RCURLY);
+  src = tmp_results7889.result1;
+  tok_str = tmp_results7889.result2;
+  int tmp_strlen7823 = strlen(out) + strlen(body) + 1;
+  char* tmp_str7823 = calloc(tmp_strlen7823, sizeof(char));
+  strcpy(tmp_str7823, out);
+  strcat(tmp_str7823, body);
+  out = tmp_str7823;
+  int tmp_strlen7799 = strlen(out) + strlen(indent) + 1;
+  char* tmp_str7799 = calloc(tmp_strlen7799, sizeof(char));
+  strcpy(tmp_str7799, out);
+  strcat(tmp_str7799, indent);
+  int tmp_strlen7790 = strlen(tmp_str7799) + strlen("}\n") + 1;
+  char* tmp_str7790 = calloc(tmp_strlen7790, sizeof(char));
+  strcpy(tmp_str7790, tmp_str7799);
+  strcat(tmp_str7790, "}\n");
+  out = tmp_str7790;
   return (TranslateForStmt_results){src, out};
 }
 
 TranslateContinueStmt_results TranslateContinueStmt(char* src, char* indent) {
   char* tok_str;
-  ConsumeToken_results tmp_results7625 = ConsumeToken(src, TOK_CONTINUE);
-  src = tmp_results7625.result1;
-  tok_str = tmp_results7625.result2;
-  int tmp_strlen7541 = strlen(indent) + strlen("continue;") + 1;
-  char* tmp_str7541 = calloc(tmp_strlen7541, sizeof(char));
-  strcpy(tmp_str7541, indent);
-  strcat(tmp_str7541, "continue;");
-  return (TranslateContinueStmt_results){src, tmp_str7541};
+  ConsumeToken_results tmp_results7662 = ConsumeToken(src, TOK_CONTINUE);
+  src = tmp_results7662.result1;
+  tok_str = tmp_results7662.result2;
+  int tmp_strlen7578 = strlen(indent) + strlen("continue;") + 1;
+  char* tmp_str7578 = calloc(tmp_strlen7578, sizeof(char));
+  strcpy(tmp_str7578, indent);
+  strcat(tmp_str7578, "continue;");
+  return (TranslateContinueStmt_results){src, tmp_str7578};
 }
 
 TranslateBreakStmt_results TranslateBreakStmt(char* src, char* indent) {
   char* tok_str;
-  ConsumeToken_results tmp_results7436 = ConsumeToken(src, TOK_BREAK);
-  src = tmp_results7436.result1;
-  tok_str = tmp_results7436.result2;
-  int tmp_strlen7358 = strlen(indent) + strlen("break;") + 1;
-  char* tmp_str7358 = calloc(tmp_strlen7358, sizeof(char));
-  strcpy(tmp_str7358, indent);
-  strcat(tmp_str7358, "break;");
-  return (TranslateBreakStmt_results){src, tmp_str7358};
+  ConsumeToken_results tmp_results7473 = ConsumeToken(src, TOK_BREAK);
+  src = tmp_results7473.result1;
+  tok_str = tmp_results7473.result2;
+  int tmp_strlen7395 = strlen(indent) + strlen("break;") + 1;
+  char* tmp_str7395 = calloc(tmp_strlen7395, sizeof(char));
+  strcpy(tmp_str7395, indent);
+  strcat(tmp_str7395, "break;");
+  return (TranslateBreakStmt_results){src, tmp_str7395};
 }
 
 TranslateReturnStmt_results TranslateReturnStmt(char* src, char* indent, char* func_name) {
   char* tok_str;
-  ConsumeToken_results tmp_results7233 = ConsumeToken(src, TOK_RETURN);
-  src = tmp_results7233.result1;
-  tok_str = tmp_results7233.result2;
+  ConsumeToken_results tmp_results7270 = ConsumeToken(src, TOK_RETURN);
+  src = tmp_results7270.result1;
+  tok_str = tmp_results7270.result2;
   int expr_count;
   char* exprs_setup;
   char* exprs_value;
-  TranslateExprs_results tmp_results7104 = TranslateExprs(src, indent);
-  src = tmp_results7104.result1;
-  expr_count = tmp_results7104.result2;
-  exprs_setup = tmp_results7104.result3;
-  exprs_value = tmp_results7104.result4;
-  ConsumeToken_results tmp_results7028 = ConsumeToken(src, TOK_NEWLINE);
-  src = tmp_results7028.result1;
-  tok_str = tmp_results7028.result2;
-  int tmp_strlen6939 = strlen(exprs_setup) + strlen(indent) + 1;
-  char* tmp_str6939 = calloc(tmp_strlen6939, sizeof(char));
-  strcpy(tmp_str6939, exprs_setup);
-  strcat(tmp_str6939, indent);
-  int tmp_strlen6926 = strlen(tmp_str6939) + strlen("return ") + 1;
-  char* tmp_str6926 = calloc(tmp_strlen6926, sizeof(char));
-  strcpy(tmp_str6926, tmp_str6939);
-  strcat(tmp_str6926, "return ");
-  char* out = tmp_str6926;
+  TranslateExprs_results tmp_results7141 = TranslateExprs(src, indent);
+  src = tmp_results7141.result1;
+  expr_count = tmp_results7141.result2;
+  exprs_setup = tmp_results7141.result3;
+  exprs_value = tmp_results7141.result4;
+  ConsumeToken_results tmp_results7065 = ConsumeToken(src, TOK_NEWLINE);
+  src = tmp_results7065.result1;
+  tok_str = tmp_results7065.result2;
+  int tmp_strlen6976 = strlen(exprs_setup) + strlen(indent) + 1;
+  char* tmp_str6976 = calloc(tmp_strlen6976, sizeof(char));
+  strcpy(tmp_str6976, exprs_setup);
+  strcat(tmp_str6976, indent);
+  int tmp_strlen6963 = strlen(tmp_str6976) + strlen("return ") + 1;
+  char* tmp_str6963 = calloc(tmp_strlen6963, sizeof(char));
+  strcpy(tmp_str6963, tmp_str6976);
+  strcat(tmp_str6963, "return ");
+  char* out = tmp_str6963;
   if ((expr_count) > (1)) {
-    int tmp_strlen6877 = strlen(out) + strlen("(") + 1;
-    char* tmp_str6877 = calloc(tmp_strlen6877, sizeof(char));
-    strcpy(tmp_str6877, out);
-    strcat(tmp_str6877, "(");
-    int tmp_strlen6864 = strlen(tmp_str6877) + strlen(func_name) + 1;
-    char* tmp_str6864 = calloc(tmp_strlen6864, sizeof(char));
-    strcpy(tmp_str6864, tmp_str6877);
-    strcat(tmp_str6864, func_name);
-    int tmp_strlen6848 = strlen(tmp_str6864) + strlen("_results){") + 1;
-    char* tmp_str6848 = calloc(tmp_strlen6848, sizeof(char));
-    strcpy(tmp_str6848, tmp_str6864);
-    strcat(tmp_str6848, "_results){");
-    out = tmp_str6848;
+    int tmp_strlen6914 = strlen(out) + strlen("(") + 1;
+    char* tmp_str6914 = calloc(tmp_strlen6914, sizeof(char));
+    strcpy(tmp_str6914, out);
+    strcat(tmp_str6914, "(");
+    int tmp_strlen6901 = strlen(tmp_str6914) + strlen(func_name) + 1;
+    char* tmp_str6901 = calloc(tmp_strlen6901, sizeof(char));
+    strcpy(tmp_str6901, tmp_str6914);
+    strcat(tmp_str6901, func_name);
+    int tmp_strlen6885 = strlen(tmp_str6901) + strlen("_results){") + 1;
+    char* tmp_str6885 = calloc(tmp_strlen6885, sizeof(char));
+    strcpy(tmp_str6885, tmp_str6901);
+    strcat(tmp_str6885, "_results){");
+    out = tmp_str6885;
   }
-  int tmp_strlen6813 = strlen(out) + strlen(exprs_value) + 1;
-  char* tmp_str6813 = calloc(tmp_strlen6813, sizeof(char));
-  strcpy(tmp_str6813, out);
-  strcat(tmp_str6813, exprs_value);
-  out = tmp_str6813;
+  int tmp_strlen6850 = strlen(out) + strlen(exprs_value) + 1;
+  char* tmp_str6850 = calloc(tmp_strlen6850, sizeof(char));
+  strcpy(tmp_str6850, out);
+  strcat(tmp_str6850, exprs_value);
+  out = tmp_str6850;
   if ((expr_count) > (1)) {
-    int tmp_strlen6763 = strlen(out) + strlen("}") + 1;
-    char* tmp_str6763 = calloc(tmp_strlen6763, sizeof(char));
-    strcpy(tmp_str6763, out);
-    strcat(tmp_str6763, "}");
-    out = tmp_str6763;
+    int tmp_strlen6800 = strlen(out) + strlen("}") + 1;
+    char* tmp_str6800 = calloc(tmp_strlen6800, sizeof(char));
+    strcpy(tmp_str6800, out);
+    strcat(tmp_str6800, "}");
+    out = tmp_str6800;
   }
-  int tmp_strlen6734 = strlen(out) + strlen(";\n") + 1;
-  char* tmp_str6734 = calloc(tmp_strlen6734, sizeof(char));
-  strcpy(tmp_str6734, out);
-  strcat(tmp_str6734, ";\n");
-  out = tmp_str6734;
+  int tmp_strlen6771 = strlen(out) + strlen(";\n") + 1;
+  char* tmp_str6771 = calloc(tmp_strlen6771, sizeof(char));
+  strcpy(tmp_str6771, out);
+  strcat(tmp_str6771, ";\n");
+  out = tmp_str6771;
   return (TranslateReturnStmt_results){src, out};
 }
 
 TranslateStmt_results TranslateStmt(char* src, char* indent, char* func_name) {
   int tok;
   char* tok_str;
-  Peek_results tmp_results6578 = Peek(src);
-  tok = tmp_results6578.result1;
-  tok_str = tmp_results6578.result2;
+  Peek_results tmp_results6615 = Peek(src);
+  tok = tmp_results6615.result1;
+  tok_str = tmp_results6615.result2;
   char* out;
   if ((tok) == (TOK_LET)) {
-    TranslateConstDeclStmt_results tmp_results6501 = TranslateConstDeclStmt(src, indent);
-    src = tmp_results6501.result1;
-    out = tmp_results6501.result2;
+    TranslateConstDeclStmt_results tmp_results6538 = TranslateConstDeclStmt(src, indent);
+    src = tmp_results6538.result1;
+    out = tmp_results6538.result2;
     return (TranslateStmt_results){src, out};
   } else {
     if ((tok) == (TOK_VAR)) {
-      TranslateVarDeclStmt_results tmp_results6391 = TranslateVarDeclStmt(src, indent);
-      src = tmp_results6391.result1;
-      out = tmp_results6391.result2;
+      TranslateVarDeclStmt_results tmp_results6428 = TranslateVarDeclStmt(src, indent);
+      src = tmp_results6428.result1;
+      out = tmp_results6428.result2;
       return (TranslateStmt_results){src, out};
     } else {
       if ((tok) == (TOK_IF)) {
-        TranslateIfStmt_results tmp_results6284 = TranslateIfStmt(src, indent, func_name);
-        src = tmp_results6284.result1;
-        out = tmp_results6284.result2;
+        TranslateIfStmt_results tmp_results6321 = TranslateIfStmt(src, indent, func_name);
+        src = tmp_results6321.result1;
+        out = tmp_results6321.result2;
         return (TranslateStmt_results){src, out};
       } else {
         if ((tok) == (TOK_FOR)) {
-          TranslateForStmt_results tmp_results6170 = TranslateForStmt(src, indent, func_name);
-          src = tmp_results6170.result1;
-          out = tmp_results6170.result2;
+          TranslateForStmt_results tmp_results6207 = TranslateForStmt(src, indent, func_name);
+          src = tmp_results6207.result1;
+          out = tmp_results6207.result2;
           return (TranslateStmt_results){src, out};
         } else {
           if ((tok) == (TOK_CONTINUE)) {
-            TranslateContinueStmt_results tmp_results6050 = TranslateContinueStmt(src, indent);
-            src = tmp_results6050.result1;
-            out = tmp_results6050.result2;
+            TranslateContinueStmt_results tmp_results6087 = TranslateContinueStmt(src, indent);
+            src = tmp_results6087.result1;
+            out = tmp_results6087.result2;
             return (TranslateStmt_results){src, out};
           } else {
             if ((tok) == (TOK_BREAK)) {
-              TranslateBreakStmt_results tmp_results5939 = TranslateBreakStmt(src, indent);
-              src = tmp_results5939.result1;
-              out = tmp_results5939.result2;
+              TranslateBreakStmt_results tmp_results5976 = TranslateBreakStmt(src, indent);
+              src = tmp_results5976.result1;
+              out = tmp_results5976.result2;
               return (TranslateStmt_results){src, out};
             } else {
               if ((tok) == (TOK_RETURN)) {
-                TranslateReturnStmt_results tmp_results5830 = TranslateReturnStmt(src, indent, func_name);
-                src = tmp_results5830.result1;
-                out = tmp_results5830.result2;
+                TranslateReturnStmt_results tmp_results5867 = TranslateReturnStmt(src, indent, func_name);
+                src = tmp_results5867.result1;
+                out = tmp_results5867.result2;
                 return (TranslateStmt_results){src, out};
               } else {
-                if ((tok) == (TOK_IDENT)) {
+                if (((tok) == (TOK_IDENT)) || ((tok) == (TOK_UNDERSCORE))) {
                   char* first_ident;
-                  ConsumeIdent_results tmp_results5678 = ConsumeIdent(src);
-                  src = tmp_results5678.result1;
-                  first_ident = tmp_results5678.result2;
+                  ConsumeIdentOrUnderscore_results tmp_results5690 = ConsumeIdentOrUnderscore(src);
+                  src = tmp_results5690.result1;
+                  first_ident = tmp_results5690.result2;
                   Peek_results tmp_results5633 = Peek(src);
                   tok = tmp_results5633.result1;
                   tok_str = tmp_results5633.result2;

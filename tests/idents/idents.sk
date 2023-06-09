@@ -1,0 +1,9 @@
+fn f() {
+}
+
+fn g() {
+}
+
+fn main(args: string) {
+    let a: int = 42
+}

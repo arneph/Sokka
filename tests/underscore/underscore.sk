@@ -1,0 +1,16 @@
+fn t() -> (bool, int, string) {
+    return true, 42, "hello world"
+}
+
+fn main {
+    var a: bool
+    var b: int
+    var c: string
+    a, _, _ = t()
+    _, b, _ = t()
+    _, _, c = t()
+    a, b, _ = t()
+    a, _, c = t()
+    _, b, c = t()
+    a, b, c = t()
+}

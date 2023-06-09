@@ -41,6 +41,7 @@ var (
 	bootstrapFile = filepath.Join(bootstrapDir, "sokka.py")
 	sokkaDir      = filepath.Join(baseDir, "sokka")
 	sokkaFile     = filepath.Join(sokkaDir, "sokka.sk")
+	sokkaCFile2   = filepath.Join(sokkaDir, "sokka"+cPhaseExt(phase(2)))
 	testsDir      = filepath.Join(baseDir, "tests")
 )
 
@@ -62,14 +63,22 @@ func run(name string, args ...string) error {
 	return nil
 }
 
+func compileWithCCompiler(cFile string, p phase) (execFile string, err error) {
+	execFile = strings.TrimSuffix(cFile, cExt) + execExt
+	if err := run(cc, cFile, "-o", execFile); err != nil {
+		return "", err
+	}
+	return execFile, nil
+}
+
 func compileWithBootstrapCompiler(srcFile string) (cFile, execFile string, err error) {
 	const p = phase(1)
 	cFile = strings.TrimSuffix(srcFile, sokkaExt) + cPhaseExt(p)
 	if err := run(python, bootstrapFile, srcFile, cFile); err != nil {
 		return "", "", err
 	}
-	execFile = strings.TrimSuffix(srcFile, sokkaExt) + execPhaseExt(p)
-	if err := run(cc, cFile, "-o", execFile); err != nil {
+	execFile, err = compileWithCCompiler(cFile, p)
+	if err != nil {
 		return "", "", err
 	}
 	return cFile, execFile, nil
@@ -80,15 +89,41 @@ func compileWithSokkaCompiler(sokka, srcFile string, p phase) (cFile, execFile s
 	if err := run(sokka, srcFile, cFile); err != nil {
 		return "", "", err
 	}
-	execFile = strings.TrimSuffix(srcFile, sokkaExt) + execPhaseExt(p)
-	if err := run(cc, cFile, "-o", execFile); err != nil {
+	execFile, err = compileWithCCompiler(cFile, p)
+	if err != nil {
 		return "", "", err
 	}
 	return cFile, execFile, nil
 }
 
 func main() {
+	sokkaExecFile2, err := compileWithCCompiler(sokkaCFile2, phase(2))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	success := true
+	sokkaCFile3, sokkaExecFile3, err := compileWithSokkaCompiler(sokkaExecFile2, sokkaFile, phase(3))
+	if err != nil {
+		fmt.Println(err)
+		success = false
+	}
+	sokkaCFile2Contents, err := ioutil.ReadFile(sokkaCFile2)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	sokkaCFile3Contents, err := ioutil.ReadFile(sokkaCFile3)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if !bytes.Equal(sokkaCFile2Contents, sokkaCFile3Contents) {
+		fmt.Println("Sokka did not compile itself with the same output.")
+		success = false
+	}
+
 	entries, err := ioutil.ReadDir(testsDir)
 	if err != nil {
 		fmt.Printf("failed to read test dir: %v\n", err)
@@ -100,64 +135,18 @@ func main() {
 		}
 		testDir := filepath.Join(testsDir, dir.Name())
 		testFile := filepath.Join(testDir, dir.Name()+".sk")
-		_, execFile, err := compileWithBootstrapCompiler(testFile)
-		if err != nil {
-			fmt.Println(err)
-			success = false
-			continue
-		}
-		if err := run(execFile); err != nil {
-			fmt.Println(err)
-			success = false
-			continue
-		}
-	}
-	_, sokkaExecFile1, err := compileWithBootstrapCompiler(sokkaFile)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	sokkaCFile2, sokkaExecFile2, err := compileWithSokkaCompiler(sokkaExecFile1, sokkaFile, phase(2))
-	if err != nil {
-		fmt.Println(err)
-		success = false
-	} else {
-		sokkaCFile3, _, err := compileWithSokkaCompiler(sokkaExecFile2, sokkaFile, phase(3))
-		if err != nil {
-			fmt.Println(err)
-			success = false
-		}
-		sokkaCFile2Contents, err := ioutil.ReadFile(sokkaCFile2)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		sokkaCFile3Contents, err := ioutil.ReadFile(sokkaCFile3)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		if !bytes.Equal(sokkaCFile2Contents, sokkaCFile3Contents) {
-			fmt.Println("Sokka did not compile itself with the same output.")
-		}
-	}
-
-	for _, dir := range entries {
-		if !dir.IsDir() {
-			continue
-		}
-		testDir := filepath.Join(testsDir, dir.Name())
-		testFile := filepath.Join(testDir, dir.Name()+".sk")
-		_, execFile, err := compileWithSokkaCompiler(sokkaExecFile1, testFile, phase(2))
-		if err != nil {
-			fmt.Println(err)
-			success = false
-			continue
-		}
-		if err := run(execFile); err != nil {
-			fmt.Println(err)
-			success = false
-			continue
+		for p, sokkaExecFile := range [2]string{sokkaExecFile2, sokkaExecFile3} {
+			_, execFile, err := compileWithSokkaCompiler(sokkaExecFile, testFile, phase(p+2))
+			if err != nil {
+				fmt.Println(err)
+				success = false
+				continue
+			}
+			if err := run(execFile); err != nil {
+				fmt.Println(err)
+				success = false
+				continue
+			}
 		}
 	}
 	if !success {
