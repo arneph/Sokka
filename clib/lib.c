@@ -17,7 +17,7 @@ char* read(const char* path) {
   }
   fseek(f, 0, SEEK_END);
   int length = ftell(f);
-  char* text = malloc(length);
+  char* text = malloc(length + 1);
   fseek(f, 0, SEEK_SET);
   fread(text, 1, length, f);
   fclose(f);
