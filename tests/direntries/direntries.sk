@@ -1,0 +1,48 @@
+fn Find(haystack: string, needle: string) -> int {
+    if len(needle) == 0 {
+        return 0
+    }
+    var c: int = needle[0]
+    var i: int = 0
+    for i <= len(haystack) - len(needle) {
+        if haystack[i] != c {
+            i = i + 1
+            continue
+        } else if haystack[i:i+len(needle)] <!> needle {
+            i = i + 1
+            continue
+        }
+        return i
+    }
+    return -1
+}
+
+fn Split(s: string) -> (string, string) {
+    let i: int = Find(s, " ")
+    if i == -1 {
+        return s, ""
+    }
+    return s[:i], s[i+1:]
+}
+
+fn EndsWith(text: string, suffix: string) -> bool {
+    if len(text) < len(suffix) {
+        return false
+    } else if len(text) == len(suffix) {
+        return text <> suffix
+    } else {
+        return text[len(text)-len(suffix):] <> suffix
+    }
+}
+
+fn main(args: string) {
+    var entries: string = direntries(".")
+    var entry: string
+    entry, entries = Split(entries)
+    for len(entries) > 0 {
+        if EndsWith(entry, ".txt") {
+            print(entry ++ "\n")
+        }
+        entry, entries = Split(entries)
+    }
+}

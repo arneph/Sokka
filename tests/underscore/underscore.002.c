@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 
 char* itoa(int x) {
   char* a = malloc(20);
@@ -32,6 +33,27 @@ void write(const char* path, const char* text) {
   }
   fprintf(f, "%s", text);
   fclose(f);
+}
+
+char* direntries(const char* path) {
+  DIR *d;
+  d = opendir(path);
+  if (!d) {
+    printf("could not open dir: %s\n", path);
+    exit(1);
+  }
+  struct dirent *dir;
+  char *entries = calloc(10000, sizeof(char));
+  char* a = entries;
+  while ((dir = readdir(d)) != NULL) {
+    int c = strlen(dir->d_name);
+    strncpy(a, dir->d_name, c);
+    a += c;
+    a[0] = ' ';
+    a += 1;
+  }
+  closedir(d);
+  return entries;
 }
 
 int _main(char* args);
