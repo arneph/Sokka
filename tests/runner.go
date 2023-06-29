@@ -41,7 +41,7 @@ var (
 	bootstrapFile = filepath.Join(bootstrapDir, "sokka.py")
 	sokkaDir      = filepath.Join(baseDir, "sokka")
 	sokkaFile     = filepath.Join(sokkaDir, "sokka.sk")
-	sokkaCFile2   = filepath.Join(sokkaDir, "sokka"+cPhaseExt(phase(2)))
+	sokkaCFile2   = filepath.Join(sokkaDir, "out", "sokka"+cPhaseExt(phase(2)))
 	testsDir      = filepath.Join(baseDir, "tests")
 )
 
@@ -97,8 +97,12 @@ func compileWithBootstrapCompiler(srcFile string) (cFile, execFile string, err e
 }
 
 func compileWithSokkaCompiler(sokka, srcDir string, p phase) (cFile, execFile string, err error) {
+	outDir := srcDir + "/out"
+	if err := os.MkdirAll(outDir, 0700); err != nil {
+		return "", "", err
+	}
 	_, name := filepath.Split(srcDir)
-	cFile = srcDir + "/" + name + cPhaseExt(p)
+	cFile = outDir + "/" + name + cPhaseExt(p)
 	if err := run(sokka, srcDir, cFile); err != nil {
 		return "", "", err
 	}

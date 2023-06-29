@@ -77,3 +77,19 @@ int main(int argc, char **argv) {
   return _main(args);
 }
 
+void f();
+void g();
+int _main(char* args);
+
+void f() {
+}
+
+void g() {
+}
+
+int _main(char* args) {
+  const int a = 42;
+  return 0;
+}
+
+

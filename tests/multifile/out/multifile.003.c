@@ -77,3 +77,35 @@ int main(int argc, char **argv) {
   return _main(args);
 }
 
+int _main(char* args);
+int factorial(int i);
+
+int _main(char* args) {
+  int i = 1;
+  while ((i) <= (10)) {
+    int tmp_strlen162 = strlen(itoa(i)) + strlen("! = ") + 1;
+    char* tmp_str162 = calloc(tmp_strlen162, sizeof(char));
+    strcpy(tmp_str162, itoa(i));
+    strcat(tmp_str162, "! = ");
+    int tmp_strlen139 = strlen(tmp_str162) + strlen(itoa(factorial(10))) + 1;
+    char* tmp_str139 = calloc(tmp_strlen139, sizeof(char));
+    strcpy(tmp_str139, tmp_str162);
+    strcat(tmp_str139, itoa(factorial(10)));
+    int tmp_strlen131 = strlen(tmp_str139) + strlen("\n") + 1;
+    char* tmp_str131 = calloc(tmp_strlen131, sizeof(char));
+    strcpy(tmp_str131, tmp_str139);
+    strcat(tmp_str131, "\n");
+    printf("%s", tmp_str131);
+    i = (i) + (1);
+  }
+  return 0;
+}
+
+int factorial(int i) {
+  if ((i) == (1)) {
+    return 1;
+  }
+  return (i) * (factorial((i) - (1)));
+}
+
+

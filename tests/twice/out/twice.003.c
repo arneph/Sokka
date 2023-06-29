@@ -77,3 +77,11 @@ int main(int argc, char **argv) {
   return _main(args);
 }
 
+int _main(char* args);
+
+int _main(char* args) {
+  write("tests/twice/twice.txt", "Fancy");
+  return 0;
+}
+
+

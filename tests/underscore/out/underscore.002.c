@@ -77,3 +77,42 @@ int main(int argc, char **argv) {
   return _main(args);
 }
 
+typedef struct {
+  bool result1;
+  int result2;
+  char* result3;
+} t_results;
+t_results t();
+int _main(char* args);
+
+t_results t() {
+  return (t_results){true, 42, "hello world"};
+}
+
+int _main(char* args) {
+  bool a;
+  int b;
+  char* c;
+  t_results tmp_results124 = t();
+  a = tmp_results124.result1;
+  t_results tmp_results106 = t();
+  b = tmp_results106.result2;
+  t_results tmp_results88 = t();
+  c = tmp_results88.result3;
+  t_results tmp_results70 = t();
+  a = tmp_results70.result1;
+  b = tmp_results70.result2;
+  t_results tmp_results52 = t();
+  a = tmp_results52.result1;
+  c = tmp_results52.result3;
+  t_results tmp_results34 = t();
+  b = tmp_results34.result2;
+  c = tmp_results34.result3;
+  t_results tmp_results16 = t();
+  a = tmp_results16.result1;
+  b = tmp_results16.result2;
+  c = tmp_results16.result3;
+  return 0;
+}
+
+

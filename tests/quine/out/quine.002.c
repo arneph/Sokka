@@ -77,3 +77,11 @@ int main(int argc, char **argv) {
   return _main(args);
 }
 
+int _main(char* args);
+
+int _main(char* args) {
+  printf("%s", read("tests/quine/quine.sk"));
+  return 0;
+}
+
+
