@@ -52,6 +52,7 @@ char* direntries(const char* path) {
     a[0] = ' ';
     a += 1;
   }
+  a[-1] = 0;
   closedir(d);
   return entries;
 }

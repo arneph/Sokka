@@ -52,6 +52,7 @@ char* direntries(const char* path) {
     a[0] = ' ';
     a += 1;
   }
+  a[-1] = 0;
   closedir(d);
   return entries;
 }
@@ -103,11 +104,11 @@ void test();
 
 void myFunc(char* x, bool y) {
   char* a = "xyz";
-  int tmp_strlen2043 = strlen(a) + strlen(x) + 1;
-  char* tmp_str2043 = calloc(tmp_strlen2043, sizeof(char));
-  strcpy(tmp_str2043, a);
-  strcat(tmp_str2043, x);
-  printf("%s", tmp_str2043);
+  int tmp_strlen2044 = strlen(a) + strlen(x) + 1;
+  char* tmp_str2044 = calloc(tmp_strlen2044, sizeof(char));
+  strcpy(tmp_str2044, a);
+  strcat(tmp_str2044, x);
+  printf("%s", tmp_str2044);
 }
 
 int compA(int a, int b) {
@@ -119,15 +120,15 @@ compB_results compB(int a, int b) {
 }
 
 yolo_results yolo(char* a, char* b) {
-  int tmp_strlen1853 = strlen(a) + strlen(b) + 1;
-  char* tmp_str1853 = calloc(tmp_strlen1853, sizeof(char));
-  strcpy(tmp_str1853, a);
-  strcat(tmp_str1853, b);
-  int tmp_strlen1845 = strlen(b) + strlen(a) + 1;
-  char* tmp_str1845 = calloc(tmp_strlen1845, sizeof(char));
-  strcpy(tmp_str1845, b);
-  strcat(tmp_str1845, a);
-  return (yolo_results){tmp_str1853, tmp_str1845};
+  int tmp_strlen1854 = strlen(a) + strlen(b) + 1;
+  char* tmp_str1854 = calloc(tmp_strlen1854, sizeof(char));
+  strcpy(tmp_str1854, a);
+  strcat(tmp_str1854, b);
+  int tmp_strlen1846 = strlen(b) + strlen(a) + 1;
+  char* tmp_str1846 = calloc(tmp_strlen1846, sizeof(char));
+  strcpy(tmp_str1846, b);
+  strcat(tmp_str1846, a);
+  return (yolo_results){tmp_str1854, tmp_str1846};
 }
 
 bool boolTest() {
@@ -173,39 +174,39 @@ void forTest() {
   char* s = "Hello!";
   while ((i) <= (10)) {
     if (((i) % (2)) == (0)) {
-      int tmp_strlen992 = strlen(s) + strlen("!") + 1;
-      char* tmp_str992 = calloc(tmp_strlen992, sizeof(char));
-      strcpy(tmp_str992, s);
-      strcat(tmp_str992, "!");
-      s = tmp_str992;
+      int tmp_strlen993 = strlen(s) + strlen("!") + 1;
+      char* tmp_str993 = calloc(tmp_strlen993, sizeof(char));
+      strcpy(tmp_str993, s);
+      strcat(tmp_str993, "!");
+      s = tmp_str993;
       i = (i) + (1);
       continue;
     }
-    int tmp_strlen935 = strlen(s) + strlen("\n") + 1;
-    char* tmp_str935 = calloc(tmp_strlen935, sizeof(char));
-    strcpy(tmp_str935, s);
-    strcat(tmp_str935, "\n");
-    printf("%s", tmp_str935);
-    int tmp_strlen917 = strlen(s) + strlen("!") + 1;
-    char* tmp_str917 = calloc(tmp_strlen917, sizeof(char));
-    strcpy(tmp_str917, s);
-    strcat(tmp_str917, "!");
-    s = tmp_str917;
+    int tmp_strlen936 = strlen(s) + strlen("\n") + 1;
+    char* tmp_str936 = calloc(tmp_strlen936, sizeof(char));
+    strcpy(tmp_str936, s);
+    strcat(tmp_str936, "\n");
+    printf("%s", tmp_str936);
+    int tmp_strlen918 = strlen(s) + strlen("!") + 1;
+    char* tmp_str918 = calloc(tmp_strlen918, sizeof(char));
+    strcpy(tmp_str918, s);
+    strcat(tmp_str918, "!");
+    s = tmp_str918;
     i = (i) + (1);
   }
   s = "Bye!";
   i = 1;
   while (true) {
-    int tmp_strlen850 = strlen(s) + strlen("\n") + 1;
-    char* tmp_str850 = calloc(tmp_strlen850, sizeof(char));
-    strcpy(tmp_str850, s);
-    strcat(tmp_str850, "\n");
-    printf("%s", tmp_str850);
-    int tmp_strlen832 = strlen(s) + strlen("!") + 1;
-    char* tmp_str832 = calloc(tmp_strlen832, sizeof(char));
-    strcpy(tmp_str832, s);
-    strcat(tmp_str832, "!");
-    s = tmp_str832;
+    int tmp_strlen851 = strlen(s) + strlen("\n") + 1;
+    char* tmp_str851 = calloc(tmp_strlen851, sizeof(char));
+    strcpy(tmp_str851, s);
+    strcat(tmp_str851, "\n");
+    printf("%s", tmp_str851);
+    int tmp_strlen833 = strlen(s) + strlen("!") + 1;
+    char* tmp_str833 = calloc(tmp_strlen833, sizeof(char));
+    strcpy(tmp_str833, s);
+    strcat(tmp_str833, "!");
+    s = tmp_str833;
     i = (i) + (1);
     if ((i) > (5)) {
       break;
@@ -220,92 +221,92 @@ int four() {
 
 void substrTest() {
   char* s = "Yolo What's up? Howdie\n";
-  int tmp_strlen615 = (four()) - (0) + 1;
-  char* tmp_str615 = calloc(tmp_strlen615, sizeof(char));
-  strncpy(tmp_str615, s + 0, tmp_strlen615 - 1);
-  tmp_str615[tmp_strlen615 - 1] = 0;
-  int tmp_strlen598 = strlen(tmp_str615) + strlen("\n") + 1;
-  char* tmp_str598 = calloc(tmp_strlen598, sizeof(char));
-  strcpy(tmp_str598, tmp_str615);
-  strcat(tmp_str598, "\n");
-  printf("%s", tmp_str598);
-  int tmp_strlen587 = (15) - ((2) + (3)) + 1;
-  char* tmp_str587 = calloc(tmp_strlen587, sizeof(char));
-  strncpy(tmp_str587, s + (2) + (3), tmp_strlen587 - 1);
-  tmp_str587[tmp_strlen587 - 1] = 0;
-  int tmp_strlen571 = strlen(tmp_str587) + strlen("\n") + 1;
-  char* tmp_str571 = calloc(tmp_strlen571, sizeof(char));
-  strcpy(tmp_str571, tmp_str587);
-  strcat(tmp_str571, "\n");
-  printf("%s", tmp_str571);
-  int tmp_strlen560 = (strlen(s)) - (kHowdieStart) + 1;
-  char* tmp_str560 = calloc(tmp_strlen560, sizeof(char));
-  strncpy(tmp_str560, s + kHowdieStart, tmp_strlen560 - 1);
-  tmp_str560[tmp_strlen560 - 1] = 0;
-  printf("%s", tmp_str560);
+  int tmp_strlen616 = (four()) - (0) + 1;
+  char* tmp_str616 = calloc(tmp_strlen616, sizeof(char));
+  strncpy(tmp_str616, s + 0, tmp_strlen616 - 1);
+  tmp_str616[tmp_strlen616 - 1] = 0;
+  int tmp_strlen599 = strlen(tmp_str616) + strlen("\n") + 1;
+  char* tmp_str599 = calloc(tmp_strlen599, sizeof(char));
+  strcpy(tmp_str599, tmp_str616);
+  strcat(tmp_str599, "\n");
+  printf("%s", tmp_str599);
+  int tmp_strlen588 = (15) - ((2) + (3)) + 1;
+  char* tmp_str588 = calloc(tmp_strlen588, sizeof(char));
+  strncpy(tmp_str588, s + (2) + (3), tmp_strlen588 - 1);
+  tmp_str588[tmp_strlen588 - 1] = 0;
+  int tmp_strlen572 = strlen(tmp_str588) + strlen("\n") + 1;
+  char* tmp_str572 = calloc(tmp_strlen572, sizeof(char));
+  strcpy(tmp_str572, tmp_str588);
+  strcat(tmp_str572, "\n");
+  printf("%s", tmp_str572);
+  int tmp_strlen561 = (strlen(s)) - (kHowdieStart) + 1;
+  char* tmp_str561 = calloc(tmp_strlen561, sizeof(char));
+  strncpy(tmp_str561, s + kHowdieStart, tmp_strlen561 - 1);
+  tmp_str561[tmp_strlen561 - 1] = 0;
+  printf("%s", tmp_str561);
 }
 
 void lenTest() {
   char* s = "ABCDEFGHIJK";
-  int tmp_strlen486 = (strlen("abc")) - (0) + 1;
-  char* tmp_str486 = calloc(tmp_strlen486, sizeof(char));
-  strncpy(tmp_str486, s + 0, tmp_strlen486 - 1);
-  tmp_str486[tmp_strlen486 - 1] = 0;
-  int tmp_strlen465 = strlen(tmp_str486) + strlen("\n") + 1;
-  char* tmp_str465 = calloc(tmp_strlen465, sizeof(char));
-  strcpy(tmp_str465, tmp_str486);
-  strcat(tmp_str465, "\n");
-  printf("%s", tmp_str465);
-  int tmp_strlen454 = (strlen(s)) - (0) + 1;
-  char* tmp_str454 = calloc(tmp_strlen454, sizeof(char));
-  strncpy(tmp_str454, s + 0, tmp_strlen454 - 1);
-  tmp_str454[tmp_strlen454 - 1] = 0;
-  int tmp_strlen437 = strlen(tmp_str454) + strlen("\n") + 1;
-  char* tmp_str437 = calloc(tmp_strlen437, sizeof(char));
-  strcpy(tmp_str437, tmp_str454);
-  strcat(tmp_str437, "\n");
-  printf("%s", tmp_str437);
+  int tmp_strlen487 = (strlen("abc")) - (0) + 1;
+  char* tmp_str487 = calloc(tmp_strlen487, sizeof(char));
+  strncpy(tmp_str487, s + 0, tmp_strlen487 - 1);
+  tmp_str487[tmp_strlen487 - 1] = 0;
+  int tmp_strlen466 = strlen(tmp_str487) + strlen("\n") + 1;
+  char* tmp_str466 = calloc(tmp_strlen466, sizeof(char));
+  strcpy(tmp_str466, tmp_str487);
+  strcat(tmp_str466, "\n");
+  printf("%s", tmp_str466);
+  int tmp_strlen455 = (strlen(s)) - (0) + 1;
+  char* tmp_str455 = calloc(tmp_strlen455, sizeof(char));
+  strncpy(tmp_str455, s + 0, tmp_strlen455 - 1);
+  tmp_str455[tmp_strlen455 - 1] = 0;
+  int tmp_strlen438 = strlen(tmp_str455) + strlen("\n") + 1;
+  char* tmp_str438 = calloc(tmp_strlen438, sizeof(char));
+  strcpy(tmp_str438, tmp_str455);
+  strcat(tmp_str438, "\n");
+  printf("%s", tmp_str438);
 }
 
 int _main(char* args) {
-  int tmp_strlen392 = strlen("Hello world!") + strlen("\n") + 1;
-  char* tmp_str392 = calloc(tmp_strlen392, sizeof(char));
-  strcpy(tmp_str392, "Hello world!");
-  strcat(tmp_str392, "\n");
-  printf("%s", tmp_str392);
+  int tmp_strlen393 = strlen("Hello world!") + strlen("\n") + 1;
+  char* tmp_str393 = calloc(tmp_strlen393, sizeof(char));
+  strcpy(tmp_str393, "Hello world!");
+  strcat(tmp_str393, "\n");
+  printf("%s", tmp_str393);
   substrTest();
   lenTest();
   test();
   myFunc("??\n", false);
   char* a;
   char* b;
-  yolo_results tmp_results296 = yolo("!", "?");
-  a = tmp_results296.result1;
-  b = tmp_results296.result2;
-  int tmp_strlen257 = strlen(a) + strlen("\n") + 1;
-  char* tmp_str257 = calloc(tmp_strlen257, sizeof(char));
-  strcpy(tmp_str257, a);
-  strcat(tmp_str257, "\n");
-  printf("%s", tmp_str257);
-  int tmp_strlen238 = strlen(b) + strlen("\n") + 1;
-  char* tmp_str238 = calloc(tmp_strlen238, sizeof(char));
-  strcpy(tmp_str238, b);
-  strcat(tmp_str238, "\n");
-  printf("%s", tmp_str238);
+  yolo_results tmp_results297 = yolo("!", "?");
+  a = tmp_results297.result1;
+  b = tmp_results297.result2;
+  int tmp_strlen258 = strlen(a) + strlen("\n") + 1;
+  char* tmp_str258 = calloc(tmp_strlen258, sizeof(char));
+  strcpy(tmp_str258, a);
+  strcat(tmp_str258, "\n");
+  printf("%s", tmp_str258);
+  int tmp_strlen239 = strlen(b) + strlen("\n") + 1;
+  char* tmp_str239 = calloc(tmp_strlen239, sizeof(char));
+  strcpy(tmp_str239, b);
+  strcat(tmp_str239, "\n");
+  printf("%s", tmp_str239);
   char* tmp;
   tmp = b;
   b = a;
   a = tmp;
-  int tmp_strlen177 = strlen(a) + strlen("\n") + 1;
-  char* tmp_str177 = calloc(tmp_strlen177, sizeof(char));
-  strcpy(tmp_str177, a);
-  strcat(tmp_str177, "\n");
-  printf("%s", tmp_str177);
-  int tmp_strlen158 = strlen(b) + strlen("\n") + 1;
-  char* tmp_str158 = calloc(tmp_strlen158, sizeof(char));
-  strcpy(tmp_str158, b);
-  strcat(tmp_str158, "\n");
-  printf("%s", tmp_str158);
+  int tmp_strlen178 = strlen(a) + strlen("\n") + 1;
+  char* tmp_str178 = calloc(tmp_strlen178, sizeof(char));
+  strcpy(tmp_str178, a);
+  strcat(tmp_str178, "\n");
+  printf("%s", tmp_str178);
+  int tmp_strlen159 = strlen(b) + strlen("\n") + 1;
+  char* tmp_str159 = calloc(tmp_strlen159, sizeof(char));
+  strcpy(tmp_str159, b);
+  strcat(tmp_str159, "\n");
+  printf("%s", tmp_str159);
   ifTest();
   forTest();
   printf("%s", "Goodbye world!\n");
@@ -313,11 +314,11 @@ int _main(char* args) {
 }
 
 void test() {
-  int tmp_strlen61 = strlen("abc") + strlen("\n") + 1;
-  char* tmp_str61 = calloc(tmp_strlen61, sizeof(char));
-  strcpy(tmp_str61, "abc");
-  strcat(tmp_str61, "\n");
-  char* x = tmp_str61;
+  int tmp_strlen62 = strlen("abc") + strlen("\n") + 1;
+  char* tmp_str62 = calloc(tmp_strlen62, sizeof(char));
+  strcpy(tmp_str62, "abc");
+  strcat(tmp_str62, "\n");
+  char* x = tmp_str62;
   int y = (123) + (456);
   bool z = false;
   printf("%s", x);

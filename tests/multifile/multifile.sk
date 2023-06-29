@@ -1,0 +1,7 @@
+fn main {
+    var i: int = 1
+    for i <= 10 {
+        print(itoa(i) ++ "! = " ++ itoa(factorial(10)) ++ "\n")
+        i = i + 1
+    }
+}

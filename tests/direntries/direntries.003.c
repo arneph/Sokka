@@ -52,6 +52,7 @@ char* direntries(const char* path) {
     a[0] = ' ';
     a += 1;
   }
+  a[-1] = 0;
   closedir(d);
   return entries;
 }
@@ -96,11 +97,11 @@ int Find(char* haystack, char* needle) {
       i = (i) + (1);
       continue;
     } else {
-      int tmp_strlen800 = ((i) + (strlen(needle))) - (i) + 1;
-      char* tmp_str800 = calloc(tmp_strlen800, sizeof(char));
-      strncpy(tmp_str800, haystack + i, tmp_strlen800 - 1);
-      tmp_str800[tmp_strlen800 - 1] = 0;
-      if ((strcmp(tmp_str800, needle) != 0)) {
+      int tmp_strlen801 = ((i) + (strlen(needle))) - (i) + 1;
+      char* tmp_str801 = calloc(tmp_strlen801, sizeof(char));
+      strncpy(tmp_str801, haystack + i, tmp_strlen801 - 1);
+      tmp_str801[tmp_strlen801 - 1] = 0;
+      if ((strcmp(tmp_str801, needle) != 0)) {
         i = (i) + (1);
         continue;
       }
@@ -115,15 +116,15 @@ Split_results Split(char* s) {
   if ((i) == (-(1))) {
     return (Split_results){s, ""};
   }
-  int tmp_strlen548 = (i) - (0) + 1;
-  char* tmp_str548 = calloc(tmp_strlen548, sizeof(char));
-  strncpy(tmp_str548, s + 0, tmp_strlen548 - 1);
-  tmp_str548[tmp_strlen548 - 1] = 0;
-  int tmp_strlen541 = (strlen(s)) - ((i) + (1)) + 1;
-  char* tmp_str541 = calloc(tmp_strlen541, sizeof(char));
-  strncpy(tmp_str541, s + (i) + (1), tmp_strlen541 - 1);
-  tmp_str541[tmp_strlen541 - 1] = 0;
-  return (Split_results){tmp_str548, tmp_str541};
+  int tmp_strlen549 = (i) - (0) + 1;
+  char* tmp_str549 = calloc(tmp_strlen549, sizeof(char));
+  strncpy(tmp_str549, s + 0, tmp_strlen549 - 1);
+  tmp_str549[tmp_strlen549 - 1] = 0;
+  int tmp_strlen542 = (strlen(s)) - ((i) + (1)) + 1;
+  char* tmp_str542 = calloc(tmp_strlen542, sizeof(char));
+  strncpy(tmp_str542, s + (i) + (1), tmp_strlen542 - 1);
+  tmp_str542[tmp_strlen542 - 1] = 0;
+  return (Split_results){tmp_str549, tmp_str542};
 }
 
 bool EndsWith(char* text, char* suffix) {
@@ -133,11 +134,11 @@ bool EndsWith(char* text, char* suffix) {
     if ((strlen(text)) == (strlen(suffix))) {
       return (strcmp(text, suffix) == 0);
     } else {
-      int tmp_strlen322 = (strlen(text)) - ((strlen(text)) - (strlen(suffix))) + 1;
-      char* tmp_str322 = calloc(tmp_strlen322, sizeof(char));
-      strncpy(tmp_str322, text + (strlen(text)) - (strlen(suffix)), tmp_strlen322 - 1);
-      tmp_str322[tmp_strlen322 - 1] = 0;
-      return (strcmp(tmp_str322, suffix) == 0);
+      int tmp_strlen323 = (strlen(text)) - ((strlen(text)) - (strlen(suffix))) + 1;
+      char* tmp_str323 = calloc(tmp_strlen323, sizeof(char));
+      strncpy(tmp_str323, text + (strlen(text)) - (strlen(suffix)), tmp_strlen323 - 1);
+      tmp_str323[tmp_strlen323 - 1] = 0;
+      return (strcmp(tmp_str323, suffix) == 0);
     }
   }
 }
@@ -145,20 +146,20 @@ bool EndsWith(char* text, char* suffix) {
 int _main(char* args) {
   char* entries = direntries(".");
   char* entry;
-  Split_results tmp_results186 = Split(entries);
-  entry = tmp_results186.result1;
-  entries = tmp_results186.result2;
+  Split_results tmp_results187 = Split(entries);
+  entry = tmp_results187.result1;
+  entries = tmp_results187.result2;
   while ((strlen(entries)) > (0)) {
     if (EndsWith(entry, ".txt")) {
-      int tmp_strlen59 = strlen(entry) + strlen("\n") + 1;
-      char* tmp_str59 = calloc(tmp_strlen59, sizeof(char));
-      strcpy(tmp_str59, entry);
-      strcat(tmp_str59, "\n");
-      printf("%s", tmp_str59);
+      int tmp_strlen60 = strlen(entry) + strlen("\n") + 1;
+      char* tmp_str60 = calloc(tmp_strlen60, sizeof(char));
+      strcpy(tmp_str60, entry);
+      strcat(tmp_str60, "\n");
+      printf("%s", tmp_str60);
     }
-    Split_results tmp_results39 = Split(entries);
-    entry = tmp_results39.result1;
-    entries = tmp_results39.result2;
+    Split_results tmp_results40 = Split(entries);
+    entry = tmp_results40.result1;
+    entries = tmp_results40.result2;
   }
   return 0;
 }

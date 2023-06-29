@@ -45,6 +45,18 @@ var (
 	testsDir      = filepath.Join(baseDir, "tests")
 )
 
+func green(text string) string {
+	return "\033[92m" + text + "\033[0m"
+}
+
+func yellow(text string) string {
+	return "\033[93m" + text + "\033[0m"
+}
+
+func red(text string) string {
+	return "\033[91m" + text + "\033[0m"
+}
+
 func run(name string, args ...string) error {
 	var outBuffer bytes.Buffer
 	cmd := exec.Command(name, args...)
@@ -57,9 +69,9 @@ func run(name string, args ...string) error {
 		if len(out) > 0 {
 			out = "\n" + out
 		}
-		return fmt.Errorf("FAIL $ %s\n %v%s", cmdStr, err, out)
+		return fmt.Errorf(red("FAIL")+" $ %s\n %v%s", cmdStr, err, out)
 	}
-	fmt.Printf("  OK $ %s\n", cmdStr)
+	fmt.Printf("  "+green("OK")+" $ %s\n", cmdStr)
 	return nil
 }
 
@@ -84,9 +96,10 @@ func compileWithBootstrapCompiler(srcFile string) (cFile, execFile string, err e
 	return cFile, execFile, nil
 }
 
-func compileWithSokkaCompiler(sokka, srcFile string, p phase) (cFile, execFile string, err error) {
-	cFile = strings.TrimSuffix(srcFile, sokkaExt) + cPhaseExt(p)
-	if err := run(sokka, srcFile, cFile); err != nil {
+func compileWithSokkaCompiler(sokka, srcDir string, p phase) (cFile, execFile string, err error) {
+	_, name := filepath.Split(srcDir)
+	cFile = srcDir + "/" + name + cPhaseExt(p)
+	if err := run(sokka, srcDir, cFile); err != nil {
 		return "", "", err
 	}
 	execFile, err = compileWithCCompiler(cFile, p)
@@ -104,7 +117,7 @@ func main() {
 	}
 
 	success := true
-	sokkaCFile3, sokkaExecFile3, err := compileWithSokkaCompiler(sokkaExecFile2, sokkaFile, phase(3))
+	sokkaCFile3, sokkaExecFile3, err := compileWithSokkaCompiler(sokkaExecFile2, sokkaDir, phase(3))
 	if err != nil {
 		fmt.Println(err)
 		success = false
@@ -120,7 +133,7 @@ func main() {
 		os.Exit(1)
 	}
 	if !bytes.Equal(sokkaCFile2Contents, sokkaCFile3Contents) {
-		fmt.Println("Sokka did not compile itself with the same output.")
+		fmt.Println(yellow("Note:") + " Sokka did not compile itself with the same output.")
 		success = false
 	}
 
@@ -134,9 +147,8 @@ func main() {
 			continue
 		}
 		testDir := filepath.Join(testsDir, dir.Name())
-		testFile := filepath.Join(testDir, dir.Name()+".sk")
 		for p, sokkaExecFile := range [2]string{sokkaExecFile2, sokkaExecFile3} {
-			_, execFile, err := compileWithSokkaCompiler(sokkaExecFile, testFile, phase(p+2))
+			_, execFile, err := compileWithSokkaCompiler(sokkaExecFile, testDir, phase(p+2))
 			if err != nil {
 				fmt.Println(err)
 				success = false

@@ -133,6 +133,27 @@ fn StartsWith(text: string, prefix: string) -> bool {
     }
 }
 
+fn EndsWith(text: string, suffix: string) -> bool {
+    if len(text) < len(suffix) {
+        return false
+    } else if len(text) == len(suffix) {
+        return text <> suffix
+    } else {
+        return text[len(text)-len(suffix):] <> suffix
+    }
+}
+
+fn Split(s: string) -> (string, string) {
+    if len(s) == 0 {
+        return "", ""
+    }
+    let i: int = Find(s, " ")
+    if i == -1 {
+        return s, ""
+    }
+    return s[:i], s[i+1:]
+}
+
 fn IsNumeric(c: int) -> bool {
     return 48 <= c && c <= 57
 }
@@ -940,10 +961,24 @@ fn TranslateProgram(src: string) -> string {
     return out
 }
 
+fn ReadSrc(src_dir: string) -> string {
+    var src: string = ""
+    var src_files: string = direntries(src_dir)
+    var src_file: string
+    src_file, src_files = Split(src_files)
+    for len(src_files) > 0 || len(src_file) > 0 {
+        if EndsWith(src_file, ".sk") {
+            src = src ++ read(src_dir ++ "/" ++ src_file) ++ "\n"
+        }
+        src_file, src_files = Split(src_files)
+    }
+    return src
+}
+
 fn main(args: string) {
     var i: int = Find(args, " ")
-    var src_file: string = args[:i]
-    var src: string = read(src_file)
+    var src_dir: string = args[:i]
+    var src: string = ReadSrc(src_dir)
     var out: string = TranslateProgram(src)
     var out_file: string = args[i+1:]
     write(out_file, out)

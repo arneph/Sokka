@@ -52,6 +52,7 @@ char* direntries(const char* path) {
     a[0] = ' ';
     a += 1;
   }
+  a[-1] = 0;
   closedir(d);
   return entries;
 }
@@ -92,25 +93,25 @@ int _main(char* args) {
   bool a;
   int b;
   char* c;
-  t_results tmp_results123 = t();
-  a = tmp_results123.result1;
-  t_results tmp_results105 = t();
-  b = tmp_results105.result2;
-  t_results tmp_results87 = t();
-  c = tmp_results87.result3;
-  t_results tmp_results69 = t();
-  a = tmp_results69.result1;
-  b = tmp_results69.result2;
-  t_results tmp_results51 = t();
-  a = tmp_results51.result1;
-  c = tmp_results51.result3;
-  t_results tmp_results33 = t();
-  b = tmp_results33.result2;
-  c = tmp_results33.result3;
-  t_results tmp_results15 = t();
-  a = tmp_results15.result1;
-  b = tmp_results15.result2;
-  c = tmp_results15.result3;
+  t_results tmp_results124 = t();
+  a = tmp_results124.result1;
+  t_results tmp_results106 = t();
+  b = tmp_results106.result2;
+  t_results tmp_results88 = t();
+  c = tmp_results88.result3;
+  t_results tmp_results70 = t();
+  a = tmp_results70.result1;
+  b = tmp_results70.result2;
+  t_results tmp_results52 = t();
+  a = tmp_results52.result1;
+  c = tmp_results52.result3;
+  t_results tmp_results34 = t();
+  b = tmp_results34.result2;
+  c = tmp_results34.result3;
+  t_results tmp_results16 = t();
+  a = tmp_results16.result1;
+  b = tmp_results16.result2;
+  c = tmp_results16.result3;
   return 0;
 }
 
