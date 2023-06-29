@@ -1,0 +1,257 @@
+fn TranslateConstOrVar(src: string) -> (string, string) {
+    var name: string
+    src, name = ConsumeIdent(src)
+    src, _ = ConsumeToken(src, TOK_COLON)
+    var typ: int
+    var typ_str: string
+    src, typ, typ_str = TranslateType(src)
+    var out: string = typ_str ++ " " ++ name
+    return src, out
+}
+
+fn TranslateConstDecl(src: string, indent: string) -> (string, string) {
+    src, _ = ConsumeToken(src, TOK_LET)
+    var out: string
+    src, out = TranslateConstOrVar(src)
+    out = "const " ++ out
+    src, _ = ConsumeToken(src, TOK_ASSIGN)
+    var setup: string
+    var val: string
+    src, setup, val = TranslateExpr(src, indent)
+    src, _ = ConsumeToken(src, TOK_NEWLINE)
+    out = out ++ " = " ++ val ++ ";\n"
+    return src, out
+}
+
+fn TranslateConstDeclStmt(src: string, indent: string) -> (string, string) {
+    var out: string
+    src, out = TranslateConstDecl(src, indent)
+    return src, indent ++ out
+}
+
+fn TranslateVarDeclStmt(src: string, indent: string) -> (string, string) {
+    var tok: int
+    src, _ = ConsumeToken(src, TOK_VAR)
+    var setup: string = ""
+    var val: string
+    var out: string
+    src, out = TranslateConstOrVar(src)
+    tok, _ = Peek(src)
+    if tok == TOK_ASSIGN {
+        src, _ = ConsumeToken(src, TOK_ASSIGN)
+        src, setup, val = TranslateExpr(src, indent)
+        src, _ = ConsumeToken(src, TOK_NEWLINE)
+        out = out ++ " = " ++ val
+    }
+    out = setup ++ indent ++ out ++ ";\n"
+    return src, out
+}
+
+fn TranslateAssignStmt(src: string, indent: string) -> (string, string) {
+    var x: int = Find(src, "=")
+    var lhs: string = src[:x]
+    var rhs: string = src[x+1:]
+    var lhs_ident: string
+    lhs, lhs_ident = ConsumeIdentOrUnderscore(lhs)
+    var old_rhs: string = rhs
+    var setup: string
+    var rhs_expr: string
+    rhs, setup, rhs_expr = TranslateExpr(rhs, indent)
+    var lhs_tok: int
+    var rhs_tok: int
+    lhs_tok, _ = Peek(lhs)
+    rhs_tok, _ = Peek(rhs)
+    if lhs_tok == TOK_COMMA && rhs_tok != TOK_COMMA {
+        var func_name: string
+        old_rhs, func_name = ConsumeIdent(old_rhs)
+        var tmp_results: string = "tmp_results" ++ itoa(len(src))
+        var out: string = setup
+        out = out ++ indent ++ func_name ++ "_results " ++ tmp_results ++ " = " ++ rhs_expr ++ ";\n"
+        if lhs_ident <!> "_" {
+            out = out ++ indent ++ lhs_ident ++ " = " ++ tmp_results ++ ".result1;\n"
+        }
+        var result_count: int = 1
+        for lhs_tok == TOK_COMMA {
+            result_count = result_count + 1
+            lhs, _ = ConsumeToken(lhs, TOK_COMMA)
+            lhs, lhs_ident = ConsumeIdentOrUnderscore(lhs)
+            if lhs_ident <!> "_" {
+                out = out ++ indent ++ lhs_ident ++ " = " ++ tmp_results ++ ".result" ++ itoa(result_count) ++ ";\n"
+            }
+            lhs_tok, _ = Peek(lhs)
+        }
+        src, _ = ConsumeToken(rhs, TOK_NEWLINE)
+        return src, out
+    }
+    var assignments: string = indent ++ lhs_ident ++ " = " ++ rhs_expr ++ ";\n"
+    for lhs_tok == TOK_COMMA {
+        lhs, _ = ConsumeToken(lhs, TOK_COMMA)
+        rhs, _ = ConsumeToken(rhs, TOK_COMMA)
+        lhs, lhs_ident = ConsumeIdent(lhs)
+        var rhs_expr_setup: string
+        rhs, rhs_expr_setup, rhs_expr = TranslateExpr(rhs, indent)
+        setup = setup ++ rhs_expr_setup
+        assignments = assignments ++ indent ++ lhs_ident ++ " = " ++ rhs_expr ++ ";\n"
+        lhs_tok, _ = Peek(lhs)
+    }
+    src, _ = ConsumeToken(rhs, TOK_NEWLINE)
+    return src, setup ++ assignments
+}
+
+fn TranslateIfStmt(src: string, indent: string, func_name: string) -> (string, string) {
+    src, _ = ConsumeToken(src, TOK_IF)
+    var cond_setup: string
+    var cond: string
+    src, cond_setup, cond = TranslateExpr(src, indent)
+    src, _ = ConsumeToken(src, TOK_LCURLY)
+    var out: string = cond_setup
+    out = out ++ indent ++ "if (" ++ cond ++ ") {\n"
+    var body: string
+    src, body = TranslateStmts(src, indent ++ SINGLE_INDENT, func_name)
+    src, _ = ConsumeToken(src, TOK_RCURLY)
+    out = out ++ body
+    out = out ++ indent ++ "}"
+    var tok: int
+    tok, _ = Peek(src)
+    if tok != TOK_ELSE {
+        return src, out ++ "\n"
+    }
+    src, _ = ConsumeToken(src, TOK_ELSE)
+    tok, _ = Peek(src)
+    var else_out: string
+    if tok == TOK_IF {
+        src, else_out = TranslateIfStmt(src, indent ++ SINGLE_INDENT, func_name)
+        out = out ++ " else {\n"
+        out = out ++ else_out
+        out = out ++ indent ++ "}\n"
+        return src, out
+    }
+    src, _ = ConsumeToken(src, TOK_LCURLY)
+    src, else_out = TranslateStmts(src, indent ++ SINGLE_INDENT, func_name)
+    src, _ = ConsumeToken(src, TOK_RCURLY)
+    out = out ++ " else {\n"
+    out = out ++ else_out
+    out = out ++ indent ++ "}\n"
+    return src, out
+}
+
+fn TranslateForStmt(src: string, indent: string, func_name: string) -> (string, string) {
+    var tok: int
+    src, _ = ConsumeToken(src, TOK_FOR)
+    tok, _ = Peek(src)
+    var cond_setup: string = ""
+    var cond: string = "true"
+    if tok != TOK_LCURLY {
+        src, cond_setup, cond = TranslateExpr(src, indent ++ SINGLE_INDENT)
+    }
+    src, _ = ConsumeToken(src, TOK_LCURLY)
+    var out: string
+    if cond_setup <> "" {
+        out = indent ++ "while (" ++ cond ++ ") {\n"
+    } else {
+        out = indent ++ "while (true) {\n"
+        out = out ++ cond_setup
+        out = out ++ indent ++ SINGLE_INDENT ++ "if (!(" ++ cond ++ ")) break;\n"
+    }
+    var body: string
+    src, body = TranslateStmts(src, indent ++ SINGLE_INDENT, func_name)
+    src, _ = ConsumeToken(src, TOK_RCURLY)
+    out = out ++ body
+    out = out ++ indent ++ "}\n"
+    return src, out
+}
+
+fn TranslateContinueStmt(src: string, indent: string) -> (string, string) {
+    src, _ = ConsumeToken(src, TOK_CONTINUE)
+    return src, indent ++ "continue;"
+}
+
+fn TranslateBreakStmt(src: string, indent: string) -> (string, string) {
+    src, _ = ConsumeToken(src, TOK_BREAK)
+    return src, indent ++ "break;"
+}
+
+fn TranslateReturnStmt(src: string, indent: string, func_name: string) -> (string, string) {
+    src, _ = ConsumeToken(src, TOK_RETURN)
+    var expr_count: int
+    var exprs_setup: string
+    var exprs_value: string
+    src, expr_count, exprs_setup, exprs_value = TranslateExprs(src, indent)
+    src, _ = ConsumeToken(src, TOK_NEWLINE)
+    var out: string = exprs_setup ++ indent ++ "return "
+    if expr_count > 1 {
+        out = out ++ "(" ++ func_name ++ "_results){"
+    }
+    out = out ++ exprs_value
+    if expr_count > 1 {
+        out = out ++  "}"
+    }
+    out = out ++ ";\n"
+    return src, out
+}
+
+fn TranslateStmt(src: string, indent: string, func_name: string) -> (string, string) {
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    var out: string
+    if tok == TOK_LET {
+        src, out = TranslateConstDeclStmt(src, indent)
+        return src, out
+    } else if tok == TOK_VAR {
+        src, out = TranslateVarDeclStmt(src, indent)
+        return src, out
+    } else if tok == TOK_IF {
+        src, out = TranslateIfStmt(src, indent, func_name)
+        return src, out
+    } else if tok == TOK_FOR {
+        src, out = TranslateForStmt(src, indent, func_name)
+        return src, out
+    } else if tok == TOK_CONTINUE {
+        src, out = TranslateContinueStmt(src, indent)
+        return src, out
+    } else if tok == TOK_BREAK {
+        src, out = TranslateBreakStmt(src, indent)
+        return src, out
+    } else if tok == TOK_RETURN {
+        src, out = TranslateReturnStmt(src, indent, func_name)
+        return src, out
+    } else if tok == TOK_IDENT || tok == TOK_UNDERSCORE {
+        var first_ident: string
+        src, first_ident = ConsumeIdentOrUnderscore(src)
+        tok, _ = Peek(src)
+        src = first_ident ++ src
+        if tok == TOK_COMMA || tok == TOK_ASSIGN {
+            src, out = TranslateAssignStmt(src, indent)
+            return src, out
+        } else {
+            var setup: string
+            var val: string
+            src, setup, val = TranslateExpr(src, indent)
+            src, _ = ConsumeToken(src, TOK_NEWLINE)
+            out = setup ++ indent ++ val ++ ";\n"
+            return src, out
+        }
+    } else {
+        print("unexpected stmt token, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+        exit(1)
+    }
+}
+
+fn TranslateStmts(src: string, indent: string, func_name: string) -> (string, string) {
+    var tok: int
+    tok, _ = Peek(src)
+    var out: string = ""
+    for tok != TOK_RCURLY {
+        if tok == TOK_NEWLINE {
+            src, _ = ConsumeToken(src, TOK_NEWLINE)
+            tok, _ = Peek(src)
+            continue
+        }
+        var stmt_out: string
+        src, stmt_out = TranslateStmt(src, indent, func_name)
+        out = out ++ stmt_out
+        tok, _ = Peek(src)
+    }
+    return src, out
+}

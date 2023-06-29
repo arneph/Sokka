@@ -1,0 +1,19 @@
+let TYPE_BOOL: int = 1000
+let TYPE_INT: int = 1001
+let TYPE_STRING: int = 1002
+
+fn TranslateType(src: string) -> (string, int, string) {
+    var tok: int
+    var tok_str: string
+    src, tok, tok_str = Next(src)
+    if tok == TOK_BOOL {
+        return src, TYPE_BOOL, "bool"
+    } else if tok == TOK_INT {
+        return src, TYPE_INT, "int"
+    } else if tok == TOK_STRING {
+        return src, TYPE_STRING, "char*"
+    } else {
+        print("expected type, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+        exit(1)
+    }
+}

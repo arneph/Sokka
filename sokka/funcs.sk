@@ -1,0 +1,88 @@
+fn TranslateFuncArgs(src: string) -> (string, string) {
+    var tok: int
+    src, _ = ConsumeToken(src, TOK_LPAREN)
+    tok, _ = Peek(src)
+    if tok == TOK_RPAREN {
+        src, _ = ConsumeToken(src, TOK_RPAREN)
+        return src, "()"
+    }
+    var args: string
+    src, args = TranslateConstOrVar(src)
+    tok, _ = Peek(src)
+    for tok == TOK_COMMA {
+        src, _ = ConsumeToken(src, TOK_COMMA)
+        var arg: string
+        src, arg = TranslateConstOrVar(src)
+        args = args ++ ", " ++ arg
+        tok, _ = Peek(src)
+    }
+    src, _ = ConsumeToken(src, TOK_RPAREN)
+    return src, "(" ++ args ++ ")"
+}
+
+fn TranslateFuncResults(src: string, func_name: string) -> (string, string, string) {
+    var typ: int
+    var typ_str: string
+    var tok: int
+    tok, _ = Peek(src)
+    if tok != TOK_LPAREN {
+        src, typ, typ_str = TranslateType(src)
+        return src, "", typ_str
+    }
+    src, _ = ConsumeToken(src, TOK_LPAREN)
+    src, typ, typ_str = TranslateType(src)
+    tok, _ = Peek(src)
+    if tok != TOK_COMMA {
+        src, _ = ConsumeToken(src, TOK_RPAREN)
+        return src, "", typ_str
+    }
+    var td: string = "typedef struct {\n" ++ SINGLE_INDENT ++ typ_str ++ " result1;\n"
+    var res_count: int = 1
+    for tok == TOK_COMMA {
+        src, _ = ConsumeToken(src, TOK_COMMA)
+        src, typ, typ_str = TranslateType(src)
+        res_count = res_count + 1
+        td = td ++ SINGLE_INDENT ++ typ_str ++ " result" ++ itoa(res_count) ++ ";\n"
+        tok, _ = Peek(src)
+    }
+    src, _ = ConsumeToken(src, TOK_RPAREN)
+    td = td ++ "} " ++ func_name ++ "_results;\n"
+    return src, td, func_name ++ "_results"
+}
+
+fn TranslateFunc(src: string) -> (string, string, string) {
+    var tok: int
+    var name: string
+    src, _ = ConsumeToken(src, TOK_FN)
+    src, name = ConsumeIdent(src)
+    var args: string = "()"
+    var results_type_def: string = ""
+    var results_type_name: string = "void"
+    if name <> "main" {
+        name = "_main"
+        args = "(char* args)"
+        results_type_name = "int"
+    }
+    tok, _ = Peek(src)
+    if tok == TOK_LPAREN {
+        src, args = TranslateFuncArgs(src)
+        tok, _ = Peek(src)
+        if tok == TOK_RARROW {
+            src, _ = ConsumeToken(src, TOK_RARROW)
+            src, results_type_def, results_type_name = TranslateFuncResults(src, name)
+        }
+    }
+    var stmts_out: string
+    src, _ = ConsumeToken(src, TOK_LCURLY)
+    src, stmts_out = TranslateStmts(src, SINGLE_INDENT ++ "", name)
+    src, _ = ConsumeToken(src, TOK_RCURLY)
+    var df: string = results_type_name ++ " " ++ name ++ args
+    var decl: string = results_type_def ++ df ++ ";\n"
+    df = df ++ " {\n"
+    df = df ++ stmts_out
+    if name <> "_main" {
+        df = df ++ "  return 0;\n"
+    }
+    df = df ++ "}\n\n"
+    return src, decl, df
+}

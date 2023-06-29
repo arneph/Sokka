@@ -1,0 +1,213 @@
+fn TranslateBoolLiteral(src: string) -> (string, string) {
+    var tok: int
+    var tok_str: string
+    src, tok, tok_str = Next(src)
+    if tok == TOK_FALSE || tok == TOK_TRUE {
+        return src, tok_str
+    } else {
+        print("expected false or true, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+        exit(1)
+    }
+}
+
+fn TranslateIntLiteral(src: string) -> (string, string) {
+    var lit: string
+    src, lit = ConsumeToken(src, TOK_INTLIT)
+    return src, lit
+}
+
+fn TranslateStringLiteral(src: string) -> (string, string) {
+    var lit: string
+    src, lit = ConsumeToken(src, TOK_STRLIT)
+    return src, lit
+}
+
+fn TranslateCall(src: string, indent: string, callee: string) -> (string, string, string) {
+    var tok: int
+    src, _ = ConsumeToken(src, TOK_LPAREN)
+    tok, _ = Peek(src)
+    var args_setup: string = ""
+    var arg_values: string = ""
+    if tok != TOK_RPAREN {
+        var expr_count: int
+        src, expr_count, args_setup, arg_values = TranslateExprs(src, indent)
+    }
+    src, _ = ConsumeToken(src, TOK_RPAREN)
+    var val: string
+    if callee <> "print" {
+        val = "printf(\"%s\", " ++ arg_values ++ ")"
+    } else if callee <> "len" {
+        val = "strlen(" ++ arg_values ++ ")"
+    } else {
+        val = callee ++ "(" ++ arg_values ++ ")"
+    }
+    return src, args_setup, val
+}
+
+fn TranslateSubstrExpr(src: string, indent: string, strvar: string) -> (string, string, string) {
+    var tok: int
+    var p: int = len(src)
+    src, _ = ConsumeToken(src, TOK_LBRACKET)
+    var low_setup: string = ""
+    var low_expr: string = "0"
+    var high_setup: string = ""
+    var high_expr: string = "strlen(" ++ strvar ++ ")"
+    tok, _ = Peek(src)
+    if tok == TOK_COLON {
+        src, _ = ConsumeToken(src, TOK_COLON)
+        src, high_setup, high_expr = TranslateExpr(src, indent)
+        src, _ = ConsumeToken(src, TOK_RBRACKET)
+    } else {
+        src, low_setup, low_expr = TranslateExpr(src, indent)
+        tok, _ = Peek(src)
+        if tok == TOK_RBRACKET {
+            src, _ = ConsumeToken(src, TOK_RBRACKET)
+            return src, low_setup, strvar ++ "[" ++ low_expr ++ "]"
+        }
+        src, _ = ConsumeToken(src, TOK_COLON)
+        tok, _ = Peek(src)
+        if tok != TOK_RBRACKET {
+            src, high_setup, high_expr = TranslateExpr(src, indent)
+        }
+        src, _ = ConsumeToken(src, TOK_RBRACKET)
+    }
+    var tmp_str: string = "tmp_str" ++ itoa(p)
+    var tmp_strlen: string = "tmp_strlen" ++ itoa(p)
+    var setup: string = low_setup ++ high_setup
+    setup = setup ++ indent ++ "int " ++ tmp_strlen ++ " = (" ++ high_expr ++ ") - (" ++ low_expr ++ ") + 1;\n"
+    setup = setup ++ indent ++ "char* " ++ tmp_str ++ " = calloc(" ++ tmp_strlen ++ ", sizeof(char));\n"
+    setup = setup ++ indent ++ "strncpy(" ++ tmp_str ++ ", " ++ strvar ++ " + " ++ low_expr ++ ", " ++ tmp_strlen ++ " - 1);\n"
+    setup = setup ++ indent ++ tmp_str ++ "[" ++ tmp_strlen ++ " - 1] = 0;\n"
+    return src, setup, tmp_str
+}
+
+fn TranslateOperand(src: string, indent: string) -> (string, string, string) {
+    var tok: int
+    var tok_str: string
+    tok, tok_str = Peek(src)
+    if tok == TOK_LPAREN {
+        var setup: string
+        var val: string
+        src, _ = ConsumeToken(src, TOK_LPAREN)
+        src, setup, val = TranslateExpr(src, indent)
+        src, _ = ConsumeToken(src, TOK_RPAREN)
+        return src, setup, val
+    } else if tok == TOK_FALSE || tok == TOK_TRUE {
+        var lit: string
+        src, lit = TranslateBoolLiteral(src)
+        return src, "", lit
+    } else if tok == TOK_INTLIT {
+        var lit: string
+        src, lit = TranslateIntLiteral(src)
+        return src, "", lit
+    } else if tok == TOK_STRLIT {
+        var lit: string
+        src, lit = TranslateStringLiteral(src)
+        return src, "", lit
+    } else if tok == TOK_IDENT {
+        var ident: string
+        src, ident = ConsumeIdent(src)
+        tok, _ = Peek(src)
+        if tok == TOK_LPAREN {
+            var setup: string
+            var expr: string
+            src, setup, expr = TranslateCall(src, indent, ident)
+            return src, setup, expr
+        } else if tok == TOK_LBRACKET {
+            var setup: string
+            var expr: string
+            src, setup, expr = TranslateSubstrExpr(src, indent, ident)
+            return src, setup, expr
+        } else {
+            return src, "", ident
+        }
+    } else {
+        print("unexpected expr, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
+        exit(1)
+    }
+}
+
+fn TranslateUnaryExpr(src: string, indent: string) -> (string, string, string) {
+    var tok: int
+    tok, _ = Peek(src)
+    if IsUnaryOp(tok) {
+        var tok_str: string
+        src, tok_str = ConsumeToken(src, tok)
+        var setup: string
+        var val: string
+        src, setup, val = TranslateExpr(src, indent)
+        val = tok_str ++ "(" ++ val ++ ")"
+        return src, setup, val
+    } else {
+        var setup: string
+        var expr: string
+        src, setup, expr = TranslateOperand(src, indent)
+        return src, setup, expr
+    }
+}
+
+fn TranslateExprWithPrecedence(src: string, indent: string, precedence: int) -> (string, string, string) {
+    var setup: string
+    var val: string
+    src, setup, val = TranslateUnaryExpr(src, indent)
+    var op: int
+    var op_str: string
+    op, op_str = Peek(src)
+    for IsBinaryOp(op) && Precedence(op) > precedence {
+        src, op_str = ConsumeToken(src, op)
+        var tok: int
+        tok, _ = Peek(src)
+        for tok == TOK_NEWLINE {
+            src, _ = ConsumeToken(src, TOK_NEWLINE)
+            tok, _ = Peek(src)
+        }
+        var setup_b: string
+        var val_b: string
+        src, setup_b, val_b = TranslateExprWithPrecedence(src, indent, Precedence(op))
+        setup = setup ++ setup_b
+        if op == TOK_STRCAT {
+            var tmp_str: string = "tmp_str" ++ itoa(len(src))
+            var tmp_strlen: string = "tmp_strlen" ++ itoa(len(src))
+            setup = setup ++ indent ++ "int " ++ tmp_strlen ++ " = strlen(" ++ val ++ ") + strlen(" ++ val_b ++ ") + 1;\n"
+            setup = setup ++ indent ++ "char* " ++ tmp_str ++ " = calloc(" ++ tmp_strlen ++ ", sizeof(char));\n"
+            setup = setup ++ indent ++ "strcpy(" ++ tmp_str ++ ", " ++ val ++ ");\n"
+            setup = setup ++ indent ++ "strcat(" ++ tmp_str ++ ", " ++ val_b ++ ");\n"
+            val = tmp_str
+        } else if op == TOK_STREQ {
+            val = "(strcmp(" ++ val ++ ", " ++ val_b ++ ") == 0)"
+        } else if op == TOK_STRNEQ {
+            val = "(strcmp(" ++ val ++ ", " ++ val_b ++ ") != 0)"
+        } else {
+            val = "(" ++ val ++ ") " ++ op_str ++ " (" ++ val_b ++ ")"
+        }
+        op, _ = Peek(src)
+    }
+    return src, setup, val
+}
+
+fn TranslateExpr(src: string, indent: string) -> (string, string, string) {
+    var setup: string
+    var expr: string
+    src, setup, expr = TranslateExprWithPrecedence(src, indent, 0)
+    return src, setup, expr
+}
+
+fn TranslateExprs(src: string, indent: string) -> (string, int, string, string) {
+    var expr_setup: string
+    var expr_value: string
+    src, expr_setup, expr_value = TranslateExpr(src, indent)
+    var tok: int
+    tok, _ = Peek(src)
+    var exprs_count: int = 1
+    var exprs_setup: string = expr_setup
+    var exprs_value: string = expr_value
+    for tok == TOK_COMMA {
+        src, _ = ConsumeToken(src, TOK_COMMA)
+        src, expr_setup, expr_value = TranslateExpr(src, indent)
+        exprs_count = exprs_count + 1
+        exprs_setup = exprs_setup ++ expr_setup
+        exprs_value = exprs_value ++ ", " ++ expr_value
+        tok, _ = Peek(src)
+    }
+    return src, exprs_count, exprs_setup, exprs_value
+}

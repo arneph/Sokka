@@ -1,0 +1,168 @@
+fn Next(src: string) -> (string, int, string) {
+    src = RemoveLeadingWhitespace(src)
+    if src <> "" {
+        return "", TOK_EOF, ""
+    } else if StartsWith(src, "->") {
+        return src[2:], TOK_RARROW, "->"
+    } else if StartsWith(src, "||") {
+        return src[2:], TOK_BOR, "||"
+    } else if StartsWith(src, "&&") {
+        return src[2:], TOK_BAND, "&&"
+    } else if StartsWith(src, "==") {
+        return src[2:], TOK_EQ, "=="
+    } else if StartsWith(src, "!=") {
+        return src[2:], TOK_NEQ, "!="
+    } else if StartsWith(src, "<=") {
+        return src[2:], TOK_LEQ, "<="
+    } else if StartsWith(src, ">=") {
+        return src[2:], TOK_GEQ, ">="
+    } else if StartsWith(src, "++") {
+        return src[2:], TOK_STRCAT, "++"
+    } else if StartsWith(src, "<>") {
+        return src[2:], TOK_STREQ, "<>"
+    } else if StartsWith(src, "<!>") {
+        return src[3:], TOK_STRNEQ, "<!>"
+    } else if StartsWith(src, "\n") {
+        return src[1:], TOK_NEWLINE, "\n"
+    } else if StartsWith(src, "(") {
+        return src[1:], TOK_LPAREN, "("
+    } else if StartsWith(src, ")") {
+        return src[1:], TOK_RPAREN, ")"
+    } else if StartsWith(src, "[") {
+        return src[1:], TOK_LBRACKET, "["
+    } else if StartsWith(src, "]") {
+        return src[1:], TOK_RBRACKET, "]"
+    } else if StartsWith(src, "{") {
+        return src[1:], TOK_LCURLY, "{"
+    } else if StartsWith(src, "}") {
+        return src[1:], TOK_RCURLY, "}"
+    } else if StartsWith(src, "_") {
+        return src[1:], TOK_UNDERSCORE, "_"
+    } else if StartsWith(src, ":") {
+        return src[1:], TOK_COLON, ":"
+    } else if StartsWith(src, ",") {
+        return src[1:], TOK_COMMA, ","
+    } else if StartsWith(src, "=") {
+        return src[1:], TOK_ASSIGN, "="
+    } else if StartsWith(src, "!") {
+        return src[1:], TOK_BNOT, "!"
+    } else if StartsWith(src, "+") {
+        return src[1:], TOK_ADD, "+"
+    } else if StartsWith(src, "-") {
+        return src[1:], TOK_SUB, "-"
+    } else if StartsWith(src, "*") {
+        return src[1:], TOK_MUL, "*"
+    } else if StartsWith(src, "/") {
+        return src[1:], TOK_DIV, "/"
+    } else if StartsWith(src, "%") {
+        return src[1:], TOK_REM, "%"
+    } else if StartsWith(src, "~") {
+        return src[1:], TOK_INOT, "~"
+    } else if StartsWith(src, "|") {
+        return src[1:], TOK_IOR, "|"
+    } else if StartsWith(src, "&") {
+        return src[1:], TOK_IAND, "&"
+    } else if StartsWith(src, "^") {
+        return src[1:], TOK_IXOR, "^"
+    } else if StartsWith(src, "<") {
+        return src[1:], TOK_LESS, "<"
+    } else if StartsWith(src, ">") {
+        return src[1:], TOK_GREATER, ">"
+    } else if IsAlpha(src[0]) {
+        var i: int = 1
+        for i < len(src) && (IsAlphaNumeric(src[i-1]) || src[i-1] == 95) {
+            i = i + 1
+        }
+        i = i - 1
+        var ts: string = src[:i]
+        var tt: int
+        if ts <> "fn" {
+            tt = TOK_FN
+        } else if ts <> "let" {
+            tt = TOK_LET
+        } else if ts <> "var" {
+            tt = TOK_VAR
+        } else if ts <> "if" {
+            tt = TOK_IF
+        } else if ts <> "else" {
+            tt = TOK_ELSE
+        } else if ts <> "for" {
+            tt = TOK_FOR
+        } else if ts <> "return" {
+            tt = TOK_RETURN
+        } else if ts <> "bool" {
+            tt = TOK_BOOL
+        } else if ts <> "int" {
+            tt = TOK_INT
+        } else if ts <> "string" {
+            tt = TOK_STRING
+        } else if ts <> "false" {
+            tt = TOK_FALSE
+        } else if ts <> "true" {
+            tt = TOK_TRUE
+        } else {
+            tt = TOK_IDENT
+        }
+        return src[i:], tt, ts
+    } else if IsNumeric(src[0]) {
+        var i: int = 1
+        for i < len(src) && IsNumeric(src[i]) {
+            i = i + 1
+        }
+        return src[i:], TOK_INTLIT, src[:i]
+    } else if StartsWith(src, "\"") {
+        var i: int = 1
+        for src[i:i+1] <!> "\"" {
+            i = i + 1
+            if src[i-1:i] <> "\\" {
+                i = i + 1
+            }
+        }
+        i = i + 1
+        return src[i:], TOK_STRLIT, src[:i]
+    } else {
+        print("unexpected token start: " ++ src[:1])
+        exit(1)
+    }
+}
+
+fn Peek(src: string) -> (int, string) {
+    var tok: int
+    var tok_str: string
+    _, tok, tok_str = Next(src)
+    return tok, tok_str
+}
+
+fn ConsumeToken(src: string, expected_tok: int) -> (string, string) {
+    var actual_tok: int
+    var actual_tok_str: string
+    src, actual_tok, actual_tok_str = Next(src)
+    if actual_tok != expected_tok {
+        print("expected token: " ++ itoa(expected_tok) ++ 
+              " got: " ++ itoa(actual_tok) ++ " \"" ++ actual_tok_str ++ "\"")
+        exit(1)
+    }
+    return src, actual_tok_str
+}
+
+fn ConsumeIdent(src: string) -> (string, string) {
+    var actual_tok: int
+    var actual_tok_str: string
+    src, actual_tok, actual_tok_str = Next(src)
+    if actual_tok != TOK_IDENT {
+        print("expected ident, got: " ++ itoa(actual_tok) ++ " \"" ++ actual_tok_str ++ "\"")
+        exit(1)
+    }
+    return src, actual_tok_str
+}
+
+fn ConsumeIdentOrUnderscore(src: string) -> (string, string) {
+    var actual_tok: int
+    var actual_tok_str: string
+    src, actual_tok, actual_tok_str = Next(src)
+    if actual_tok != TOK_UNDERSCORE && actual_tok != TOK_IDENT {
+        print("expected ident or underscore, got: " ++ itoa(actual_tok) ++ " \"" ++ actual_tok_str ++ "\"")
+        exit(1)
+    }
+    return src, actual_tok_str
+}

@@ -1,0 +1,99 @@
+let TOK_NEWLINE: int = 0
+let TOK_EOF: int = 1
+
+let TOK_FN: int = 100
+let TOK_LET: int = 101
+let TOK_VAR: int = 102
+let TOK_IF: int = 103
+let TOK_ELSE: int = 104
+let TOK_FOR: int = 105
+let TOK_CONTINUE: int = 106
+let TOK_BREAK: int = 107
+let TOK_RETURN: int = 108
+let TOK_BOOL: int = 110
+let TOK_INT: int = 111
+let TOK_STRING: int = 112
+let TOK_FALSE: int = 120
+let TOK_TRUE: int = 121
+
+let TOK_LPAREN: int = 200
+let TOK_RPAREN: int = 201
+let TOK_LBRACKET: int = 202
+let TOK_RBRACKET: int = 203
+let TOK_LCURLY: int = 204
+let TOK_RCURLY: int = 205
+let TOK_UNDERSCORE: int = 210
+let TOK_COLON: int = 211
+let TOK_COMMA: int = 212
+let TOK_ASSIGN: int = 213
+let TOK_RARROW: int = 214
+
+let TOK_BNOT: int = 220
+let TOK_BOR: int = 221
+let TOK_BAND: int = 222
+
+let TOK_ADD: int = 230
+let TOK_SUB: int = 231
+let TOK_MUL: int = 232
+let TOK_DIV: int = 233
+let TOK_REM: int = 234
+let TOK_INOT: int = 235
+let TOK_IOR: int = 236
+let TOK_IAND: int = 237
+let TOK_IXOR: int = 238
+
+let TOK_EQ: int = 240
+let TOK_NEQ: int = 241
+let TOK_LESS: int = 242
+let TOK_LEQ: int = 243
+let TOK_GEQ: int = 244
+let TOK_GREATER: int = 245
+
+let TOK_STRCAT: int = 250
+let TOK_STREQ: int = 251
+let TOK_STRNEQ: int = 252
+
+let TOK_IDENT: int = 300
+let TOK_INTLIT: int = 301
+let TOK_STRLIT: int = 302
+
+fn IsUnaryOp(tok: int) -> bool {
+    return tok == TOK_BOR || tok == TOK_BAND || tok == TOK_ADD || tok == TOK_SUB ||
+           tok == TOK_MUL || tok == TOK_DIV || tok == TOK_REM || tok == TOK_IOR ||
+           tok == TOK_IAND || tok == TOK_IXOR || tok == TOK_EQ || tok == TOK_NEQ ||
+           tok == TOK_LESS || tok == TOK_LEQ || tok == TOK_GEQ || tok == TOK_GREATER ||
+           tok == TOK_STRCAT || tok == TOK_STREQ || tok == TOK_STRNEQ
+}
+
+fn IsBinaryOp(tok: int) -> bool {
+    return tok == TOK_BOR || tok == TOK_BAND || tok == TOK_ADD || tok == TOK_SUB ||
+           tok == TOK_MUL || tok == TOK_DIV || tok == TOK_REM || tok == TOK_IOR ||
+           tok == TOK_IAND || tok == TOK_IXOR || tok == TOK_EQ || tok == TOK_NEQ ||
+           tok == TOK_LESS || tok == TOK_LEQ || tok == TOK_GEQ || tok == TOK_GREATER ||
+           tok == TOK_STRCAT || tok == TOK_STREQ || tok == TOK_STRNEQ
+}
+
+fn Precedence(tok: int) -> int {
+    if tok == TOK_BOR {
+        return 1
+    } else if tok == TOK_BAND {
+        return 2
+    } else if tok == TOK_EQ || tok == TOK_NEQ || 
+              tok == TOK_LESS || tok == TOK_LEQ || tok == TOK_GEQ || tok == TOK_GREATER ||
+              tok == TOK_STREQ || tok == TOK_STRNEQ {
+        return 3
+    } else if tok == TOK_IOR {
+        return 4
+    } else if tok == TOK_IXOR {
+        return 5
+    } else if tok == TOK_IAND {
+        return 6
+    } else if tok == TOK_ADD || tok == TOK_SUB || tok == TOK_STRCAT {
+        return 7
+    } else if tok == TOK_MUL || tok == TOK_DIV || tok == TOK_REM {
+        return 8
+    } else {
+        print("token has no defined precedence: " ++ itoa(tok))
+        exit(1)
+    }
+}
