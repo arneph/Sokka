@@ -1,6 +1,9 @@
 let SINGLE_INDENT: string = "  "
 
 fn Find(haystack: string, needle: string) -> int {
+    if len(haystack) == 0 {
+        return -1
+    }
     if len(needle) == 0 {
         return 0
     }
@@ -65,6 +68,18 @@ fn IsAlphaNumeric(c: int) -> bool {
 fn RemoveLeadingWhitespace(text: string) -> string {
     for StartsWith(text, " ") || StartsWith(text, "\t") {
         text = text[1:]
+    }
+    return text
+}
+
+fn Escape(text: string) -> string {
+    var i: int = 0
+    for i < len(text) {
+        if text[i] == 34 || text[i] == 92 {
+            text = text[:i] ++ "\\" ++ text[i:]
+            i = i + 1
+        }
+        i = i + 1
     }
     return text
 }

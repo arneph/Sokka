@@ -2,13 +2,24 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
+
+func init() {
+	flag.Parse()
+}
+
+var printAllOutput = flag.Bool("print-all-output",
+	false,
+	"Print all output from failed and successful comands.")
 
 const (
 	sokkaExt = ".sk"
@@ -41,8 +52,12 @@ var (
 	bootstrapFile = filepath.Join(bootstrapDir, "sokka.py")
 	sokkaDir      = filepath.Join(baseDir, "sokka")
 	sokkaFile     = filepath.Join(sokkaDir, "sokka.sk")
-	sokkaCFile2   = filepath.Join(sokkaDir, "out", "sokka"+cPhaseExt(phase(2)))
+	sokkaCFile2   = filepath.Join(sokkaDir, "out", "sokka.build"+cPhaseExt(phase(2)))
 	testsDir      = filepath.Join(baseDir, "tests")
+)
+
+var (
+	cmdTimeout = 10 * time.Second
 )
 
 func green(text string) string {
@@ -59,19 +74,26 @@ func red(text string) string {
 
 func run(name string, args ...string) error {
 	var outBuffer bytes.Buffer
-	cmd := exec.Command(name, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), cmdTimeout)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = &outBuffer
 	cmd.Stderr = &outBuffer
 	cmdStr := name + " " + strings.Join(args, " ")
 	err := cmd.Run()
+	out := outBuffer.String()
+	if len(out) > 0 {
+		out = strings.TrimSuffix(out, "\n")
+		out = "\n" + out
+	}
 	if err != nil {
-		out := outBuffer.String()
-		if len(out) > 0 {
-			out = "\n" + out
-		}
 		return fmt.Errorf(red("FAIL")+" $ %s\n %v%s", cmdStr, err, out)
 	}
-	fmt.Printf("  "+green("OK")+" $ %s\n", cmdStr)
+	if !*printAllOutput || len(out) == 0 {
+		fmt.Printf("  "+green("OK")+" $ %s\n", cmdStr)
+	} else {
+		fmt.Printf("  "+green("OK")+" $ %s\n%s\n", cmdStr, out)
+	}
 	return nil
 }
 
@@ -96,14 +118,14 @@ func compileWithBootstrapCompiler(srcFile string) (cFile, execFile string, err e
 	return cFile, execFile, nil
 }
 
-func compileWithSokkaCompiler(sokka, srcDir string, p phase) (cFile, execFile string, err error) {
+func compileWithSokkaCompiler(sokka, verb, srcDir string, p phase) (cFile, execFile string, err error) {
 	outDir := srcDir + "/out"
 	if err := os.MkdirAll(outDir, 0700); err != nil {
 		return "", "", err
 	}
 	_, name := filepath.Split(srcDir)
-	cFile = outDir + "/" + name + cPhaseExt(p)
-	if err := run(sokka, srcDir, cFile); err != nil {
+	cFile = outDir + "/" + name + "." + verb + cPhaseExt(p)
+	if err := run(sokka, verb, srcDir, cFile); err != nil {
 		return "", "", err
 	}
 	execFile, err = compileWithCCompiler(cFile, p)
@@ -121,11 +143,21 @@ func main() {
 	}
 
 	success := true
-	sokkaCFile3, sokkaExecFile3, err := compileWithSokkaCompiler(sokkaExecFile2, sokkaDir, phase(3))
+	sokkaCFile3, sokkaExecFile3, err := compileWithSokkaCompiler(sokkaExecFile2, "build", sokkaDir, phase(3))
 	if err != nil {
 		fmt.Println(err)
 		success = false
 	}
+	_, sokkaTestFile3, err := compileWithSokkaCompiler(sokkaExecFile2, "test", sokkaDir, phase(3))
+	if err != nil {
+		fmt.Println(err)
+		success = false
+	}
+	if err := run(sokkaTestFile3); err != nil {
+		fmt.Println(err)
+		success = false
+	}
+
 	sokkaCFile2Contents, err := ioutil.ReadFile(sokkaCFile2)
 	if err != nil {
 		fmt.Println(err)
@@ -152,16 +184,18 @@ func main() {
 		}
 		testDir := filepath.Join(testsDir, dir.Name())
 		for p, sokkaExecFile := range [2]string{sokkaExecFile2, sokkaExecFile3} {
-			_, execFile, err := compileWithSokkaCompiler(sokkaExecFile, testDir, phase(p+2))
-			if err != nil {
-				fmt.Println(err)
-				success = false
-				continue
-			}
-			if err := run(execFile); err != nil {
-				fmt.Println(err)
-				success = false
-				continue
+			for _, verb := range [2]string{"build", "test"} {
+				_, execFile, err := compileWithSokkaCompiler(sokkaExecFile, verb, testDir, phase(p+2))
+				if err != nil {
+					fmt.Println(err)
+					success = false
+					continue
+				}
+				if err := run(execFile); err != nil {
+					fmt.Println(err)
+					success = false
+					continue
+				}
 			}
 		}
 	}

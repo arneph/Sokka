@@ -1,19 +1,24 @@
-fn ReadSrc(src_dir: string) -> string {
+fn ReadSrc(src_dir: string, read_tests: bool) -> (string, string) {
     var src: string = ""
+    var tests: string = ""
     var src_files: string = direntries(src_dir)
     var src_file: string
     src_file, src_files = Split(src_files)
     for len(src_files) > 0 || len(src_file) > 0 {
-        if EndsWith(src_file, ".sk") {
+        if EndsWith(src_file, "_test.sk") {
+            if read_tests {
+                tests = tests ++ read(src_dir ++ "/" ++ src_file) ++ "\n"
+            }
+        } else if EndsWith(src_file, ".sk") {
             src = src ++ read(src_dir ++ "/" ++ src_file) ++ "\n"
         }
         src_file, src_files = Split(src_files)
     }
-    return src
+    return src, tests
 }
 
-fn TranslateProgram(src: string) -> string {
-    var out: string = read("clib/lib.c")
+fn TranslateCode(src: string, testing: bool) -> string {
+    var out: string = ""
     var constants: string = ""
     var decls: string = ""
     var defs: string = ""
@@ -32,8 +37,15 @@ fn TranslateProgram(src: string) -> string {
         } else if tok == TOK_FN {
             var fn_decl: string
             var fn_def: string
-            src, fn_decl, fn_def = TranslateFunc(src)
-            decls = decls ++ fn_decl
+            var is_main: bool
+            src, fn_decl, fn_def, is_main = TranslateFunc(src)
+            if testing && is_main {
+                tok, tok_str = Peek(src)
+                continue
+            }
+            if is_main == false {
+                decls = decls ++ fn_decl
+            }
             defs = defs ++ fn_def
         } else {
             print("unexpected decl token, got: " ++ itoa(tok) ++ " \"" ++ tok_str ++ "\"")
@@ -54,11 +66,78 @@ fn TranslateProgram(src: string) -> string {
     return out
 }
 
+fn TranslateProgram(src: string) -> string {
+    var c_lib: string = read("clib/lib.c")
+    var src_out: string = TranslateCode(src, false)
+    return c_lib ++ src_out
+}
+
+fn GenerateTestMainFn(tests: string) -> string {
+    var i: int = 0
+    var j: int = Find(tests, "\n")
+    var main: string = "fn main(args: string) {\n"
+    main = main ++ SINGLE_INDENT ++ "var success: bool = true\n"
+    for j != -1 {
+        var line: string = tests[i:j]
+        if StartsWith(line, "fn test") {
+            var k: int = Find(line, "(")
+            var name: string = line[3:k]
+            main = main ++ SINGLE_INDENT ++ "if " ++ name ++ "() == false {\n"
+            main = main ++ SINGLE_INDENT ++ SINGLE_INDENT ++ "success = false\n"
+            main = main ++ SINGLE_INDENT ++ SINGLE_INDENT ++ "print(\"[Fail] " ++ name ++ "\\n\")\n"
+            main = main ++ SINGLE_INDENT ++ "} else {\n"
+            main = main ++ SINGLE_INDENT ++ SINGLE_INDENT ++ "print(\"[ Ok ] " ++ name ++ "\\n\")\n"
+            main = main ++ SINGLE_INDENT ++ "}\n"
+        }
+        i = j + 1
+        j = Find(tests[i:], "\n")
+        if j != -1 {
+            j = i + j
+        }
+    }
+    main = main ++ SINGLE_INDENT ++ "if success == false {\n"
+    main = main ++ SINGLE_INDENT ++ SINGLE_INDENT ++ "exit(1)\n"
+    main = main ++ SINGLE_INDENT ++ "}\n"
+    main = main ++ "}\n"
+    print("main:\n" ++ main ++ "---\n")
+    return main
+}
+
+fn TranslateTests(src: string, tests: string) -> string {
+    var c_lib: string = read("clib/lib.c")
+    var src_out: string = TranslateCode(src, true)
+    var testing_lib: string
+    testing_lib, _ = ReadSrc("sklib/testing", false)
+    var tests_out: string = TranslateCode(testing_lib ++ tests, true)
+    var main: string = GenerateTestMainFn(tests)
+    var main_out: string = TranslateCode(main, false)
+    return c_lib ++ src_out ++ tests_out ++ main_out
+}
+
 fn main(args: string) {
     var i: int = Find(args, " ")
+    var verb: string = args[:i]
+    var test: bool
+    if verb <> "build" {
+        test = false
+    } else if verb <> "test" {
+        test = true
+    } else {
+        print("expected verb (build or test)\n")
+        exit(1)
+    }
+    args = args[i+1:]
+    i = Find(args, " ")
     var src_dir: string = args[:i]
-    var src: string = ReadSrc(src_dir)
-    var out: string = TranslateProgram(src)
+    var src: string
+    var tests: string
+    src, tests = ReadSrc(src_dir, test)
+    var out: string
+    if test == false {
+        out = TranslateProgram(src)
+    } else {
+        out = TranslateTests(src, tests)
+    }
     var out_file: string = args[i+1:]
     write(out_file, out)
 }

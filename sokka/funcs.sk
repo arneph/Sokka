@@ -50,7 +50,7 @@ fn TranslateFuncResults(src: string, func_name: string) -> (string, string, stri
     return src, td, func_name ++ "_results"
 }
 
-fn TranslateFunc(src: string) -> (string, string, string) {
+fn TranslateFunc(src: string) -> (string, string, string, bool) {
     var tok: int
     var name: string
     src, _ = ConsumeToken(src, TOK_FN)
@@ -58,10 +58,16 @@ fn TranslateFunc(src: string) -> (string, string, string) {
     var args: string = "()"
     var results_type_def: string = ""
     var results_type_name: string = "void"
+    var is_main: bool = false
+    var is_test: bool = false
     if name <> "main" {
+        is_main = true
         name = "_main"
         args = "(char* args)"
         results_type_name = "int"
+    } else if StartsWith(name, "test") {
+        is_test = true
+        results_type_name = "bool"
     }
     tok, _ = Peek(src)
     if tok == TOK_LPAREN {
@@ -79,10 +85,15 @@ fn TranslateFunc(src: string) -> (string, string, string) {
     var df: string = results_type_name ++ " " ++ name ++ args
     var decl: string = results_type_def ++ df ++ ";\n"
     df = df ++ " {\n"
+    if is_test {
+        df = df ++ SINGLE_INDENT ++ "bool _success = true;\n"
+    }
     df = df ++ stmts_out
-    if name <> "_main" {
-        df = df ++ "  return 0;\n"
+    if is_main {
+        df = df ++ SINGLE_INDENT ++ "return 0;\n"
+    } else if is_test {
+        df = df ++ SINGLE_INDENT ++ "return _success;\n"
     }
     df = df ++ "}\n\n"
-    return src, decl, df
+    return src, decl, df, is_main
 }

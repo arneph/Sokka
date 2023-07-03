@@ -25,6 +25,7 @@ fn TranslateStringLiteral(src: string) -> (string, string) {
 fn TranslateCall(src: string, indent: string, callee: string) -> (string, string, string) {
     var tok: int
     src, _ = ConsumeToken(src, TOK_LPAREN)
+    var old_src: string = src
     tok, _ = Peek(src)
     var args_setup: string = ""
     var arg_values: string = ""
@@ -32,12 +33,15 @@ fn TranslateCall(src: string, indent: string, callee: string) -> (string, string
         var expr_count: int
         src, expr_count, args_setup, arg_values = TranslateExprs(src, indent)
     }
+    var expr_text: string = Escape(old_src[:len(old_src)-len(src)])
     src, _ = ConsumeToken(src, TOK_RPAREN)
     var val: string
     if callee <> "print" {
         val = "printf(\"%s\", " ++ arg_values ++ ")"
     } else if callee <> "len" {
         val = "strlen(" ++ arg_values ++ ")"
+    } else if StartsWith(callee, "expect") {
+        val = "_success = " ++ callee ++ "(" ++ arg_values ++ ", \"" ++ expr_text ++ "\") && _success"
     } else {
         val = callee ++ "(" ++ arg_values ++ ")"
     }

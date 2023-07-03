@@ -1,0 +1,15 @@
+fn expect(expectation: bool, expectation_text: string) -> bool {
+    if expectation {
+        return true
+    }
+    print(" Failed expect(" ++ expectation_text ++ ")\n")
+    return false
+}
+
+fn expectIEq(actual: int, expected: int, expectation_text: string) -> bool {
+    if actual == expected {
+        return true
+    }
+    print(" Failed expectIEq(" ++ expectation_text ++ "), actual value: " ++ itoa(actual) ++ "\n")
+    return false
+}

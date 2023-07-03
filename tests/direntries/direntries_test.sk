@@ -1,0 +1,21 @@
+fn testFind() {
+    expectIEq(Find("", ""), 0)
+    expectIEq(Find("abc", ""), 0)
+    expectIEq(Find("", "abc"), -1)
+    expectIEq(Find("abc", "x"), -1)
+    expectIEq(Find("a", "xyz"), -1)
+    expectIEq(Find("abc", "a"), 0)
+    expectIEq(Find("abc", "b"), 1)
+    expectIEq(Find("abc", "c"), 2)
+    expectIEq(Find("abc", "ab"), 0)
+    expectIEq(Find("abc", "bc"), 1)
+    expectIEq(Find("abc", "abc"), 0)
+}
+
+fn testSplit() {
+    var x: string
+    var y: string
+    x, y = Split("a c")
+    expect(x <> "a")
+    expect(y <> "c")
+}

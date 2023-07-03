@@ -173,6 +173,12 @@ fn TranslateBreakStmt(src: string, indent: string) -> (string, string) {
 
 fn TranslateReturnStmt(src: string, indent: string, func_name: string) -> (string, string) {
     src, _ = ConsumeToken(src, TOK_RETURN)
+    var tok: int
+    tok, _ = Peek(src)
+    if tok == TOK_NEWLINE {
+        src, _ = ConsumeToken(src, TOK_NEWLINE)
+        return src, indent ++ "return;\n"
+    }
     var expr_count: int
     var exprs_setup: string
     var exprs_value: string
